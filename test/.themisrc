@@ -1,0 +1,12 @@
+
+call themis#option('recursive', 1)
+
+function! KiviewTestBeforeEach() abort
+    call kiview#logger#set_func({ msg -> themis#log(msg) })
+    call themis#log('')
+endfunction
+
+function! KiviewTestAfterEach() abort
+    silent! %bwipeout!
+    call kiview#logger#clear()
+endfunction
