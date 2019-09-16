@@ -39,5 +39,7 @@ endfunction
 
 function! kiview#buffer#from_buffer() abort
     let bufnr = bufnr('%')
-    return s:new(bufnr, get(b:, 'kiview_options', {}))
+    let options = get(b:, 'kiview_options', {})
+    let options['target'] = getline(line('.'))
+    return s:new(bufnr, options)
 endfunction

@@ -24,6 +24,13 @@ fn main() {
                         .takes_value(true)
                         .default_value(".")
                         .required(false),
+                )
+                .arg(
+                    Arg::with_name("target")
+                        .long("target")
+                        .takes_value(true)
+                        .default_value(".")
+                        .required(false),
                 ),
         )
         .subcommand(
@@ -41,9 +48,12 @@ fn main() {
         ("run", Some(cmd)) => {
             let arg = cmd.value_of("arg").unwrap();
             let cwd = cmd.value_of("cwd").unwrap();
+            let target = cmd.value_of("target").unwrap();
 
+            let child = Path::new(cwd).join(target);
             let dir = match arg {
                 "parent" => Path::new(cwd).parent().unwrap_or(Path::new(cwd)),
+                "child" => child.as_path(),
                 _ => Path::new(cwd),
             };
 

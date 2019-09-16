@@ -4,9 +4,15 @@ let s:id = 0
 function! kiview#node#new(arg, event_service, options) abort
     let s:id += 1
 
+    let cmd_options = []
+    for [k, v] in items(a:options)
+        call extend(cmd_options, ['--' . k, v])
+    endfor
+    let cmd = extend(['kiview', 'run', '--arg', a:arg], cmd_options)
+
     let node = {
         \ 'id': s:id,
-        \ 'job': kiview#job#new(['kiview', 'run', '--cwd', a:options['cwd'], '--arg', a:arg], a:event_service),
+        \ 'job': kiview#job#new(cmd, a:event_service),
         \ 'event_service': a:event_service,
         \ 'logger': kiview#logger#new().label('node'),
         \ '_lines': [],
