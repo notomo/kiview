@@ -29,9 +29,22 @@ fn main() {
         ("run", Some(cmd)) => {
             let _arg = cmd.value_of("arg").unwrap();
 
-            let paths = fs::read_dir("./").unwrap();
-            for path in paths {
-                println!("{}", path.unwrap().path().display())
+            let directories: Vec<_> = fs::read_dir(".")
+                .unwrap()
+                .filter(|path| path.as_ref().unwrap().metadata().unwrap().is_dir())
+                .map(|path| path.unwrap().file_name())
+                .collect();
+            for path in directories {
+                println!("{}/", path.to_str().unwrap())
+            }
+
+            let files: Vec<_> = fs::read_dir(".")
+                .unwrap()
+                .filter(|path| !path.as_ref().unwrap().metadata().unwrap().is_dir())
+                .map(|path| path.unwrap().file_name())
+                .collect();
+            for path in files {
+                println!("{}", path.to_str().unwrap())
             }
         }
         ("complete", Some(cmd)) => {

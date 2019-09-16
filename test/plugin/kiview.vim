@@ -17,4 +17,5 @@ function! s:suite.run()
     let lines = node.lines()
 
     call s:assert.not_empty(lines)
+    call s:assert.not_equals(count(lines, 'autoload/'), 0, '`autoload/` must be in the lines')
 endfunction

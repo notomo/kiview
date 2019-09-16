@@ -14,7 +14,7 @@ function! kiview#buffer#new() abort
 
     function! buffer.write(lines) abort
         let length = nvim_buf_line_count(self.bufnr)
-        call nvim_buf_set_lines(self.bufnr, 0, length, v:false, a:lines)
+        call nvim_buf_set_lines(self.bufnr, 0, length - 1, v:false, a:lines)
         call self.logger.logs(a:lines)
     endfunction
 
