@@ -9,13 +9,16 @@ function! kiview#buffer#new() abort
     function! buffer.open() abort
         leftabove vsplit
         execute 'buffer' self.bufnr
+        call nvim_win_set_width(win_getid(), 38)
         call self.logger.log('opend bufnr: ' . self.bufnr)
     endfunction
 
     function! buffer.write(lines) abort
         let length = nvim_buf_line_count(self.bufnr)
-        call nvim_buf_set_lines(self.bufnr, 0, length - 1, v:false, a:lines)
-        call self.logger.logs(a:lines)
+        call nvim_buf_set_lines(self.bufnr, 0, length, v:false, a:lines)
+
+        let lines = nvim_buf_get_lines(self.bufnr, 0, nvim_buf_line_count(self.bufnr), v:false)
+        call self.logger.logs(lines)
     endfunction
 
     return buffer

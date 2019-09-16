@@ -2,6 +2,8 @@
 let s:logger = kiview#logger#new().label('kiview')
 
 function! kiview#main(arg) abort
+    call s:logger.log('arg: ' . a:arg)
+
     let buffer = kiview#buffer#new()
     let event_service = kiview#event#service()
     let node = kiview#node#new(a:arg, event_service)

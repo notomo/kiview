@@ -18,4 +18,5 @@ function! s:suite.run()
 
     call s:assert.not_empty(lines)
     call s:assert.not_equals(count(lines, 'autoload/'), 0, '`autoload/` must be in the lines')
+    call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
 endfunction

@@ -55,13 +55,15 @@ function! kiview#job#new(cmd, event_service) abort
 endfunction
 
 function! s:handle_stderr(job_id, data, event) abort dict
-    call extend(self.job.stderr, a:data)
-    call self.job.logger.label('stderr').logs(a:data)
+    let valid_data = filter(a:data, { _, v -> !empty(v) })
+    call extend(self.job.stderr, valid_data)
+    call self.job.logger.label('stderr').logs(valid_data)
 endfunction
 
 function! s:handle_stdout(job_id, data, event) abort dict
-    call extend(self.job.stdout, a:data)
-    call self.job.logger.label('stdout').logs(a:data)
+    let valid_data = filter(a:data, { _, v -> !empty(v) })
+    call extend(self.job.stdout, valid_data)
+    call self.job.logger.label('stdout').logs(valid_data)
 endfunction
 
 function! s:handle_exit(job_id, exit_code, event) abort dict
