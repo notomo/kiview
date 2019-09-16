@@ -4,19 +4,12 @@ let s:logger = kiview#logger#new().label('kiview')
 function! kiview#main(arg) abort
     call s:logger.log('arg: ' . a:arg)
 
-    let buffer = kiview#buffer#new()
-    let event_service = kiview#event#service()
-    let node = kiview#node#new(a:arg, event_service)
+    let factors = split(a:arg, '\v\s+', v:true)
+    let action_name = factors[0]
+    let arg = join(factors[1:], ' ')
 
-    call event_service.on_node_updated(node.id, { id -> s:on_node_updated(id, node, buffer) })
-    call node.collect()
-
-    call buffer.open()
-
-    return node
-endfunction
-
-function! s:on_node_updated(id, node, buffer) abort
-    call a:buffer.write(a:node.lines())
-    call s:logger.log('finished callback on node updated')
+    if action_name ==# 'do'
+        return kiview#command#do(arg)
+    endif
+    return kiview#command#create(arg)
 endfunction

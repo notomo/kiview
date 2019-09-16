@@ -1,15 +1,16 @@
 
 let s:id = 0
 
-function! kiview#node#new(arg, event_service) abort
+function! kiview#node#new(arg, event_service, options) abort
     let s:id += 1
 
     let node = {
         \ 'id': s:id,
-        \ 'job': kiview#job#new(['kiview', 'run', '--arg', a:arg], a:event_service),
+        \ 'job': kiview#job#new(['kiview', 'run', '--cwd', a:options['cwd'], '--arg', a:arg], a:event_service),
         \ 'event_service': a:event_service,
         \ 'logger': kiview#logger#new().label('node'),
         \ '_lines': [],
+        \ 'options': a:options,
     \ }
 
     function! node.lines() abort
@@ -17,7 +18,9 @@ function! kiview#node#new(arg, event_service) abort
     endfunction
 
     function! node.on_job_finished(id) abort
-        let self._lines = self.job.stdout
+        let json = json_decode(join(self.job.stdout, ''))
+        let self._lines = json['lines']
+        let self.options = {'cwd': json['cwd']}
         call self.event_service.node_updated(self.id)
         call self.logger.log('finished callback on job finished')
     endfunction

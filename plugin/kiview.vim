@@ -3,4 +3,4 @@ if exists('g:loaded_kiview')
 endif
 let g:loaded_kiview = 1
 
-command! Kiview call kiview#main(<q-args>)
+command! -nargs=* Kiview call kiview#main(<q-args>)

@@ -10,7 +10,7 @@ function! s:suite.after_each()
     call KiviewTestAfterEach()
 endfunction
 
-function! s:suite.run()
+function! s:suite.create()
     let node = kiview#main('')
     call node.wait()
 
@@ -19,4 +19,38 @@ function! s:suite.run()
     call s:assert.not_empty(lines)
     call s:assert.not_equals(count(lines, 'autoload/'), 0, '`autoload/` must be in the lines')
     call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
+    call s:assert.equals('kiview', &filetype)
+endfunction
+
+function! s:suite.do_parent()
+    cd ./test/plugin
+
+    let node = kiview#main('')
+    call node.wait()
+
+    let lines = node.lines()
+    call s:assert.not_empty(lines)
+    call s:assert.not_equals(count(lines, 'kiview.vim'), 0, '`kiview.vim` must be in the lines')
+    call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
+    call s:assert.equals('kiview', &filetype)
+
+    let node = kiview#main('do parent')
+    call node.wait()
+
+    let lines = node.lines()
+
+    call s:assert.not_empty(lines)
+    call s:assert.not_equals(count(lines, 'plugin/'), 0, '`plugin/` must be in the lines')
+    call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
+    call s:assert.equals('kiview', &filetype)
+
+    let node = kiview#main('do parent')
+    call node.wait()
+
+    let lines = node.lines()
+
+    call s:assert.not_empty(lines)
+    call s:assert.not_equals(count(lines, 'autoload/'), 0, '`autoload/` must be in the lines')
+    call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
+    call s:assert.equals('kiview', &filetype)
 endfunction
