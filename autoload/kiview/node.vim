@@ -27,7 +27,9 @@ function! kiview#node#new(arg, event_service, options) abort
         let json = json_decode(join(self.job.stdout, ''))
         let self._lines = json['lines']
         let self.options = {'cwd': json['cwd']}
+
         call self.event_service.node_updated(self.id)
+
         call self.logger.log('finished callback on job finished')
     endfunction
 
