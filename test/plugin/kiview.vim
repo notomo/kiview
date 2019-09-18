@@ -4,10 +4,12 @@ let s:assert = themis#helper('assert')
 
 function! s:suite.before_each()
     call KiviewTestBeforeEach()
+    filetype on
 endfunction
 
 function! s:suite.after_each()
     call KiviewTestAfterEach()
+    filetype off
 endfunction
 
 function! s:suite.create()
@@ -22,7 +24,7 @@ function! s:suite.create()
     call s:assert.equals('kiview', &filetype)
 endfunction
 
-function! s:suite.do_parent()
+function! s:suite.do_parent_child()
     cd ./test/plugin
 
     let node = kiview#main('')
@@ -65,4 +67,11 @@ function! s:suite.do_parent()
     call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
     call s:assert.equals('kiview', &filetype)
     call s:assert.equals(lines, test_lines)
+
+    call search('\.themisrc')
+    let node = kiview#main('do child')
+    call node.wait()
+
+    call s:assert.equals(fnamemodify(bufname('%'), ':t'), '.themisrc')
+    call s:assert.equals('vim', &filetype)
 endfunction

@@ -53,8 +53,16 @@ fn main() {
             let child = Path::new(cwd).join(target);
             let dir = match arg {
                 "parent" => Path::new(cwd).parent().unwrap_or(Path::new(cwd)),
-                "child" => child.as_path(),
+                "child" if child.metadata().unwrap().is_dir() => child.as_path(),
                 _ => Path::new(cwd),
+            };
+
+            let actions = match arg {
+                "child" if !child.metadata().unwrap().is_dir() => Some(json!([{
+                    "name": "open",
+                    "target": child.canonicalize().unwrap().to_str().unwrap(),
+                }])),
+                _ => None,
             };
 
             let directories: Vec<_> = fs::read_dir(dir)
@@ -71,9 +79,13 @@ fn main() {
 
             let paths = [&directories[..], &files[..]].concat();
 
+            let need_update = &actions.is_none();
+
             let output = json!({
                 "lines": paths,
-                "cwd": dir.to_str().unwrap(),
+                "cwd": dir.canonicalize().unwrap().to_str().unwrap(),
+                "actions": actions.unwrap_or_else(|| json!([])),
+                "need_update": need_update,
             });
 
             println!("{}", serde_json::to_string_pretty(&output).unwrap());

@@ -28,7 +28,13 @@ function! kiview#node#new(arg, event_service, options) abort
         let self._lines = json['lines']
         let self.options = {'cwd': json['cwd']}
 
-        call self.event_service.node_updated(self.id)
+        if json['need_update']
+            call self.event_service.node_updated(self.id)
+        endif
+
+        for action in json['actions']
+            call kiview#action#handle(action)
+        endfor
 
         call self.logger.log('finished callback on job finished')
     endfunction

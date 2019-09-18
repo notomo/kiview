@@ -12,12 +12,12 @@ function! kiview#event#service() abort
 
     function! service.on_node_updated(node_id, callback) abort
         let s:node_callbacks[a:node_id] = a:callback
-        execute printf('autocmd User %s:%s ++once call s:node_callback(expand("<amatch>"))', s:NODE_UPDATED, a:node_id)
+        execute printf('autocmd User %s:%s ++nested ++once call s:node_callback(expand("<amatch>"))', s:NODE_UPDATED, a:node_id)
     endfunction
 
     function! service.on_job_finished(job_id, callback) abort
         let s:job_callbacks[a:job_id] = a:callback
-        execute printf('autocmd User %s:%s ++once call s:job_callback(expand("<amatch>"))', s:JOB_FINISHED, a:job_id)
+        execute printf('autocmd User %s:%s ++nested ++once call s:job_callback(expand("<amatch>"))', s:JOB_FINISHED, a:job_id)
     endfunction
 
     function! service.node_updated(node_id) abort
