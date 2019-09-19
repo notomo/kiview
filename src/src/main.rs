@@ -52,8 +52,15 @@ fn main() {
 
             let child = Path::new(cwd).join(target);
             let dir = match arg {
-                "parent" => Path::new(cwd).parent().unwrap_or(Path::new(cwd)),
-                "child" if child.metadata().unwrap().is_dir() => child.as_path(),
+                "parent" => Path::new(cwd).parent().unwrap_or_else(|| Path::new(cwd)),
+                "child"
+                    if child
+                        .metadata()
+                        .and_then(|metadata| Ok(metadata.is_dir()))
+                        .unwrap_or(false) =>
+                {
+                    child.as_path()
+                }
                 _ => Path::new(cwd),
             };
 

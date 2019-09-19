@@ -28,5 +28,6 @@ endfunction
 function! s:on_node_updated(id, node, buffer) abort
     call a:buffer.write(a:node.lines())
     call a:buffer.set(a:node.options)
+
     call s:logger.log('finished callback on node updated')
 endfunction
