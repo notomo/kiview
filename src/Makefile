@@ -4,4 +4,4 @@ build:
 
 start:
 	$(MAKE) build
-	./target/debug/kiview run --arg ${ARG}
+	./target/debug/kiview do --arg ${ARG}

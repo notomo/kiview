@@ -1,3 +1,4 @@
+#![feature(slice_patterns)]
 use clap::{App, Arg, SubCommand};
 use std::path::Path;
 
@@ -10,7 +11,7 @@ fn main() {
     let app = App::new("kiview")
         .version("0.0.1")
         .subcommand(
-            SubCommand::with_name("run")
+            SubCommand::with_name("do")
                 .arg(
                     Arg::with_name("arg")
                         .long("arg")
@@ -26,10 +27,10 @@ fn main() {
                         .required(false),
                 )
                 .arg(
-                    Arg::with_name("target")
-                        .long("target")
+                    Arg::with_name("targets")
+                        .long("targets")
                         .takes_value(true)
-                        .default_value(".")
+                        .multiple(true)
                         .required(false),
                 ),
         )
@@ -45,54 +46,83 @@ fn main() {
 
     let matches = app.get_matches();
     match matches.subcommand() {
-        ("run", Some(cmd)) => {
+        ("do", Some(cmd)) => {
             let arg = cmd.value_of("arg").unwrap();
             let cwd = cmd.value_of("cwd").unwrap();
-            let target = cmd.value_of("target").unwrap();
-
-            let child = Path::new(cwd).join(target);
-            let dir = match arg {
-                "parent" => Path::new(cwd).parent().unwrap_or_else(|| Path::new(cwd)),
-                "child"
-                    if child
-                        .metadata()
-                        .and_then(|metadata| Ok(metadata.is_dir()))
-                        .unwrap_or(false) =>
-                {
-                    child.as_path()
-                }
-                _ => Path::new(cwd),
-            };
+            let targets: Vec<_> = cmd.values_of("targets").unwrap_or_default().collect();
 
             let actions = match arg {
-                "child" if !child.metadata().unwrap().is_dir() => Some(json!([{
-                    "name": "open",
-                    "target": child.canonicalize().unwrap().to_str().unwrap(),
-                }])),
-                _ => None,
+                "parent" => {
+                    let path = Path::new(cwd).parent().unwrap_or_else(|| Path::new(cwd));
+                    let paths = get_paths(path);
+                    json!([{
+                          "name": "update",
+                          "args": paths,
+                          "options": {
+                              "cwd": path.canonicalize().unwrap(),
+                          },
+                    }])
+                }
+                "child" => {
+                    let path = Path::new(cwd);
+                    let dirs: Vec<_> = targets
+                        .iter()
+                        .map(|target| Path::new(cwd).join(target))
+                        .filter(|path| {
+                            path.metadata()
+                                .and_then(|metadata| Ok(metadata.is_dir()))
+                                .unwrap_or(false)
+                        })
+                        .collect();
+
+                    match &dirs[..] {
+                        [] => {
+                            let files: Vec<_> = targets
+                                .iter()
+                                .map(|target| Path::new(cwd).join(target))
+                                .filter(|path| {
+                                    path.metadata()
+                                        .and_then(|metadata| Ok(!metadata.is_dir()))
+                                        .unwrap_or(false)
+                                })
+                                .collect();
+
+                            json!([{
+                              "name": "open",
+                              "args": files,
+                              "options": {
+                                  "cwd": path.canonicalize().unwrap(),
+                              },
+                            }])
+                        }
+                        _ => {
+                            let path = dirs[0].as_path();
+                            let paths = get_paths(path);
+                            json!([{
+                              "name": "update",
+                              "args": paths,
+                              "options": {
+                                  "cwd": path.canonicalize().unwrap(),
+                              }
+                            }])
+                        }
+                    }
+                }
+                _ => {
+                    let path = Path::new(cwd);
+                    let paths = get_paths(path);
+                    json!([{
+                          "name": "create",
+                          "args": paths,
+                          "options": {
+                              "cwd": path.canonicalize().unwrap(),
+                          },
+                    }])
+                }
             };
 
-            let directories: Vec<_> = fs::read_dir(dir)
-                .unwrap()
-                .filter(|path| path.as_ref().unwrap().metadata().unwrap().is_dir())
-                .map(|path| format!("{}/", path.unwrap().file_name().to_str().unwrap()))
-                .collect();
-
-            let files: Vec<_> = fs::read_dir(dir)
-                .unwrap()
-                .filter(|path| !path.as_ref().unwrap().metadata().unwrap().is_dir())
-                .map(|path| format!("{}", path.unwrap().file_name().to_str().unwrap()))
-                .collect();
-
-            let paths = [&directories[..], &files[..]].concat();
-
-            let need_update = &actions.is_none();
-
             let output = json!({
-                "lines": paths,
-                "cwd": dir.canonicalize().unwrap().to_str().unwrap(),
-                "actions": actions.unwrap_or_else(|| json!([])),
-                "need_update": need_update,
+                "actions": actions,
             });
 
             println!("{}", serde_json::to_string_pretty(&output).unwrap());
@@ -103,4 +133,20 @@ fn main() {
         }
         _ => (),
     }
+}
+
+fn get_paths(dir_path: &Path) -> Vec<String> {
+    let directories: Vec<_> = fs::read_dir(dir_path)
+        .unwrap()
+        .filter(|path| path.as_ref().unwrap().metadata().unwrap().is_dir())
+        .map(|path| format!("{}/", path.unwrap().file_name().to_str().unwrap()))
+        .collect();
+
+    let files: Vec<_> = fs::read_dir(dir_path)
+        .unwrap()
+        .filter(|path| !path.as_ref().unwrap().metadata().unwrap().is_dir())
+        .map(|path| format!("{}", path.unwrap().file_name().to_str().unwrap()))
+        .collect();
+
+    [&directories[..], &files[..]].concat()
 }

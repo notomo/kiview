@@ -1,33 +1,53 @@
 
-let s:logger = kiview#logger#new().label('command')
+function! kiview#command#new(buffer, action_handler, event_service, arg) abort
+    let cmd = s:build_cmd(a:buffer, a:arg)
+    let command = {
+        \ 'job': kiview#job#new(cmd, a:event_service),
+        \ 'event_service': a:event_service,
+        \ 'action_handler': a:action_handler,
+        \ 'logger': kiview#logger#new().label('command'),
+    \ }
 
-function! kiview#command#create(arg) abort
-    let buffer = kiview#buffer#new()
-    let event_service = kiview#event#service()
-    let node = kiview#node#new(a:arg, event_service, {'cwd': getcwd()})
+    function! command.start() abort
+        call self.event_service.on_job_finished(self.job.id, { id -> self.on_job_finished(id) })
+        call self.job.start()
+    endfunction
 
-    call event_service.on_node_updated(node.id, { id -> s:on_node_updated(id, node, buffer) })
-    call node.collect()
+    function! command.on_job_finished(id) abort
+        let json = json_decode(join(self.job.stdout, ''))
 
-    call buffer.open()
+        for action in json['actions']
+            call self.action_handler.handle(action)
+        endfor
 
-    return node
+        call self.logger.log('finished callback on job finished')
+    endfunction
+
+    function! command.wait(...) abort
+        if empty(a:000)
+            let timeout_msec = 100
+        else
+            let timeout_msec = a:000[0]
+        endif
+
+        return self.job.wait(timeout_msec)
+    endfunction
+
+    return command
 endfunction
 
-function! kiview#command#do(arg) abort
-    let buffer = kiview#buffer#from_buffer()
-    let event_service = kiview#event#service()
-    let node = kiview#node#new(a:arg, event_service, buffer.options)
+function! s:build_cmd(buffer, arg) abort
+    let options = {
+        \ 'cwd': a:buffer.cwd,
+        \ 'arg': a:arg,
+    \ }
+    let cmd_options = []
+    for [k, v] in items(options)
+        call extend(cmd_options, ['--' . k, v])
+    endfor
+    for target in a:buffer.targets
+        call extend(cmd_options, ['--targets', target])
+    endfor
 
-    call event_service.on_node_updated(node.id, { id -> s:on_node_updated(id, node, buffer) })
-    call node.collect()
-
-    return node
-endfunction
-
-function! s:on_node_updated(id, node, buffer) abort
-    call a:buffer.write(a:node.lines())
-    call a:buffer.set(a:node.options)
-
-    call s:logger.log('finished callback on node updated')
+    return extend(['kiview', 'do'], cmd_options)
 endfunction

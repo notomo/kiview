@@ -12,11 +12,15 @@ function! s:suite.after_each()
     filetype off
 endfunction
 
-function! s:suite.create()
-    let node = kiview#main('')
-    call node.wait()
+function! s:lines() abort
+    return getbufline('%', 1, '$')
+endfunction
 
-    let lines = node.lines()
+function! s:suite.create()
+    let command = kiview#main('')
+    call command.wait()
+
+    let lines = s:lines()
 
     call s:assert.not_empty(lines)
     call s:assert.not_equals(count(lines, 'autoload/'), 0, '`autoload/` must be in the lines')
@@ -27,29 +31,29 @@ endfunction
 function! s:suite.do_parent_child()
     cd ./test/plugin
 
-    let node = kiview#main('')
-    call node.wait()
+    let command = kiview#main('')
+    call command.wait()
 
-    let lines = node.lines()
+    let lines = s:lines()
     call s:assert.not_empty(lines)
     call s:assert.not_equals(count(lines, 'kiview.vim'), 0, '`kiview.vim` must be in the lines')
     call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
     call s:assert.equals('kiview', &filetype)
 
-    let node = kiview#main('do parent')
-    call node.wait()
+    let command = kiview#main('parent')
+    call command.wait()
 
-    let test_lines = node.lines()
+    let test_lines = s:lines()
 
     call s:assert.not_empty(test_lines)
     call s:assert.not_equals(count(test_lines, 'plugin/'), 0, '`plugin/` must be in the lines')
     call s:assert.equals(count(test_lines, ''), 0, ''' must not be in the lines')
     call s:assert.equals('kiview', &filetype)
 
-    let node = kiview#main('do parent')
-    call node.wait()
+    let command = kiview#main('parent')
+    call command.wait()
 
-    let lines = node.lines()
+    let lines = s:lines()
 
     call s:assert.not_empty(lines)
     call s:assert.not_equals(count(lines, 'autoload/'), 0, '`autoload/` must be in the lines')
@@ -57,10 +61,10 @@ function! s:suite.do_parent_child()
     call s:assert.equals('kiview', &filetype)
 
     call search('test/')
-    let node = kiview#main('do child')
-    call node.wait()
+    let command = kiview#main('child')
+    call command.wait()
 
-    let lines = node.lines()
+    let lines = s:lines()
 
     call s:assert.not_empty(lines)
     call s:assert.not_equals(count(lines, 'plugin/'), 0, '`plugin/` must be in the lines')
@@ -69,8 +73,8 @@ function! s:suite.do_parent_child()
     call s:assert.equals(lines, test_lines)
 
     call search('\.themisrc')
-    let node = kiview#main('do child')
-    call node.wait()
+    let command = kiview#main('child')
+    call command.wait()
 
     call s:assert.equals(fnamemodify(bufname('%'), ':t'), '.themisrc')
     call s:assert.equals('vim', &filetype)
