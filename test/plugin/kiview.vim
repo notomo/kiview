@@ -79,3 +79,17 @@ function! s:suite.do_parent_child()
     call s:assert.equals(fnamemodify(bufname('%'), ':t'), '.themisrc')
     call s:assert.equals('vim', &filetype)
 endfunction
+
+function! s:suite.quit()
+    let command = kiview#main('')
+    call command.wait()
+
+    call s:assert.equals('kiview', &filetype)
+    call s:assert.equals(2, tabpagewinnr(tabpagenr(), '$'))
+
+    let command = kiview#main('quit')
+    call command.wait()
+
+    call s:assert.not_equals('kiview', &filetype)
+    call s:assert.equals(1, tabpagewinnr(tabpagenr(), '$'))
+endfunction

@@ -52,6 +52,12 @@ fn main() {
             let targets: Vec<_> = cmd.values_of("targets").unwrap_or_default().collect();
 
             let actions = match arg {
+                "quit" => json!([{
+                      "name": "quit",
+                      "args": [],
+                      "options": {
+                      },
+                }]),
                 "parent" => {
                     let path = Path::new(cwd).parent().unwrap_or_else(|| Path::new(cwd));
                     let paths = get_paths(path);

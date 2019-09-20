@@ -1,7 +1,11 @@
 
 call themis#option('recursive', 1)
 
+let s:root = getcwd()
+
 function! KiviewTestBeforeEach() abort
+    execute 'cd' s:root
+
     call kiview#logger#set_func({ msg -> themis#log(msg) })
     call themis#log('')
 endfunction

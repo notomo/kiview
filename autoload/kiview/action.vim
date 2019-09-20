@@ -2,11 +2,11 @@
 function! kiview#action#new_handler(buffer) abort
     let buffer = a:buffer
     let handler = {
-        \ 'buffer': buffer,
         \ 'funcs': {
             \ 'open': { args, options -> s:open_targets(args) },
             \ 'create': { args, options -> s:create(buffer, args, options) },
             \ 'update': { args, options -> s:update(buffer, args, options) },
+            \ 'quit': { args, options -> s:quit(buffer) },
         \ },
     \ }
 
@@ -37,4 +37,8 @@ endfunction
 function! s:update(buffer, args, options) abort
     call a:buffer.write(a:args)
     call a:buffer.set(a:options)
+endfunction
+
+function! s:quit(buffer) abort
+    call a:buffer.close_windows()
 endfunction

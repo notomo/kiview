@@ -31,6 +31,13 @@ function! s:new(bufnr, cwd, targets) abort
         call self.logger.log('options: ' . string(a:options))
     endfunction
 
+    function! buffer.close_windows() abort
+        let window_ids = win_findbuf(self.bufnr)
+        for id in window_ids
+            call nvim_win_close(id, v:false)
+        endfor
+    endfunction
+
     return buffer
 endfunction
 
