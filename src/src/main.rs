@@ -31,6 +31,12 @@ fn main() {
                         .required(false),
                 )
                 .arg(
+                    Arg::with_name("current_target")
+                        .long("current-target")
+                        .takes_value(true)
+                        .required(false),
+                )
+                .arg(
                     Arg::with_name("targets")
                         .long("targets")
                         .takes_value(true)
@@ -55,6 +61,7 @@ fn main() {
             let command_name = CommandName::from(arg);
 
             let current_path = cmd.value_of("current_path").unwrap();
+            let current_target = cmd.value_of("current_target");
             let targets: Vec<&str> = cmd.values_of("targets").unwrap_or_default().collect();
 
             let path_repository = repository::FilePathRepository {};
@@ -68,6 +75,7 @@ fn main() {
                 .actions(),
                 CommandName::Child => ChildCommand {
                     current_path: current_path,
+                    current_target: current_target,
                     targets: targets,
                     path_repository: &path_repository,
                 }

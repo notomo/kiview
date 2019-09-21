@@ -39,10 +39,14 @@ endfunction
 function! s:build_cmd(buffer, arg) abort
     let options = {
         \ 'current-path': a:buffer.current_path,
+        \ 'current-target': a:buffer.current_target,
         \ 'arg': a:arg,
     \ }
     let cmd_options = []
     for [k, v] in items(options)
+        if empty(v)
+            continue
+        endif
         call extend(cmd_options, ['--' . k, v])
     endfor
     for target in a:buffer.targets
