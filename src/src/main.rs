@@ -1,3 +1,4 @@
+#![feature(custom_attribute)]
 #![feature(slice_patterns)]
 use clap::{App, Arg, SubCommand};
 use std::path::Path;
@@ -6,6 +7,9 @@ use std::path::Path;
 extern crate serde_json;
 
 use std::fs;
+
+mod command;
+use command::{CommandName, NamedCommand};
 
 fn main() {
     let app = App::new("kiview")
@@ -48,17 +52,14 @@ fn main() {
     match matches.subcommand() {
         ("do", Some(cmd)) => {
             let arg = cmd.value_of("arg").unwrap();
+            let command_name = CommandName::from(arg);
+
             let cwd = cmd.value_of("cwd").unwrap();
             let targets: Vec<_> = cmd.values_of("targets").unwrap_or_default().collect();
 
-            let actions = match arg {
-                "quit" => json!([{
-                      "name": "quit",
-                      "args": [],
-                      "options": {
-                      },
-                }]),
-                "parent" => {
+            let actions = match command_name {
+                CommandName::Quit => NamedCommand { name: command_name }.actions(),
+                CommandName::Parent => {
                     let path = Path::new(cwd).parent().unwrap_or_else(|| Path::new(cwd));
                     let paths = get_paths(path);
                     json!([{
@@ -69,7 +70,7 @@ fn main() {
                           },
                     }])
                 }
-                "child" => {
+                CommandName::Child => {
                     let path = Path::new(cwd);
                     let dirs: Vec<_> = targets
                         .iter()
@@ -114,7 +115,7 @@ fn main() {
                         }
                     }
                 }
-                _ => {
+                CommandName::Create => {
                     let path = Path::new(cwd);
                     let paths = get_paths(path);
                     json!([{
@@ -125,6 +126,7 @@ fn main() {
                           },
                     }])
                 }
+                CommandName::Unknown => json!([]),
             };
 
             let output = json!({
