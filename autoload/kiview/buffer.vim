@@ -1,8 +1,8 @@
 
-function! s:new(bufnr, cwd, targets) abort
+function! s:new(bufnr, current_path, targets) abort
     let buffer = {
         \ 'bufnr': a:bufnr,
-        \ 'cwd': a:cwd,
+        \ 'current_path': a:current_path,
         \ 'targets': a:targets,
         \ 'logger': kiview#logger#new().label('buffer'),
     \ }
@@ -44,14 +44,14 @@ endfunction
 function! kiview#buffer#find() abort
     if &filetype !=? 'kiview'
         let bufnr = nvim_create_buf(v:false, v:true)
-        let cwd = getcwd()
+        let current_path = getcwd()
         let targets = []
-        return s:new(bufnr, cwd, targets)
+        return s:new(bufnr, current_path, targets)
     endif
 
     let bufnr = bufnr('%')
     let options = get(b:, 'kiview_options', {})
-    let cwd = get(options, 'cwd', getcwd())
+    let current_path = get(options, 'current_path', getcwd())
     let targets = [getline(line('.'))]
-    return s:new(bufnr, cwd, targets)
+    return s:new(bufnr, current_path, targets)
 endfunction

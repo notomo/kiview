@@ -38,7 +38,7 @@ endfunction
 
 function! s:build_cmd(buffer, arg) abort
     let options = {
-        \ 'cwd': a:buffer.cwd,
+        \ 'current-path': a:buffer.current_path,
         \ 'arg': a:arg,
     \ }
     let cmd_options = []
