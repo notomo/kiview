@@ -39,6 +39,7 @@ endfunction
 function! s:build_cmd(buffer, arg) abort
     let options = {
         \ 'current-path': a:buffer.current_path,
+        \ 'line-number': a:buffer.line_number,
         \ 'current-target': a:buffer.current_target,
         \ 'arg': a:arg,
     \ }

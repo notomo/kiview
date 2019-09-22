@@ -5,6 +5,7 @@ use crate::repository::PathRepository;
 
 pub struct ChildCommand<'a> {
     pub current_path: &'a str,
+    pub line_number: u64,
     pub current_target: Option<&'a str>,
     pub opts: &'a CommandOptions,
     pub targets: Vec<&'a str>,
@@ -23,13 +24,17 @@ impl<'a> ChildCommand<'a> {
                     .and_then(|metadata| Ok(metadata.is_dir()))
                     .unwrap_or(false) =>
             {
-                let path = path.join(current_target);
-                let paths = self.path_repository.children(path.to_str().unwrap());
+                let current_path = path.join(current_target);
+                let paths = self
+                    .path_repository
+                    .children(current_path.to_str().unwrap());
                 json!([{
                   "name": "update",
                   "args": paths,
                   "options": {
-                      "current_path": path.canonicalize().unwrap(),
+                      "current_path": current_path.canonicalize().unwrap(),
+                      "last_path": path.canonicalize().unwrap(),
+                      "last_line_number": self.line_number,
                   }
                 }])
             }

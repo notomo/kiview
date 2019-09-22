@@ -112,3 +112,33 @@ function! s:suite.tab_open()
     call s:assert.equals(fnamemodify(bufname('%'), ':t'), 'Makefile')
     call s:assert.equals(2, tabpagenr())
 endfunction
+
+function! s:suite.history()
+    cd ./src
+
+    let command = kiview#main('')
+    call command.wait()
+
+    call search('src')
+    let command = kiview#main('child')
+    call command.wait()
+
+    call search('repository')
+    let command = kiview#main('child')
+    call command.wait()
+
+    let command = kiview#main('parent')
+    call command.wait()
+    let command = kiview#main('parent')
+    call command.wait()
+    let command = kiview#main('parent')
+    call command.wait()
+
+    let command = kiview#main('child')
+    call command.wait()
+    let command = kiview#main('child')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.not_equals(count(lines, 'repository/'), 0, '`repository/` must be in the lines')
+endfunction

@@ -32,6 +32,13 @@ fn main() {
                         .required(false),
                 )
                 .arg(
+                    Arg::with_name("line_number")
+                        .long("line-number")
+                        .takes_value(true)
+                        .default_value("1")
+                        .required(false),
+                )
+                .arg(
                     Arg::with_name("current_target")
                         .long("current-target")
                         .takes_value(true)
@@ -63,6 +70,7 @@ fn main() {
             let command_opts = CommandOptions::new(arg);
 
             let current_path = cmd.value_of("current_path").unwrap();
+            let line_number = cmd.value_of("line_number").unwrap().parse().unwrap();
             let current_target = cmd.value_of("current_target");
             let targets: Vec<&str> = cmd.values_of("targets").unwrap_or_default().collect();
 
@@ -72,11 +80,13 @@ fn main() {
                 CommandName::Quit => NamedCommand { name: command_name }.actions(),
                 CommandName::Parent => ParentCommand {
                     current_path: current_path,
+                    line_number: line_number,
                     path_repository: &path_repository,
                 }
                 .actions(),
                 CommandName::Child => ChildCommand {
                     current_path: current_path,
+                    line_number: line_number,
                     current_target: current_target,
                     targets: targets,
                     opts: &command_opts,
@@ -85,6 +95,7 @@ fn main() {
                 .actions(),
                 CommandName::Create => CreateCommand {
                     current_path: current_path,
+                    line_number: line_number,
                     path_repository: &path_repository,
                 }
                 .actions(),

@@ -43,6 +43,7 @@ endfunction
 
 function! s:update(buffer, args, options) abort
     call a:buffer.write(a:args)
+    call a:buffer.restore_cursor(a:options)
     call a:buffer.set(a:options)
 endfunction
 

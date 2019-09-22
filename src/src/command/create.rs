@@ -4,6 +4,7 @@ use crate::repository::PathRepository;
 
 pub struct CreateCommand<'a> {
     pub current_path: &'a str,
+    pub line_number: u64,
     pub path_repository: &'a dyn PathRepository,
 }
 
@@ -16,6 +17,8 @@ impl<'a> CreateCommand<'a> {
             "args": paths,
             "options": {
                 "current_path": path.canonicalize().unwrap(),
+                "last_path": path.canonicalize().unwrap(),
+                "last_line_number": self.line_number,
             },
         }])
     }
