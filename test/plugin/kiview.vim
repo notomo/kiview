@@ -16,6 +16,10 @@ function! s:lines() abort
     return getbufline('%', 1, '$')
 endfunction
 
+function! s:syntax_name() abort
+    return synIDattr(synID(line('.'), col('.'), v:true), 'name')
+endfunction
+
 function! s:suite.create()
     let command = kiview#main('')
     call command.wait()
@@ -26,6 +30,9 @@ function! s:suite.create()
     call s:assert.not_equals(count(lines, 'autoload/'), 0, '`autoload/` must be in the lines')
     call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
     call s:assert.equals('kiview', &filetype)
+
+    call search('autoload\/')
+    call s:assert.equals('KiviewNode', s:syntax_name())
 endfunction
 
 function! s:suite.do_parent_child()
