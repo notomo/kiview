@@ -28,18 +28,26 @@ function! s:file_name() abort
     return fnamemodify(bufname('%'), ':t')
 endfunction
 
+function! s:assert.contains(haystack, needle) abort
+    call s:assert.true(count(a:haystack, a:needle) != 0, a:needle . ' must be in the haystack')
+endfunction
+
+function! s:assert.not_contains(haystack, needle) abort
+    call s:assert.false(count(a:haystack, a:needle) != 0, a:needle . ' must not be in the haystack')
+endfunction
+
 function! s:suite.create()
     let command = kiview#main('')
     call command.wait()
 
     let lines = s:lines()
     call s:assert.not_empty(lines)
-    call s:assert.not_equals(count(lines, 'autoload/'), 0, '`autoload/` must be in the lines')
-    call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
-    call s:assert.equals('kiview', &filetype)
+    call s:assert.contains(lines, 'autoload/')
+    call s:assert.not_contains(lines, '')
+    call s:assert.equals(&filetype, 'kiview')
 
     call search('autoload\/')
-    call s:assert.equals('KiviewNode', s:syntax_name())
+    call s:assert.equals(s:syntax_name(), 'KiviewNode')
 endfunction
 
 function! s:suite.do_parent_child()
@@ -50,27 +58,27 @@ function! s:suite.do_parent_child()
 
     let lines = s:lines()
     call s:assert.not_empty(lines)
-    call s:assert.not_equals(count(lines, 'kiview.vim'), 0, '`kiview.vim` must be in the lines')
-    call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
-    call s:assert.equals('kiview', &filetype)
+    call s:assert.contains(lines, 'kiview.vim')
+    call s:assert.not_contains(lines, '')
+    call s:assert.equals(&filetype, 'kiview')
 
     let command = kiview#main('parent')
     call command.wait()
 
     let test_lines = s:lines()
     call s:assert.not_empty(test_lines)
-    call s:assert.not_equals(count(test_lines, 'plugin/'), 0, '`plugin/` must be in the lines')
-    call s:assert.equals(count(test_lines, ''), 0, ''' must not be in the lines')
-    call s:assert.equals('kiview', &filetype)
+    call s:assert.contains(test_lines, 'plugin/')
+    call s:assert.not_contains(test_lines, '')
+    call s:assert.equals(&filetype, 'kiview')
 
     let command = kiview#main('parent')
     call command.wait()
 
     let lines = s:lines()
     call s:assert.not_empty(lines)
-    call s:assert.not_equals(count(lines, 'autoload/'), 0, '`autoload/` must be in the lines')
-    call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
-    call s:assert.equals('kiview', &filetype)
+    call s:assert.contains(lines, 'autoload/')
+    call s:assert.not_contains(lines, '')
+    call s:assert.equals(&filetype, 'kiview')
 
     call search('test/')
     let command = kiview#main('child')
@@ -78,9 +86,9 @@ function! s:suite.do_parent_child()
 
     let lines = s:lines()
     call s:assert.not_empty(lines)
-    call s:assert.not_equals(count(lines, 'plugin/'), 0, '`plugin/` must be in the lines')
-    call s:assert.equals(count(lines, ''), 0, ''' must not be in the lines')
-    call s:assert.equals('kiview', &filetype)
+    call s:assert.contains(test_lines, 'plugin/')
+    call s:assert.not_contains(test_lines, '')
+    call s:assert.equals(&filetype, 'kiview')
     call s:assert.equals(lines, test_lines)
 
     call search('\.themisrc')
@@ -88,21 +96,21 @@ function! s:suite.do_parent_child()
     call command.wait()
 
     call s:assert.equals(s:file_name(), '.themisrc')
-    call s:assert.equals('vim', &filetype)
+    call s:assert.equals(&filetype, 'vim')
 endfunction
 
 function! s:suite.quit()
     let command = kiview#main('')
     call command.wait()
 
-    call s:assert.equals('kiview', &filetype)
-    call s:assert.equals(2, s:count_window())
+    call s:assert.equals(&filetype, 'kiview')
+    call s:assert.equals(s:count_window(), 2)
 
     let command = kiview#main('quit')
     call command.wait()
 
     call s:assert.not_equals('kiview', &filetype)
-    call s:assert.equals(1, s:count_window())
+    call s:assert.equals(s:count_window(), 1)
 endfunction
 
 function! s:suite.quit_option()
@@ -114,7 +122,7 @@ function! s:suite.quit_option()
     call command.wait()
 
     call s:assert.equals(s:file_name(), 'Makefile')
-    call s:assert.equals(1, s:count_window())
+    call s:assert.equals(s:count_window(), 1)
 endfunction
 
 function! s:suite.tab_open()
@@ -126,7 +134,7 @@ function! s:suite.tab_open()
     call command.wait()
 
     call s:assert.equals(s:file_name(), 'Makefile')
-    call s:assert.equals(2, tabpagenr('$'))
+    call s:assert.equals(tabpagenr('$'), 2)
 endfunction
 
 function! s:suite.history()
@@ -156,5 +164,5 @@ function! s:suite.history()
     call command.wait()
 
     let lines = s:lines()
-    call s:assert.not_equals(count(lines, 'repository/'), 0, '`repository/` must be in the lines')
+    call s:assert.contains(lines, 'repository/')
 endfunction
