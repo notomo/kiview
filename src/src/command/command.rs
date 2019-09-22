@@ -17,6 +17,7 @@ pub enum CommandName {
 #[derive(Debug, Clone, Copy)]
 pub enum Layout {
     Tab,
+    Vertical,
     Unknown,
 }
 
@@ -24,6 +25,7 @@ impl Layout {
     pub fn action(&self) -> String {
         match self {
             Layout::Tab => "tab_open",
+            Layout::Vertical => "vertical_open",
             Layout::Unknown => "open",
         }
         .to_string()
@@ -34,6 +36,7 @@ impl From<&str> for Layout {
     fn from(s: &str) -> Self {
         match s {
             "tab" => Layout::Tab,
+            "vertical" => Layout::Vertical,
             _ => Layout::Unknown,
         }
     }

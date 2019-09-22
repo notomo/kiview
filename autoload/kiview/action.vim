@@ -5,6 +5,7 @@ function! kiview#action#new_handler(buffer) abort
         \ 'funcs': {
             \ 'open': { args, options -> s:open_targets(args) },
             \ 'tab_open': { args, options -> s:tab_open_targets(args) },
+            \ 'vertical_open': { args, options -> s:vertical_open_targets(args) },
             \ 'create': { args, options -> s:create(buffer, args, options) },
             \ 'update': { args, options -> s:update(buffer, args, options) },
             \ 'quit': { args, options -> s:quit(buffer) },
@@ -32,6 +33,13 @@ endfunction
 function! s:tab_open_targets(args) abort
     for arg in a:args
         execute 'tabedit' arg
+    endfor
+endfunction
+
+function! s:vertical_open_targets(args) abort
+    wincmd w
+    for arg in a:args
+        execute 'vsplit' arg
     endfor
 endfunction
 

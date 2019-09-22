@@ -137,6 +137,18 @@ function! s:suite.tab_open()
     call s:assert.equals(tabpagenr('$'), 2)
 endfunction
 
+function! s:suite.vertical()
+    let command = kiview#main('')
+    call command.wait()
+
+    call search('Makefile')
+    let command = kiview#main('child -layout=vertical')
+    call command.wait()
+
+    call s:assert.equals(s:file_name(), 'Makefile')
+    call s:assert.equals(s:count_window(), 3)
+endfunction
+
 function! s:suite.history()
     cd ./src
 
