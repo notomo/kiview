@@ -24,7 +24,9 @@ function! s:new(bufnr, current_path, line_number, current_target, targets) abort
 
     function! buffer.write(lines) abort
         let length = nvim_buf_line_count(self.bufnr)
+        call nvim_buf_set_option(self.bufnr, 'modifiable', v:true)
         call nvim_buf_set_lines(self.bufnr, 0, length, v:false, a:lines)
+        call nvim_buf_set_option(self.bufnr, 'modifiable', v:false)
 
         let lines = nvim_buf_get_lines(self.bufnr, 0, nvim_buf_line_count(self.bufnr), v:false)
         call self.logger.logs(lines)
