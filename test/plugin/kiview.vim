@@ -93,3 +93,15 @@ function! s:suite.quit()
     call s:assert.not_equals('kiview', &filetype)
     call s:assert.equals(1, tabpagewinnr(tabpagenr(), '$'))
 endfunction
+
+function! s:suite.tab_open()
+    let command = kiview#main('')
+    call command.wait()
+
+    call search('Makefile')
+    let command = kiview#main('child -layout=tab')
+    call command.wait()
+
+    call s:assert.equals(fnamemodify(bufname('%'), ':t'), 'Makefile')
+    call s:assert.equals(2, tabpagenr())
+endfunction

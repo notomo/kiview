@@ -1,10 +1,12 @@
 use std::path::Path;
 
+use crate::command::CommandOptions;
 use crate::repository::PathRepository;
 
 pub struct ChildCommand<'a> {
     pub current_path: &'a str,
     pub current_target: Option<&'a str>,
+    pub opts: &'a CommandOptions,
     pub targets: Vec<&'a str>,
     pub path_repository: &'a dyn PathRepository,
 }
@@ -43,12 +45,15 @@ impl<'a> ChildCommand<'a> {
                     })
                     .collect();
 
+                let action_name = match self.opts.layout {
+                    Some(layout) => layout.action(),
+                    None => "open".to_string(),
+                };
+
                 json!([{
-                  "name": "open",
+                  "name": action_name,
                   "args": files,
-                  "options": {
-                      "current_path": path.canonicalize().unwrap(),
-                  },
+                  "options": {},
                 }])
             }
         }

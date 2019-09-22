@@ -4,6 +4,7 @@ function! kiview#action#new_handler(buffer) abort
     let handler = {
         \ 'funcs': {
             \ 'open': { args, options -> s:open_targets(args) },
+            \ 'tab_open': { args, options -> s:tab_open_targets(args) },
             \ 'create': { args, options -> s:create(buffer, args, options) },
             \ 'update': { args, options -> s:update(buffer, args, options) },
             \ 'quit': { args, options -> s:quit(buffer) },
@@ -25,6 +26,12 @@ function! s:open_targets(args) abort
     wincmd w
     for arg in a:args
         execute 'edit' arg
+    endfor
+endfunction
+
+function! s:tab_open_targets(args) abort
+    for arg in a:args
+        execute 'tabedit' arg
     endfor
 endfunction
 

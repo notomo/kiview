@@ -7,13 +7,14 @@ use clap::{App, Arg, SubCommand};
 extern crate serde_json;
 
 mod command;
-use command::{ChildCommand, CommandName, CreateCommand, NamedCommand, ParentCommand};
+use command::{
+    ChildCommand, CommandName, CommandOptions, CreateCommand, NamedCommand, ParentCommand,
+};
 
 mod repository;
 
 fn main() {
     let app = App::new("kiview")
-        .version("0.0.1")
         .subcommand(
             SubCommand::with_name("do")
                 .arg(
@@ -59,6 +60,7 @@ fn main() {
         ("do", Some(cmd)) => {
             let arg = cmd.value_of("arg").unwrap();
             let command_name = CommandName::from(arg);
+            let command_opts = CommandOptions::new(arg);
 
             let current_path = cmd.value_of("current_path").unwrap();
             let current_target = cmd.value_of("current_target");
@@ -77,6 +79,7 @@ fn main() {
                     current_path: current_path,
                     current_target: current_target,
                     targets: targets,
+                    opts: &command_opts,
                     path_repository: &path_repository,
                 }
                 .actions(),
