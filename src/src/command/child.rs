@@ -55,11 +55,25 @@ impl<'a> ChildCommand<'a> {
                     None => "open".to_string(),
                 };
 
-                json!([{
-                  "name": action_name,
-                  "args": files,
-                  "options": {},
-                }])
+                match self.opts.quit {
+                    true => json!([
+                        {
+                            "name": action_name,
+                            "args": files,
+                            "options": {},
+                        },
+                        {
+                            "name": "quit",
+                            "args": [],
+                            "options": {},
+                        }
+                    ]),
+                    false => json!([{
+                      "name": action_name,
+                      "args": files,
+                      "options": {},
+                    }]),
+                }
             }
         }
     }

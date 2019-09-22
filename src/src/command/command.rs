@@ -42,6 +42,7 @@ impl From<&str> for Layout {
 #[derive(Debug)]
 pub enum CommandOption {
     Layout { value: Layout },
+    Quit,
     Unknown,
 }
 
@@ -69,6 +70,7 @@ impl From<&str> for CommandOption {
             ["layout", layout] => CommandOption::Layout {
                 value: Layout::from(*layout),
             },
+            ["quit"] => CommandOption::Quit,
             _ => CommandOption::Unknown,
         }
     }
@@ -77,6 +79,7 @@ impl From<&str> for CommandOption {
 #[derive(Debug)]
 pub struct CommandOptions {
     pub layout: Option<Layout>,
+    pub quit: bool,
 }
 
 impl CommandOptions {
@@ -104,6 +107,14 @@ impl CommandOptions {
             .get(0)
             .and_then(|layout| *layout);
 
-        CommandOptions { layout: layout }
+        let quit = options.iter().any(|opt| match &opt {
+            CommandOption::Quit => true,
+            _ => false,
+        });
+
+        CommandOptions {
+            layout: layout,
+            quit: quit,
+        }
     }
 }
