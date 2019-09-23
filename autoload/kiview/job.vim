@@ -10,6 +10,7 @@ function! kiview#job#new(cmd, event_service) abort
         \ 'logger': kiview#logger#new('job'),
         \ 'stdout': [],
         \ 'stderr': [],
+        \ 'started': v:false,
         \ 'done': v:false,
         \ 'event_service': a:event_service,
     \ }
@@ -26,10 +27,16 @@ function! kiview#job#new(cmd, event_service) abort
         let self.internal_job_id = jobstart(self.cmd, options)
         if self.internal_job_id <= 0
             call self.logger.label('error').log('internal_job_id=' . self.internal_job_id)
+            throw 'failed to start job: ' . self.internal_job_id
         endif
+        let self.started = v:true
     endfunction
 
     function! job.wait(timeout_msec) abort
+        if !self.started
+            call self.logger.log('has not started')
+            return v:false
+        endif
         if self.done
             call self.logger.log('already done')
             return v:true

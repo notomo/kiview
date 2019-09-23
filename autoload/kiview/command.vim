@@ -1,4 +1,6 @@
 
+let s:running = v:false
+
 function! kiview#command#new(buffer, action_handler, event_service, arg) abort
     let cmd = s:build_cmd(a:buffer, a:arg)
     let command = {
@@ -9,16 +11,24 @@ function! kiview#command#new(buffer, action_handler, event_service, arg) abort
     \ }
 
     function! command.start() abort
+        if s:running
+            call self.logger.log('cannot execute more than one command at the same time')
+            return
+        endif
         call self.event_service.on_job_finished(self.job.id, { id -> self.on_job_finished(id) })
         call self.job.start()
+        let s:running = v:true
     endfunction
 
     function! command.on_job_finished(id) abort
-        let json = json_decode(join(self.job.stdout, ''))
-
-        for action in json['actions']
-            call self.action_handler.handle(action)
-        endfor
+        try
+            let json = json_decode(join(self.job.stdout, ''))
+            for action in json['actions']
+                call self.action_handler.handle(action)
+            endfor
+        finally
+            let s:running = v:false
+        endtry
 
         call self.logger.log('finished callback on job finished')
     endfunction
