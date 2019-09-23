@@ -1,9 +1,8 @@
 
 let s:JOB_FINISHED = 'KiviewJobFinished'
+let s:job_callbacks = {}
 
 function! kiview#event#service() abort
-    let s:job_callbacks = {}
-
     let service = {
         \ 'logger': kiview#logger#new().label('event'),
     \ }

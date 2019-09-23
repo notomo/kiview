@@ -180,3 +180,15 @@ function! s:suite.history()
     let lines = s:lines()
     call s:assert.contains(lines, 'repository/')
 endfunction
+
+function! s:suite.no_error_with_continuous()
+    cd ./src/src/repository
+
+    let create_command = kiview#main('')
+    let parent_command1 = kiview#main('parent')
+    let parent_command2 = kiview#main('parent')
+
+    call create_command.wait()
+    call parent_command1.wait()
+    call parent_command2.wait()
+endfunction
