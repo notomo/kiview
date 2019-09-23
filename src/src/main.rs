@@ -7,9 +7,7 @@ use clap::{App, Arg, SubCommand};
 extern crate serde_json;
 
 mod command;
-use command::{
-    ChildCommand, CommandName, CommandOptions, CreateCommand, NamedCommand, ParentCommand,
-};
+use command::{CommandName, CommandOptions};
 
 mod repository;
 
@@ -77,14 +75,14 @@ fn main() {
             let path_repository = repository::FilePathRepository {};
 
             let actions = match command_name {
-                CommandName::Quit => NamedCommand { name: command_name }.actions(),
-                CommandName::Parent => ParentCommand {
+                CommandName::Quit => command::NamedCommand { name: command_name }.actions(),
+                CommandName::Parent => command::ParentCommand {
                     current_path: current_path,
                     line_number: line_number,
                     path_repository: &path_repository,
                 }
                 .actions(),
-                CommandName::Child => ChildCommand {
+                CommandName::Child => command::ChildCommand {
                     current_path: current_path,
                     line_number: line_number,
                     current_target: current_target,
@@ -93,9 +91,16 @@ fn main() {
                     path_repository: &path_repository,
                 }
                 .actions(),
-                CommandName::Create => CreateCommand {
+                CommandName::Create => command::CreateCommand {
                     current_path: current_path,
                     line_number: line_number,
+                    path_repository: &path_repository,
+                }
+                .actions(),
+                CommandName::Go => command::GoCommand {
+                    current_path: current_path,
+                    line_number: line_number,
+                    opts: &command_opts,
                     path_repository: &path_repository,
                 }
                 .actions(),

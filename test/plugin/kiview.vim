@@ -243,3 +243,14 @@ function! s:suite.parent_marker()
     let lines = s:lines()
     call s:assert.contains(lines, 'autoload/')
 endfunction
+
+function! s:suite.go()
+    let command = s:main('')
+    call command.wait()
+
+    let command = s:main('go -path=./autoload')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.contains(lines, 'kiview/')
+endfunction

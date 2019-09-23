@@ -10,6 +10,8 @@ pub enum CommandName {
     Child,
     #[serde(rename = "create")]
     Create,
+    #[serde(rename = "go")]
+    Go,
     #[serde(rename = "unknown")]
     Unknown,
 }
@@ -45,6 +47,7 @@ impl From<&str> for Layout {
 #[derive(Debug)]
 pub enum CommandOption {
     Layout { value: Layout },
+    Path { value: String },
     Quit,
     Unknown,
 }
@@ -60,6 +63,7 @@ impl From<&str> for CommandName {
             ["quit"] => CommandName::Quit,
             ["parent"] => CommandName::Parent,
             ["child"] => CommandName::Child,
+            ["go"] => CommandName::Go,
             [] => CommandName::Create,
             _ => CommandName::Unknown,
         }
@@ -74,6 +78,9 @@ impl From<&str> for CommandOption {
                 value: Layout::from(*layout),
             },
             ["quit"] => CommandOption::Quit,
+            ["path", path] => CommandOption::Path {
+                value: path.to_string(),
+            },
             _ => CommandOption::Unknown,
         }
     }
@@ -83,6 +90,7 @@ impl From<&str> for CommandOption {
 pub struct CommandOptions {
     pub layout: Option<Layout>,
     pub quit: bool,
+    pub path: Option<String>,
 }
 
 impl CommandOptions {
@@ -110,6 +118,16 @@ impl CommandOptions {
             .get(0)
             .and_then(|layout| *layout);
 
+        let path: Option<String> = options
+            .iter()
+            .map(|opt| match &opt {
+                CommandOption::Path { value } => Some(value.clone()),
+                _ => None,
+            })
+            .collect::<Vec<Option<String>>>()
+            .get(0)
+            .and_then(|path| path.clone());
+
         let quit = options.iter().any(|opt| match &opt {
             CommandOption::Quit => true,
             _ => false,
@@ -118,6 +136,7 @@ impl CommandOptions {
         CommandOptions {
             layout: layout,
             quit: quit,
+            path: path,
         }
     }
 }

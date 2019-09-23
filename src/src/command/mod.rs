@@ -12,3 +12,6 @@ pub use named::NamedCommand;
 
 mod child;
 pub use child::ChildCommand;
+
+mod go;
+pub use go::GoCommand;
