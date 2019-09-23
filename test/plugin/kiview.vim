@@ -5,11 +5,13 @@ let s:assert = themis#helper('assert')
 function! s:suite.before_each()
     call KiviewTestBeforeEach()
     filetype on
+    syntax enable
 endfunction
 
 function! s:suite.after_each()
     call KiviewTestAfterEach()
     filetype off
+    syntax off
 endfunction
 
 function! s:lines() abort
@@ -51,11 +53,13 @@ function! s:suite.create()
 
     let lines = s:lines()
     call s:assert.not_empty(lines)
+    call s:assert.equals(lines[0], '..')
     call s:assert.contains(lines, 'autoload/')
     call s:assert.not_contains(lines, '')
     call s:assert.equals(&filetype, 'kiview')
     call s:assert.false(&modifiable)
 
+    call s:assert.equals(s:syntax_name(), 'KiviewNode')
     call search('autoload\/')
     call s:assert.equals(s:syntax_name(), 'KiviewNode')
 endfunction
@@ -77,6 +81,7 @@ function! s:suite.do_parent_child()
 
     let test_lines = s:lines()
     call s:assert.not_empty(test_lines)
+    call s:assert.equals(lines[0], '..')
     call s:assert.contains(test_lines, 'plugin/')
     call s:assert.not_contains(test_lines, '')
     call s:assert.equals(&filetype, 'kiview')
@@ -97,6 +102,7 @@ function! s:suite.do_parent_child()
 
     let lines = s:lines()
     call s:assert.not_empty(lines)
+    call s:assert.equals(lines[0], '..')
     call s:assert.contains(test_lines, 'plugin/')
     call s:assert.not_contains(test_lines, '')
     call s:assert.equals(&filetype, 'kiview')
@@ -223,4 +229,17 @@ function! s:suite.range()
     call command.wait()
 
     call s:assert.equals(s:count_tab(), 3)
+endfunction
+
+function! s:suite.parent_marker()
+    cd ./src
+
+    let command = s:main('')
+    call command.wait()
+
+    let command = s:main('child')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.contains(lines, 'autoload/')
 endfunction

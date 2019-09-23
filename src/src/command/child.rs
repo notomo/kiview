@@ -25,9 +25,11 @@ impl<'a> ChildCommand<'a> {
                     .unwrap_or(false) =>
             {
                 let current_path = path.join(current_target);
-                let paths = self
+                let mut paths = self
                     .path_repository
                     .children(current_path.to_str().unwrap());
+                paths.splice(0..0, vec!["..".to_string()]);
+
                 json!([{
                   "name": "update",
                   "args": paths,

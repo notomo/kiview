@@ -11,7 +11,9 @@ pub struct CreateCommand<'a> {
 impl<'a> CreateCommand<'a> {
     pub fn actions(&self) -> serde_json::Value {
         let path = Path::new(self.current_path);
-        let paths = self.path_repository.children(path.to_str().unwrap());
+        let mut paths: Vec<_> = self.path_repository.children(path.to_str().unwrap());
+        paths.splice(0..0, vec!["..".to_string()]);
+
         json!([{
             "name": "create",
             "args": paths,

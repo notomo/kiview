@@ -20,9 +20,10 @@ impl<'a> ParentCommand<'a> {
         let current_path = path
             .parent()
             .unwrap_or_else(|| Path::new(self.current_path));
-        let paths = self
+        let mut paths = self
             .path_repository
             .children(current_path.to_str().unwrap());
+        paths.splice(0..0, vec!["..".to_string()]);
 
         let numbers = &paths
             .iter()

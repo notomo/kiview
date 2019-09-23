@@ -17,8 +17,6 @@ function! s:new(bufnr, current_path, line_number, current_target, targets) abort
         setlocal nonumber
         call nvim_win_set_width(win_getid(), 38)
 
-        syntax match KiviewNode ".*\/$"
-
         call self.logger.log('opend bufnr: ' . self.bufnr)
     endfunction
 
