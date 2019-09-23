@@ -18,3 +18,6 @@ pub use go::GoCommand;
 
 mod new;
 pub use new::NewCommand;
+
+mod remove;
+pub use remove::RemoveCommand;

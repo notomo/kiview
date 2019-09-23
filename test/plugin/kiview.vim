@@ -309,3 +309,72 @@ function! s:suite.cancel_new()
     let lines = s:lines()
     call s:assert.contains(lines, 'autoload/')
 endfunction
+
+function! s:suite.remove()
+    cd ./test/plugin/_test_data
+
+    let input_reader = {}
+    function! input_reader.read(msg) abort
+        return 'Y'
+    endfunction
+    call kiview#input_reader#set(input_reader)
+
+    let command = s:main('')
+    call command.wait()
+
+    let first_line = search('removed_file1')
+    let last_line = search('removed_file2')
+    let command = kiview#main([first_line, last_line], 'remove')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.not_contains(lines, 'removed_file1')
+    call s:assert.not_contains(lines, 'removed_file2')
+
+    call search('removed_dir\/')
+    let command = s:main('remove')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.not_contains(lines, 'removed_dir/')
+endfunction
+
+function! s:suite.cancel_remove()
+    cd ./test/plugin/_test_data
+
+    let input_reader = {}
+    function! input_reader.read(msg) abort
+        return ''
+    endfunction
+    call kiview#input_reader#set(input_reader)
+
+    let command = s:main('')
+    call command.wait()
+
+    call search('removed_cancel_file')
+    let command = s:main('remove')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.contains(lines, 'removed_cancel_file')
+endfunction
+
+function! s:suite.no_remove()
+    cd ./test/plugin/_test_data
+
+    let input_reader = {}
+    function! input_reader.read(msg) abort
+        return 'n'
+    endfunction
+    call kiview#input_reader#set(input_reader)
+
+    let command = s:main('')
+    call command.wait()
+
+    call search('removed_cancel_file')
+    let command = s:main('remove')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.contains(lines, 'removed_cancel_file')
+endfunction

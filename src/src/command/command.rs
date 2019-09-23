@@ -14,6 +14,8 @@ pub enum CommandName {
     Go,
     #[serde(rename = "new")]
     New,
+    #[serde(rename = "remove")]
+    Remove,
     #[serde(rename = "unknown")]
     Unknown,
 }
@@ -51,6 +53,7 @@ pub enum CommandOption {
     Layout { value: Layout },
     Path { value: String },
     Quit,
+    NoConfirm,
     Unknown,
 }
 
@@ -67,6 +70,7 @@ impl From<&str> for CommandName {
             ["child"] => CommandName::Child,
             ["go"] => CommandName::Go,
             ["new"] => CommandName::New,
+            ["remove"] => CommandName::Remove,
             [] => CommandName::Create,
             _ => CommandName::Unknown,
         }
@@ -81,6 +85,7 @@ impl From<&str> for CommandOption {
                 value: Layout::from(*layout),
             },
             ["quit"] => CommandOption::Quit,
+            ["no-confirm"] => CommandOption::NoConfirm,
             ["path", path] => CommandOption::Path {
                 value: path.to_string(),
             },
@@ -94,6 +99,7 @@ pub struct CommandOptions {
     pub layout: Option<Layout>,
     pub quit: bool,
     pub path: Option<String>,
+    pub no_confirm: bool,
 }
 
 impl CommandOptions {
@@ -136,10 +142,16 @@ impl CommandOptions {
             _ => false,
         });
 
+        let no_confirm = options.iter().any(|opt| match &opt {
+            CommandOption::NoConfirm => true,
+            _ => false,
+        });
+
         CommandOptions {
             layout: layout,
             quit: quit,
             path: path,
+            no_confirm: no_confirm,
         }
     }
 }

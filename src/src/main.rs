@@ -111,6 +111,14 @@ fn main() {
                     path_repository: &path_repository,
                 }
                 .actions(),
+                CommandName::Remove => command::RemoveCommand {
+                    current_path: current_path,
+                    line_number: line_number,
+                    opts: &command_opts,
+                    targets: targets,
+                    path_repository: &path_repository,
+                }
+                .actions(),
                 CommandName::Unknown => json!([]),
             };
 

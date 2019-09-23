@@ -12,6 +12,7 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             \ 'quit': { args, options -> s:quit(buffer) },
             \ 'confirm_new': { args, options -> s:confirm_new(input_reader) },
             \ 'new': { args, options -> s:new(args) },
+            \ 'confirm_remove': { args, options -> s:confirm_remove(input_reader) },
         \ },
     \ }
 
@@ -68,4 +69,12 @@ function! s:confirm_new(input_reader) abort
         return
     endif
     return 'new -path=' . name
+endfunction
+
+function! s:confirm_remove(input_reader) abort
+    let answer = a:input_reader.read('remove? Y/n: ')
+    if empty(answer) || answer !=? 'Y'
+        return
+    endif
+    return 'remove -no-confirm'
 endfunction
