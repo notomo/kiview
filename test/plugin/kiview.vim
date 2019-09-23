@@ -254,3 +254,58 @@ function! s:suite.go()
     let lines = s:lines()
     call s:assert.contains(lines, 'kiview/')
 endfunction
+
+function! s:suite.new()
+    cd ./test/plugin/_test_data
+
+    let input_reader = {}
+    function! input_reader.read(msg) abort
+        return 'new/'
+    endfunction
+    call kiview#input_reader#set(input_reader)
+
+    let command = s:main('')
+    call command.wait()
+
+    let command = s:main('new')
+    call command.wait()
+
+    call search('new\/')
+    let command = s:main('child')
+    call command.wait()
+
+    let input_reader = {}
+    function! input_reader.read(msg) abort
+        return 'new_file'
+    endfunction
+    call kiview#input_reader#set(input_reader)
+
+    let command = s:main('new')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.contains(lines, 'new_file')
+
+    call search('new_file')
+    let command = s:main('child')
+    call command.wait()
+
+    call s:assert.equals(s:file_name(), 'new_file')
+endfunction
+
+function! s:suite.cancel_new()
+    let input_reader = {}
+    function! input_reader.read(msg) abort
+        return ''
+    endfunction
+    call kiview#input_reader#set(input_reader)
+
+    let command = s:main('')
+    call command.wait()
+
+    let command = s:main('new')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.contains(lines, 'autoload/')
+endfunction

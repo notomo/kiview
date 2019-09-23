@@ -104,6 +104,13 @@ fn main() {
                     path_repository: &path_repository,
                 }
                 .actions(),
+                CommandName::New => command::NewCommand {
+                    current_path: current_path,
+                    line_number: line_number,
+                    opts: &command_opts,
+                    path_repository: &path_repository,
+                }
+                .actions(),
                 CommandName::Unknown => json!([]),
             };
 

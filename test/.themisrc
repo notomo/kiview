@@ -4,6 +4,7 @@ call themis#option('recursive', 1)
 let s:root = getcwd()
 
 function! KiviewTestBeforeEach() abort
+    call s:clear_test_data()
     execute 'cd' s:root
 
     call kiview#logger#set_func({ msg -> themis#log(msg) })
@@ -12,5 +13,13 @@ endfunction
 
 function! KiviewTestAfterEach() abort
     silent! %bwipeout!
+    execute 'cd' s:root
     call kiview#logger#clear()
+    call kiview#input_reader#clear()
+
+    call s:clear_test_data()
+endfunction
+
+function! s:clear_test_data() abort
+    call delete('./test/plugin/_test_data/new', 'rf')
 endfunction

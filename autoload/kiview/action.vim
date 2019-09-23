@@ -1,6 +1,7 @@
 
-function! kiview#action#new_handler(buffer) abort
+function! kiview#action#new_handler(buffer, input_reader) abort
     let buffer = a:buffer
+    let input_reader = a:input_reader
     let handler = {
         \ 'funcs': {
             \ 'open': { args, options -> s:open_targets(args) },
@@ -9,6 +10,8 @@ function! kiview#action#new_handler(buffer) abort
             \ 'create': { args, options -> s:create(buffer, args, options) },
             \ 'update': { args, options -> s:update(buffer, args, options) },
             \ 'quit': { args, options -> s:quit(buffer) },
+            \ 'confirm_new': { args, options -> s:confirm_new(input_reader) },
+            \ 'new': { args, options -> s:new(args) },
         \ },
     \ }
 
@@ -57,4 +60,12 @@ endfunction
 
 function! s:quit(buffer) abort
     call a:buffer.close_windows()
+endfunction
+
+function! s:confirm_new(input_reader) abort
+    let name = a:input_reader.read('new: ')
+    if empty(name)
+        return
+    endif
+    return 'new -path=' . name
 endfunction

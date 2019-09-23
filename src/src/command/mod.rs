@@ -15,3 +15,6 @@ pub use child::ChildCommand;
 
 mod go;
 pub use go::GoCommand;
+
+mod new;
+pub use new::NewCommand;

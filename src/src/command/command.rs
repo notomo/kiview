@@ -12,6 +12,8 @@ pub enum CommandName {
     Create,
     #[serde(rename = "go")]
     Go,
+    #[serde(rename = "new")]
+    New,
     #[serde(rename = "unknown")]
     Unknown,
 }
@@ -64,6 +66,7 @@ impl From<&str> for CommandName {
             ["parent"] => CommandName::Parent,
             ["child"] => CommandName::Child,
             ["go"] => CommandName::Go,
+            ["new"] => CommandName::New,
             [] => CommandName::Create,
             _ => CommandName::Unknown,
         }
