@@ -16,6 +16,7 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             \ 'copy': { args, options -> s:copy(buffer, args) },
             \ 'cut': { args, options -> s:cut(buffer, args) },
             \ 'clear_register': { args, options -> s:clear_register(buffer) },
+            \ 'confirm_rename': { args, options -> s:confirm_rename(args, input_reader) },
         \ },
     \ }
 
@@ -80,6 +81,15 @@ function! s:confirm_remove(input_reader) abort
         return
     endif
     return 'remove -no-confirm'
+endfunction
+
+function! s:confirm_rename(args, input_reader) abort
+    let message = printf('rename from %s to: ', a:args[0])
+    let name = a:input_reader.read(message)
+    if empty(name)
+        return
+    endif
+    return 'rename -no-confirm -path=' . name
 endfunction
 
 function! s:copy(buffer, args) abort

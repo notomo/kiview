@@ -446,3 +446,24 @@ function! s:suite.cut_and_paste()
     let lines = s:lines()
     call s:assert.not_contains(lines, 'cut_file')
 endfunction
+
+function! s:suite.rename()
+    cd ./test/plugin/_test_data
+
+    let input_reader = {}
+    function! input_reader.read(msg) abort
+        return 'renamed_file'
+    endfunction
+    call kiview#input_reader#set(input_reader)
+
+    let command = s:main('')
+    call command.wait()
+
+    call search('rename_file')
+    let command = s:main('rename')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.contains(lines, 'renamed_file')
+    call s:assert.not_contains(lines, 'rename_file')
+endfunction

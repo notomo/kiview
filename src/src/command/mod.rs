@@ -30,3 +30,6 @@ pub use cut::CutCommand;
 
 mod paste;
 pub use paste::PasteCommand;
+
+mod rename;
+pub use rename::RenameCommand;

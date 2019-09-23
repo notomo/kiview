@@ -22,6 +22,8 @@ pub enum CommandName {
     Cut,
     #[serde(rename = "paste")]
     Paste,
+    #[serde(rename = "rename")]
+    Rename,
     #[serde(rename = "unknown")]
     Unknown,
 }
@@ -80,6 +82,7 @@ impl From<&str> for CommandName {
             ["copy"] => CommandName::Copy,
             ["cut"] => CommandName::Cut,
             ["paste"] => CommandName::Paste,
+            ["rename"] => CommandName::Rename,
             [] => CommandName::Create,
             _ => CommandName::Unknown,
         }
@@ -132,6 +135,7 @@ impl CommandOptions {
                 CommandOption::Layout { value } => Some(value.clone()),
                 _ => None,
             })
+            .filter(|opt| opt.is_some())
             .collect::<Vec<Option<Layout>>>()
             .get(0)
             .and_then(|layout| *layout);
@@ -142,6 +146,7 @@ impl CommandOptions {
                 CommandOption::Path { value } => Some(value.clone()),
                 _ => None,
             })
+            .filter(|opt| opt.is_some())
             .collect::<Vec<Option<String>>>()
             .get(0)
             .and_then(|path| path.clone());

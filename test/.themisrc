@@ -31,6 +31,7 @@ function! s:make_test_data() abort
 
     call system(['touch', './test/plugin/_test_data/copy_file'])
     call system(['touch', './test/plugin/_test_data/cut_file'])
+    call system(['touch', './test/plugin/_test_data/rename_file'])
     call mkdir('./test/plugin/_test_data/paste', 'p')
 endfunction
 
@@ -44,5 +45,7 @@ function! s:clear_test_data() abort
 
     call delete('./test/plugin/_test_data/copy_file')
     call delete('./test/plugin/_test_data/cut_file')
+    call delete('./test/plugin/_test_data/rename_file')
+    call delete('./test/plugin/_test_data/renamed_file')
     call delete('./test/plugin/_test_data/paste', 'rf')
 endfunction

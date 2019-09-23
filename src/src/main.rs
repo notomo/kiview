@@ -159,6 +159,14 @@ fn main() {
                     has_cut: has_cut,
                 }
                 .actions(),
+                CommandName::Rename => command::RenameCommand {
+                    current_path: current_path,
+                    line_number: line_number,
+                    current_target: current_target,
+                    path_repository: &path_repository,
+                    opts: &command_opts,
+                }
+                .actions(),
                 CommandName::Unknown => json!([]),
             };
 
