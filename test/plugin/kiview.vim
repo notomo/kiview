@@ -24,6 +24,10 @@ function! s:count_window() abort
     return tabpagewinnr(tabpagenr(), '$')
 endfunction
 
+function! s:count_tab() abort
+    return tabpagenr('$')
+endfunction
+
 function! s:file_name() abort
     return fnamemodify(bufname('%'), ':t')
 endfunction
@@ -36,8 +40,13 @@ function! s:assert.not_contains(haystack, needle) abort
     call s:assert.false(count(a:haystack, a:needle) != 0, a:needle . ' must not be in the haystack')
 endfunction
 
+function! s:main(arg) abort
+    let line = line('.')
+    return kiview#main([line, line], a:arg)
+endfunction
+
 function! s:suite.create()
-    let command = kiview#main('')
+    let command = s:main('')
     call command.wait()
 
     let lines = s:lines()
@@ -54,7 +63,7 @@ endfunction
 function! s:suite.do_parent_child()
     cd ./test/plugin
 
-    let command = kiview#main('')
+    let command = s:main('')
     call command.wait()
 
     let lines = s:lines()
@@ -63,7 +72,7 @@ function! s:suite.do_parent_child()
     call s:assert.not_contains(lines, '')
     call s:assert.equals(&filetype, 'kiview')
 
-    let command = kiview#main('parent')
+    let command = s:main('parent')
     call command.wait()
 
     let test_lines = s:lines()
@@ -73,7 +82,7 @@ function! s:suite.do_parent_child()
     call s:assert.equals(&filetype, 'kiview')
     call s:assert.false(&modifiable)
 
-    let command = kiview#main('parent')
+    let command = s:main('parent')
     call command.wait()
 
     let lines = s:lines()
@@ -83,7 +92,7 @@ function! s:suite.do_parent_child()
     call s:assert.equals(&filetype, 'kiview')
 
     call search('test/')
-    let command = kiview#main('child')
+    let command = s:main('child')
     call command.wait()
 
     let lines = s:lines()
@@ -94,7 +103,7 @@ function! s:suite.do_parent_child()
     call s:assert.equals(lines, test_lines)
 
     call search('\.themisrc')
-    let command = kiview#main('child')
+    let command = s:main('child')
     call command.wait()
 
     call s:assert.equals(s:file_name(), '.themisrc')
@@ -102,13 +111,13 @@ function! s:suite.do_parent_child()
 endfunction
 
 function! s:suite.quit()
-    let command = kiview#main('')
+    let command = s:main('')
     call command.wait()
 
     call s:assert.equals(&filetype, 'kiview')
     call s:assert.equals(s:count_window(), 2)
 
-    let command = kiview#main('quit')
+    let command = s:main('quit')
     call command.wait()
 
     call s:assert.not_equals('kiview', &filetype)
@@ -116,11 +125,11 @@ function! s:suite.quit()
 endfunction
 
 function! s:suite.quit_option()
-    let command = kiview#main('')
+    let command = s:main('')
     call command.wait()
 
     call search('Makefile')
-    let command = kiview#main('child -quit')
+    let command = s:main('child -quit')
     call command.wait()
 
     call s:assert.equals(s:file_name(), 'Makefile')
@@ -128,23 +137,23 @@ function! s:suite.quit_option()
 endfunction
 
 function! s:suite.tab_open()
-    let command = kiview#main('')
+    let command = s:main('')
     call command.wait()
 
     call search('Makefile')
-    let command = kiview#main('child -layout=tab')
+    let command = s:main('child -layout=tab')
     call command.wait()
 
     call s:assert.equals(s:file_name(), 'Makefile')
-    call s:assert.equals(tabpagenr('$'), 2)
+    call s:assert.equals(s:count_tab(), 2)
 endfunction
 
 function! s:suite.vertical()
-    let command = kiview#main('')
+    let command = s:main('')
     call command.wait()
 
     call search('Makefile')
-    let command = kiview#main('child -layout=vertical')
+    let command = s:main('child -layout=vertical')
     call command.wait()
 
     call s:assert.equals(s:file_name(), 'Makefile')
@@ -154,27 +163,27 @@ endfunction
 function! s:suite.history()
     cd ./src
 
-    let command = kiview#main('')
+    let command = s:main('')
     call command.wait()
 
     call search('src')
-    let command = kiview#main('child')
+    let command = s:main('child')
     call command.wait()
 
     call search('repository')
-    let command = kiview#main('child')
+    let command = s:main('child')
     call command.wait()
 
-    let command = kiview#main('parent')
+    let command = s:main('parent')
     call command.wait()
-    let command = kiview#main('parent')
+    let command = s:main('parent')
     call command.wait()
-    let command = kiview#main('parent')
+    let command = s:main('parent')
     call command.wait()
 
-    let command = kiview#main('child')
+    let command = s:main('child')
     call command.wait()
-    let command = kiview#main('child')
+    let command = s:main('child')
     call command.wait()
 
     let lines = s:lines()
@@ -184,9 +193,9 @@ endfunction
 function! s:suite.no_error_with_continuous()
     cd ./src/src/repository
 
-    let create_command = kiview#main('')
-    let parent_command1 = kiview#main('parent')
-    let parent_command2 = kiview#main('parent')
+    let create_command = s:main('')
+    let parent_command1 = s:main('parent')
+    let parent_command2 = s:main('parent')
 
     call create_command.wait()
     call parent_command1.wait()
@@ -196,9 +205,22 @@ endfunction
 function! s:suite.nop_logger()
     call kiview#logger#clear()
 
-    let command = kiview#main('')
+    let command = s:main('')
     call command.wait()
 
-    let command = kiview#main('parent')
+    let command = s:main('parent')
     call command.wait()
+endfunction
+
+function! s:suite.range()
+    cd ./src
+
+    let command = s:main('')
+    call command.wait()
+
+    let line = search('Cargo\.toml')
+    let command = kiview#main([line, line + 1], 'child -layout=tab')
+    call command.wait()
+
+    call s:assert.equals(s:count_tab(), 3)
 endfunction

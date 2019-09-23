@@ -1,6 +1,6 @@
 
-function! kiview#main(arg) abort
-    let buffer = kiview#buffer#find()
+function! kiview#main(range, arg) abort
+    let buffer = kiview#buffer#find(a:range)
     let action_handler = kiview#action#new_handler(buffer)
 
     let event_service = kiview#event#service()

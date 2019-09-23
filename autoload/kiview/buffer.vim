@@ -73,7 +73,7 @@ function! s:new(bufnr, current_path, line_number, current_target, targets) abort
     return buffer
 endfunction
 
-function! kiview#buffer#find() abort
+function! kiview#buffer#find(range) abort
     if &filetype !=? 'kiview'
         let bufnr = nvim_create_buf(v:false, v:true)
         let current_path = getcwd()
@@ -88,6 +88,6 @@ function! kiview#buffer#find() abort
     let current_path = get(options, 'current_path', getcwd())
     let line_number = line('.')
     let current_target = getline(line_number)
-    let targets = [current_target]
+    let targets = getbufline('%', a:range[0], a:range[1])
     return s:new(bufnr, current_path, line_number, current_target, targets)
 endfunction
