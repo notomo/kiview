@@ -5,7 +5,7 @@ function! kiview#command#new(buffer, action_handler, event_service, arg) abort
         \ 'job': kiview#job#new(cmd, a:event_service),
         \ 'event_service': a:event_service,
         \ 'action_handler': a:action_handler,
-        \ 'logger': kiview#logger#new().label('command'),
+        \ 'logger': kiview#logger#new('command'),
     \ }
 
     function! command.start() abort

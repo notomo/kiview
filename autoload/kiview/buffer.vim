@@ -6,7 +6,7 @@ function! s:new(bufnr, current_path, line_number, current_target, targets) abort
         \ 'line_number': a:line_number,
         \ 'current_target': a:current_target,
         \ 'targets': a:targets,
-        \ 'logger': kiview#logger#new().label('buffer'),
+        \ 'logger': kiview#logger#new('buffer'),
     \ }
 
     function! buffer.open() abort
@@ -28,8 +28,7 @@ function! s:new(bufnr, current_path, line_number, current_target, targets) abort
         call nvim_buf_set_lines(self.bufnr, 0, length, v:false, a:lines)
         call nvim_buf_set_option(self.bufnr, 'modifiable', v:false)
 
-        let lines = nvim_buf_get_lines(self.bufnr, 0, nvim_buf_line_count(self.bufnr), v:false)
-        call self.logger.logs(lines)
+        call self.logger.buffer_log(self.bufnr)
     endfunction
 
     function! buffer.set(options) abort
@@ -68,7 +67,7 @@ function! s:new(bufnr, current_path, line_number, current_target, targets) abort
 
         let line_number = history[current_path]
         call setpos('.', [self.bufnr, line_number, 1, 0])
-        call self.logger.log('restored line number: ' . current_path . ': ' . line_number)
+        call self.logger.logf('restored line number: path=%s, line=%s', current_path, line_number)
     endfunction
 
     return buffer

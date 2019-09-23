@@ -192,3 +192,13 @@ function! s:suite.no_error_with_continuous()
     call parent_command1.wait()
     call parent_command2.wait()
 endfunction
+
+function! s:suite.nop_logger()
+    call kiview#logger#clear()
+
+    let command = kiview#main('')
+    call command.wait()
+
+    let command = kiview#main('parent')
+    call command.wait()
+endfunction

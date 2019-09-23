@@ -7,7 +7,7 @@ function! kiview#job#new(cmd, event_service) abort
     let job = {
         \ 'id': s:id,
         \ 'cmd': a:cmd,
-        \ 'logger': kiview#logger#new().label('job'),
+        \ 'logger': kiview#logger#new('job'),
         \ 'stdout': [],
         \ 'stderr': [],
         \ 'done': v:false,
@@ -31,14 +31,14 @@ function! kiview#job#new(cmd, event_service) abort
 
     function! job.wait(timeout_msec) abort
         if self.done
-            call self.logger.label('job').log('already done')
+            call self.logger.log('already done')
             return v:true
         endif
 
-        call self.logger.label('job').log('wait: ' . self.internal_job_id)
+        call self.logger.log('wait: ' . self.internal_job_id)
         let result = jobwait([self.internal_job_id], a:timeout_msec)
         if result[0] != -1
-            call self.logger.label('job').log('done')
+            call self.logger.log('done')
             return v:true
         endif
 

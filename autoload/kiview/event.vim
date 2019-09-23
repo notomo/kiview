@@ -4,7 +4,7 @@ let s:job_callbacks = {}
 
 function! kiview#event#service() abort
     let service = {
-        \ 'logger': kiview#logger#new().label('event'),
+        \ 'logger': kiview#logger#new('event'),
     \ }
 
     function! service.on_job_finished(job_id, callback) abort
