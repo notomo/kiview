@@ -378,3 +378,71 @@ function! s:suite.no_remove()
     let lines = s:lines()
     call s:assert.contains(lines, 'removed_cancel_file')
 endfunction
+
+function! s:suite.copy_and_paste()
+    cd ./test/plugin/_test_data
+
+    let command = s:main('')
+    call command.wait()
+
+    call search('copy_file')
+    let command = s:main('cut')
+    call command.wait()
+    let command = s:main('copy') " copy disables cut
+    call command.wait()
+
+    call search('paste\/')
+    let command = s:main('child')
+    call command.wait()
+
+    let command = s:main('paste')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.contains(lines, 'copy_file')
+
+    call search('copy_file')
+    let command = s:main('child')
+    call command.wait()
+
+    call s:assert.equals(s:file_name(), 'copy_file')
+
+    let command = s:main('')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.contains(lines, 'copy_file')
+endfunction
+
+function! s:suite.cut_and_paste()
+    cd ./test/plugin/_test_data
+
+    let command = s:main('')
+    call command.wait()
+
+    call search('cut_file')
+    let command = s:main('cut')
+    call command.wait()
+
+    call search('paste\/')
+    let command = s:main('child')
+    call command.wait()
+
+    let command = s:main('paste')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.contains(lines, 'cut_file')
+
+    call search('cut_file')
+    let command = s:main('child')
+    call command.wait()
+
+    call s:assert.equals(s:file_name(), 'cut_file')
+
+    let command = s:main('')
+    call command.wait()
+
+    let lines = s:lines()
+    call s:assert.not_contains(lines, 'cut_file')
+endfunction

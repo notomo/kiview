@@ -48,6 +48,19 @@ fn main() {
                         .takes_value(true)
                         .multiple(true)
                         .required(false),
+                )
+                .arg(
+                    Arg::with_name("registered_targets")
+                        .long("registered")
+                        .takes_value(true)
+                        .multiple(true)
+                        .required(false),
+                )
+                .arg(
+                    Arg::with_name("has_cut")
+                        .long("has-cut")
+                        .takes_value(false)
+                        .required(false),
                 ),
         )
         .subcommand(
@@ -71,6 +84,11 @@ fn main() {
             let line_number = cmd.value_of("line_number").unwrap().parse().unwrap();
             let current_target = cmd.value_of("current_target");
             let targets: Vec<&str> = cmd.values_of("targets").unwrap_or_default().collect();
+            let registered_targets: Vec<&str> = cmd
+                .values_of("registered_targets")
+                .unwrap_or_default()
+                .collect();
+            let has_cut = cmd.is_present("has_cut");
 
             let path_repository = repository::FilePathRepository {};
 
@@ -117,6 +135,28 @@ fn main() {
                     opts: &command_opts,
                     targets: targets,
                     path_repository: &path_repository,
+                }
+                .actions(),
+                CommandName::Copy => command::CopyCommand {
+                    current_path: current_path,
+                    line_number: line_number,
+                    targets: targets,
+                    path_repository: &path_repository,
+                }
+                .actions(),
+                CommandName::Cut => command::CutCommand {
+                    current_path: current_path,
+                    line_number: line_number,
+                    targets: targets,
+                    path_repository: &path_repository,
+                }
+                .actions(),
+                CommandName::Paste => command::PasteCommand {
+                    current_path: current_path,
+                    line_number: line_number,
+                    path_repository: &path_repository,
+                    registered_targets: registered_targets,
+                    has_cut: has_cut,
                 }
                 .actions(),
                 CommandName::Unknown => json!([]),

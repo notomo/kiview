@@ -101,6 +101,12 @@ function! s:build_cmd(buffer, arg) abort
     for target in a:buffer.targets
         call extend(cmd_options, ['--targets', target])
     endfor
+    for target in a:buffer.registered()
+        call extend(cmd_options, ['--registered', target])
+    endfor
+    if a:buffer.has_cut()
+        call add(cmd_options, '--has-cut')
+    endif
 
     return extend(['kiview', 'do'], cmd_options)
 endfunction

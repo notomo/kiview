@@ -28,6 +28,10 @@ function! s:make_test_data() abort
 
     call mkdir('./test/plugin/_test_data/removed_dir', 'p')
     call system(['touch', './test/plugin/_test_data/removed_dir/file'])
+
+    call system(['touch', './test/plugin/_test_data/copy_file'])
+    call system(['touch', './test/plugin/_test_data/cut_file'])
+    call mkdir('./test/plugin/_test_data/paste', 'p')
 endfunction
 
 function! s:clear_test_data() abort
@@ -37,4 +41,8 @@ function! s:clear_test_data() abort
 
     call delete('./test/plugin/_test_data/new', 'rf')
     call delete('./test/plugin/_test_data/removed_cancel_file')
+
+    call delete('./test/plugin/_test_data/copy_file')
+    call delete('./test/plugin/_test_data/cut_file')
+    call delete('./test/plugin/_test_data/paste', 'rf')
 endfunction

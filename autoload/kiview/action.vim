@@ -13,6 +13,9 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             \ 'confirm_new': { args, options -> s:confirm_new(input_reader) },
             \ 'new': { args, options -> s:new(args) },
             \ 'confirm_remove': { args, options -> s:confirm_remove(input_reader) },
+            \ 'copy': { args, options -> s:copy(buffer, args) },
+            \ 'cut': { args, options -> s:cut(buffer, args) },
+            \ 'clear_register': { args, options -> s:clear_register(buffer) },
         \ },
     \ }
 
@@ -77,4 +80,16 @@ function! s:confirm_remove(input_reader) abort
         return
     endif
     return 'remove -no-confirm'
+endfunction
+
+function! s:copy(buffer, args) abort
+    call a:buffer.save_register(a:args)
+endfunction
+
+function! s:cut(buffer, args) abort
+    call a:buffer.save_cut_register(a:args)
+endfunction
+
+function! s:clear_register(buffer) abort
+    call a:buffer.clear_register()
 endfunction

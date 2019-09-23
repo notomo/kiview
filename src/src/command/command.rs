@@ -16,6 +16,12 @@ pub enum CommandName {
     New,
     #[serde(rename = "remove")]
     Remove,
+    #[serde(rename = "copy")]
+    Copy,
+    #[serde(rename = "cut")]
+    Cut,
+    #[serde(rename = "paste")]
+    Paste,
     #[serde(rename = "unknown")]
     Unknown,
 }
@@ -71,6 +77,9 @@ impl From<&str> for CommandName {
             ["go"] => CommandName::Go,
             ["new"] => CommandName::New,
             ["remove"] => CommandName::Remove,
+            ["copy"] => CommandName::Copy,
+            ["cut"] => CommandName::Cut,
+            ["paste"] => CommandName::Paste,
             [] => CommandName::Create,
             _ => CommandName::Unknown,
         }
