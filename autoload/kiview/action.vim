@@ -11,12 +11,11 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             \ 'update': { args, options -> s:update(buffer, args, options) },
             \ 'quit': { args, options -> s:quit(buffer) },
             \ 'confirm_new': { args, options -> s:confirm_new(input_reader) },
-            \ 'new': { args, options -> s:new(args) },
             \ 'confirm_remove': { args, options -> s:confirm_remove(input_reader) },
+            \ 'confirm_rename': { args, options -> s:confirm_rename(args, input_reader) },
             \ 'copy': { args, options -> s:copy(buffer, args) },
             \ 'cut': { args, options -> s:cut(buffer, args) },
             \ 'clear_register': { args, options -> s:clear_register(buffer) },
-            \ 'confirm_rename': { args, options -> s:confirm_rename(args, input_reader) },
         \ },
     \ }
 
