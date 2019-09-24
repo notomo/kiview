@@ -1,6 +1,7 @@
 use std::fs::rename;
 use std::path::Path;
 
+use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::repository::PathRepository;
 
@@ -12,8 +13,8 @@ pub struct RenameCommand<'a> {
     pub opts: &'a CommandOptions,
 }
 
-impl<'a> RenameCommand<'a> {
-    pub fn actions(&self) -> serde_json::Value {
+impl<'a> Command for RenameCommand<'a> {
+    fn actions(&self) -> serde_json::Value {
         let path = Path::new(self.current_path);
 
         match (self.opts.no_confirm, &self.opts.path, &self.current_target) {

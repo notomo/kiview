@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::command::Command;
 use crate::repository::PathRepository;
 
 pub struct ParentCommand<'a> {
@@ -8,8 +9,8 @@ pub struct ParentCommand<'a> {
     pub path_repository: &'a dyn PathRepository,
 }
 
-impl<'a> ParentCommand<'a> {
-    pub fn actions(&self) -> serde_json::Value {
+impl<'a> Command for ParentCommand<'a> {
+    fn actions(&self) -> serde_json::Value {
         let path = Path::new(self.current_path);
         let last_target: String = path
             .file_name()

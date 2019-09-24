@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::repository::PathRepository;
 
@@ -10,8 +11,8 @@ pub struct GoCommand<'a> {
     pub path_repository: &'a dyn PathRepository,
 }
 
-impl<'a> GoCommand<'a> {
-    pub fn actions(&self) -> serde_json::Value {
+impl<'a> Command for GoCommand<'a> {
+    fn actions(&self) -> serde_json::Value {
         let path = Path::new(self.current_path);
 
         let current_path = match &self.opts.path {

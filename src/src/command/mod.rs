@@ -1,5 +1,5 @@
 mod command;
-pub use command::{CommandName, CommandOptions};
+pub use command::{Command, CommandName, CommandOptions};
 
 mod parent;
 pub use parent::ParentCommand;
@@ -33,3 +33,6 @@ pub use paste::PasteCommand;
 
 mod rename;
 pub use rename::RenameCommand;
+
+mod unknown;
+pub use unknown::UnknownCommand;

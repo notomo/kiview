@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::repository::PathRepository;
 
@@ -12,8 +13,8 @@ pub struct ChildCommand<'a> {
     pub path_repository: &'a dyn PathRepository,
 }
 
-impl<'a> ChildCommand<'a> {
-    pub fn actions(&self) -> serde_json::Value {
+impl<'a> Command for ChildCommand<'a> {
+    fn actions(&self) -> serde_json::Value {
         let path = Path::new(self.current_path);
 
         match self.current_target {

@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::command::Command;
 use crate::repository::PathRepository;
 
 pub struct CutCommand<'a> {
@@ -9,8 +10,8 @@ pub struct CutCommand<'a> {
     pub path_repository: &'a dyn PathRepository,
 }
 
-impl<'a> CutCommand<'a> {
-    pub fn actions(&self) -> serde_json::Value {
+impl<'a> Command for CutCommand<'a> {
+    fn actions(&self) -> serde_json::Value {
         let path = Path::new(self.current_path);
 
         let paths: Vec<_> = self

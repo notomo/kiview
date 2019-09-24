@@ -1,5 +1,4 @@
-#![feature(custom_attribute)]
-#![feature(slice_patterns)]
+#![feature(box_syntax)]
 
 use clap::{App, Arg, SubCommand};
 
@@ -7,7 +6,7 @@ use clap::{App, Arg, SubCommand};
 extern crate serde_json;
 
 mod command;
-use command::{CommandName, CommandOptions};
+use command::{Command, CommandName, CommandOptions};
 
 mod repository;
 
@@ -92,83 +91,74 @@ fn main() {
 
             let path_repository = repository::FilePathRepository {};
 
-            let actions = match command_name {
-                CommandName::Quit => command::NamedCommand { name: command_name }.actions(),
-                CommandName::Parent => command::ParentCommand {
+            let actions = match &command_name {
+                CommandName::Quit => box command::NamedCommand { name: command_name },
+                CommandName::Parent => box command::ParentCommand {
                     current_path: current_path,
                     line_number: line_number,
                     path_repository: &path_repository,
-                }
-                .actions(),
-                CommandName::Child => command::ChildCommand {
+                } as Box<dyn Command>,
+                CommandName::Child => box command::ChildCommand {
                     current_path: current_path,
                     line_number: line_number,
                     current_target: current_target,
                     targets: targets,
                     opts: &command_opts,
                     path_repository: &path_repository,
-                }
-                .actions(),
-                CommandName::Create => command::CreateCommand {
+                } as Box<dyn Command>,
+                CommandName::Create => box command::CreateCommand {
                     current_path: current_path,
                     line_number: line_number,
                     path_repository: &path_repository,
-                }
-                .actions(),
-                CommandName::Go => command::GoCommand {
-                    current_path: current_path,
-                    line_number: line_number,
-                    opts: &command_opts,
-                    path_repository: &path_repository,
-                }
-                .actions(),
-                CommandName::New => command::NewCommand {
+                } as Box<dyn Command>,
+                CommandName::Go => box command::GoCommand {
                     current_path: current_path,
                     line_number: line_number,
                     opts: &command_opts,
                     path_repository: &path_repository,
-                }
-                .actions(),
-                CommandName::Remove => command::RemoveCommand {
+                } as Box<dyn Command>,
+                CommandName::New => box command::NewCommand {
+                    current_path: current_path,
+                    line_number: line_number,
+                    opts: &command_opts,
+                    path_repository: &path_repository,
+                } as Box<dyn Command>,
+                CommandName::Remove => box command::RemoveCommand {
                     current_path: current_path,
                     line_number: line_number,
                     opts: &command_opts,
                     targets: targets,
                     path_repository: &path_repository,
-                }
-                .actions(),
-                CommandName::Copy => command::CopyCommand {
+                } as Box<dyn Command>,
+                CommandName::Copy => box command::CopyCommand {
                     current_path: current_path,
                     line_number: line_number,
                     targets: targets,
                     path_repository: &path_repository,
-                }
-                .actions(),
-                CommandName::Cut => command::CutCommand {
+                } as Box<dyn Command>,
+                CommandName::Cut => box command::CutCommand {
                     current_path: current_path,
                     line_number: line_number,
                     targets: targets,
                     path_repository: &path_repository,
-                }
-                .actions(),
-                CommandName::Paste => command::PasteCommand {
+                } as Box<dyn Command>,
+                CommandName::Paste => box command::PasteCommand {
                     current_path: current_path,
                     line_number: line_number,
                     path_repository: &path_repository,
                     registered_targets: registered_targets,
                     has_cut: has_cut,
-                }
-                .actions(),
-                CommandName::Rename => command::RenameCommand {
+                } as Box<dyn Command>,
+                CommandName::Rename => box command::RenameCommand {
                     current_path: current_path,
                     line_number: line_number,
                     current_target: current_target,
                     path_repository: &path_repository,
                     opts: &command_opts,
-                }
-                .actions(),
-                CommandName::Unknown => json!([]),
-            };
+                } as Box<dyn Command>,
+                CommandName::Unknown => box command::UnknownCommand {} as Box<dyn Command>,
+            }
+            .actions();
 
             let output = json!({
                 "actions": actions,

@@ -1,3 +1,4 @@
+use crate::command::Command;
 use std::fs::{remove_dir_all, remove_file};
 use std::path::Path;
 
@@ -12,8 +13,8 @@ pub struct RemoveCommand<'a> {
     pub path_repository: &'a dyn PathRepository,
 }
 
-impl<'a> RemoveCommand<'a> {
-    pub fn actions(&self) -> serde_json::Value {
+impl<'a> Command for RemoveCommand<'a> {
+    fn actions(&self) -> serde_json::Value {
         let path = Path::new(self.current_path);
 
         match self.opts.no_confirm {

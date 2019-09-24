@@ -1,3 +1,4 @@
+use crate::command::Command;
 use std::fs::{copy, rename};
 use std::path::Path;
 
@@ -11,8 +12,8 @@ pub struct PasteCommand<'a> {
     pub has_cut: bool,
 }
 
-impl<'a> PasteCommand<'a> {
-    pub fn actions(&self) -> serde_json::Value {
+impl<'a> Command for PasteCommand<'a> {
+    fn actions(&self) -> serde_json::Value {
         let current_path = Path::new(self.current_path);
 
         let from_paths: Vec<_> = self

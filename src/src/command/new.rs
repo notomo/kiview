@@ -2,6 +2,7 @@ use std::fs::create_dir_all;
 use std::fs::File;
 use std::path::Path;
 
+use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::repository::PathRepository;
 
@@ -12,8 +13,8 @@ pub struct NewCommand<'a> {
     pub path_repository: &'a dyn PathRepository,
 }
 
-impl<'a> NewCommand<'a> {
-    pub fn actions(&self) -> serde_json::Value {
+impl<'a> Command for NewCommand<'a> {
+    fn actions(&self) -> serde_json::Value {
         let path = Path::new(self.current_path);
 
         match &self.opts.path {

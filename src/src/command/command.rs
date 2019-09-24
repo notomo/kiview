@@ -1,5 +1,9 @@
 use serde_derive::Serialize;
 
+pub trait Command {
+    fn actions(&self) -> serde_json::Value;
+}
+
 #[derive(Debug, Serialize)]
 pub enum CommandName {
     #[serde(rename = "quit")]
