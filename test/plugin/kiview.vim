@@ -18,6 +18,17 @@ function! s:lines() abort
     return getbufline('%', 1, '$')
 endfunction
 
+function! s:input_reader(answer) abort
+    let input_reader = {'answer': a:answer}
+    function! input_reader.read(msg) abort
+        call themis#log('[prompt] ' . a:msg)
+        return self.answer
+    endfunction
+    call kiview#input_reader#set(input_reader)
+
+    return input_reader
+endfunction
+
 function! s:syntax_name() abort
     return synIDattr(synID(line('.'), col('.'), v:true), 'name')
 endfunction
@@ -47,9 +58,14 @@ function! s:main(arg) abort
     return kiview#main([line, line], a:arg)
 endfunction
 
-function! s:suite.create()
-    let command = s:main('')
+function! s:sync_main(arg) abort
+    let command = s:main(a:arg)
     call command.wait()
+    return command
+endfunction
+
+function! s:suite.create()
+    call s:sync_main('')
 
     let lines = s:lines()
     call s:assert.not_empty(lines)
@@ -67,8 +83,7 @@ endfunction
 function! s:suite.do_parent_child()
     cd ./test/plugin
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     let lines = s:lines()
     call s:assert.not_empty(lines)
@@ -76,8 +91,7 @@ function! s:suite.do_parent_child()
     call s:assert.not_contains(lines, '')
     call s:assert.equals(&filetype, 'kiview')
 
-    let command = s:main('parent')
-    call command.wait()
+    call s:sync_main('parent')
 
     let test_lines = s:lines()
     call s:assert.not_empty(test_lines)
@@ -87,8 +101,7 @@ function! s:suite.do_parent_child()
     call s:assert.equals(&filetype, 'kiview')
     call s:assert.false(&modifiable)
 
-    let command = s:main('parent')
-    call command.wait()
+    call s:sync_main('parent')
 
     let lines = s:lines()
     call s:assert.not_empty(lines)
@@ -97,8 +110,7 @@ function! s:suite.do_parent_child()
     call s:assert.equals(&filetype, 'kiview')
 
     call search('test/')
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
 
     let lines = s:lines()
     call s:assert.not_empty(lines)
@@ -109,58 +121,49 @@ function! s:suite.do_parent_child()
     call s:assert.equals(lines, test_lines)
 
     call search('\.themisrc')
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
 
     call s:assert.equals(s:file_name(), '.themisrc')
     call s:assert.equals(&filetype, 'vim')
 endfunction
 
 function! s:suite.quit()
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     call s:assert.equals(&filetype, 'kiview')
     call s:assert.equals(s:count_window(), 2)
 
-    let command = s:main('quit')
-    call command.wait()
+    call s:sync_main('quit')
 
     call s:assert.not_equals('kiview', &filetype)
     call s:assert.equals(s:count_window(), 1)
 endfunction
 
 function! s:suite.quit_option()
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     call search('Makefile')
-    let command = s:main('child -quit')
-    call command.wait()
+    call s:sync_main('child -quit')
 
     call s:assert.equals(s:file_name(), 'Makefile')
     call s:assert.equals(s:count_window(), 1)
 endfunction
 
 function! s:suite.tab_open()
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     call search('Makefile')
-    let command = s:main('child -layout=tab')
-    call command.wait()
+    call s:sync_main('child -layout=tab')
 
     call s:assert.equals(s:file_name(), 'Makefile')
     call s:assert.equals(s:count_tab(), 2)
 endfunction
 
 function! s:suite.vertical()
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     call search('Makefile')
-    let command = s:main('child -layout=vertical')
-    call command.wait()
+    call s:sync_main('child -layout=vertical')
 
     call s:assert.equals(s:file_name(), 'Makefile')
     call s:assert.equals(s:count_window(), 3)
@@ -169,28 +172,20 @@ endfunction
 function! s:suite.history()
     cd ./src
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     call search('src')
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
 
     call search('repository')
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
 
-    let command = s:main('parent')
-    call command.wait()
-    let command = s:main('parent')
-    call command.wait()
-    let command = s:main('parent')
-    call command.wait()
+    call s:sync_main('parent')
+    call s:sync_main('parent')
+    call s:sync_main('parent')
 
-    let command = s:main('child')
-    call command.wait()
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
+    call s:sync_main('child')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'repository/')
@@ -211,18 +206,15 @@ endfunction
 function! s:suite.nop_logger()
     call kiview#logger#clear()
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
-    let command = s:main('parent')
-    call command.wait()
+    call s:sync_main('parent')
 endfunction
 
 function! s:suite.range()
     cd ./src
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     let line = search('Cargo\.toml')
     let command = kiview#main([line, line + 1], 'child -layout=tab')
@@ -234,22 +226,16 @@ endfunction
 function! s:suite.parent_marker()
     cd ./src
 
-    let command = s:main('')
-    call command.wait()
-
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('')
+    call s:sync_main('child')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'autoload/')
 endfunction
 
 function! s:suite.go()
-    let command = s:main('')
-    call command.wait()
-
-    let command = s:main('go -path=./autoload')
-    call command.wait()
+    call s:sync_main('')
+    call s:sync_main('go -path=./autoload')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'kiview/')
@@ -258,53 +244,32 @@ endfunction
 function! s:suite.new()
     cd ./test/plugin/_test_data
 
-    let input_reader = {}
-    function! input_reader.read(msg) abort
-        return 'new/'
-    endfunction
-    call kiview#input_reader#set(input_reader)
+    let input_reader = s:input_reader('new/')
 
-    let command = s:main('')
-    call command.wait()
-
-    let command = s:main('new')
-    call command.wait()
+    call s:sync_main('')
+    call s:sync_main('new')
 
     call search('new\/')
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
 
-    let input_reader = {}
-    function! input_reader.read(msg) abort
-        return 'new_file'
-    endfunction
-    call kiview#input_reader#set(input_reader)
+    let input_reader = s:input_reader('new_file')
 
-    let command = s:main('new')
-    call command.wait()
+    call s:sync_main('new')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'new_file')
 
     call search('new_file')
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
 
     call s:assert.equals(s:file_name(), 'new_file')
 endfunction
 
 function! s:suite.cancel_new()
-    let input_reader = {}
-    function! input_reader.read(msg) abort
-        return ''
-    endfunction
-    call kiview#input_reader#set(input_reader)
+    let input_reader = s:input_reader('')
 
-    let command = s:main('')
-    call command.wait()
-
-    let command = s:main('new')
-    call command.wait()
+    call s:sync_main('')
+    call s:sync_main('new')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'autoload/')
@@ -313,14 +278,9 @@ endfunction
 function! s:suite.remove()
     cd ./test/plugin/_test_data
 
-    let input_reader = {}
-    function! input_reader.read(msg) abort
-        return 'Y'
-    endfunction
-    call kiview#input_reader#set(input_reader)
+    let input_reader = s:input_reader('Y')
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     let first_line = search('removed_file1')
     let last_line = search('removed_file2')
@@ -332,8 +292,7 @@ function! s:suite.remove()
     call s:assert.not_contains(lines, 'removed_file2')
 
     call search('removed_dir\/')
-    let command = s:main('remove')
-    call command.wait()
+    call s:sync_main('remove')
 
     let lines = s:lines()
     call s:assert.not_contains(lines, 'removed_dir/')
@@ -342,18 +301,12 @@ endfunction
 function! s:suite.cancel_remove()
     cd ./test/plugin/_test_data
 
-    let input_reader = {}
-    function! input_reader.read(msg) abort
-        return ''
-    endfunction
-    call kiview#input_reader#set(input_reader)
+    let input_reader = s:input_reader('')
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     call search('removed_cancel_file')
-    let command = s:main('remove')
-    call command.wait()
+    call s:sync_main('remove')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'removed_cancel_file')
@@ -362,18 +315,12 @@ endfunction
 function! s:suite.no_remove()
     cd ./test/plugin/_test_data
 
-    let input_reader = {}
-    function! input_reader.read(msg) abort
-        return 'n'
-    endfunction
-    call kiview#input_reader#set(input_reader)
+    let input_reader = s:input_reader('n')
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     call search('removed_cancel_file')
-    let command = s:main('remove')
-    call command.wait()
+    call s:sync_main('remove')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'removed_cancel_file')
@@ -382,33 +329,26 @@ endfunction
 function! s:suite.copy_and_paste()
     cd ./test/plugin/_test_data
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     call search('copy_file')
-    let command = s:main('cut')
-    call command.wait()
-    let command = s:main('copy') " copy disables cut
-    call command.wait()
+    call s:sync_main('cut')
+    call s:sync_main('copy') " copy disables cut
 
     call search('paste\/')
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
 
-    let command = s:main('paste')
-    call command.wait()
+    call s:sync_main('paste')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'copy_file')
 
     call search('copy_file')
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
 
     call s:assert.equals(s:file_name(), 'copy_file')
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'copy_file')
@@ -417,31 +357,25 @@ endfunction
 function! s:suite.cut_and_paste()
     cd ./test/plugin/_test_data
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     call search('cut_file')
-    let command = s:main('cut')
-    call command.wait()
+    call s:sync_main('cut')
 
     call search('paste\/')
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
 
-    let command = s:main('paste')
-    call command.wait()
+    call s:sync_main('paste')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'cut_file')
 
     call search('cut_file')
-    let command = s:main('child')
-    call command.wait()
+    call s:sync_main('child')
 
     call s:assert.equals(s:file_name(), 'cut_file')
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     let lines = s:lines()
     call s:assert.not_contains(lines, 'cut_file')
@@ -450,18 +384,12 @@ endfunction
 function! s:suite.rename()
     cd ./test/plugin/_test_data
 
-    let input_reader = {}
-    function! input_reader.read(msg) abort
-        return 'renamed_file'
-    endfunction
-    call kiview#input_reader#set(input_reader)
+    let input_reader = s:input_reader('renamed_file')
 
-    let command = s:main('')
-    call command.wait()
+    call s:sync_main('')
 
     call search('rename_file')
-    let command = s:main('rename')
-    call command.wait()
+    call s:sync_main('rename')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'renamed_file')

@@ -1,5 +1,5 @@
 mod command;
-pub use command::{CommandName, CommandOptions, Layout};
+pub use command::{CommandName, CommandOptions};
 
 mod parent;
 pub use parent::ParentCommand;
