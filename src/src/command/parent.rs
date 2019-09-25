@@ -22,10 +22,7 @@ impl<'a> Command for ParentCommand<'a> {
         let current_path = path
             .parent()
             .unwrap_or_else(|| Path::new(self.current_path));
-        let mut paths = self
-            .path_repository
-            .children(current_path.to_str().unwrap());
-        paths.splice(0..0, vec!["..".to_string()]);
+        let paths = self.path_repository.list(current_path.to_str().unwrap());
 
         let numbers = &paths
             .iter()

@@ -21,10 +21,7 @@ impl<'a> Command for GoCommand<'a> {
             None => path,
         };
 
-        let mut paths = self
-            .path_repository
-            .children(current_path.to_str().unwrap());
-        paths.splice(0..0, vec!["..".to_string()]);
+        let paths = self.path_repository.list(current_path.to_str().unwrap());
 
         vec![Action::Update {
             args: paths,

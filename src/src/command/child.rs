@@ -27,10 +27,7 @@ impl<'a> Command for ChildCommand<'a> {
                     .unwrap_or(false) =>
             {
                 let current_path = path.join(current_target);
-                let mut paths = self
-                    .path_repository
-                    .children(current_path.to_str().unwrap());
-                paths.splice(0..0, vec!["..".to_string()]);
+                let paths = self.path_repository.list(current_path.to_str().unwrap());
 
                 vec![Action::Update {
                     args: paths,

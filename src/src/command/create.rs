@@ -13,8 +13,7 @@ pub struct CreateCommand<'a> {
 impl<'a> Command for CreateCommand<'a> {
     fn actions(&self) -> Vec<Action> {
         let path = Path::new(self.current_path);
-        let mut paths: Vec<_> = self.path_repository.children(path.to_str().unwrap());
-        paths.splice(0..0, vec!["..".to_string()]);
+        let paths = self.path_repository.list(path.to_str().unwrap());
 
         let current_path = path.canonicalize().unwrap().to_str().unwrap().to_string();
         vec![Action::Create {

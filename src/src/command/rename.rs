@@ -24,8 +24,7 @@ impl<'a> Command for RenameCommand<'a> {
                 let to = path.join(opt_path);
                 rename(from, to).and_then(|_| Ok(())).unwrap();
 
-                let mut paths = self.path_repository.children(path.to_str().unwrap());
-                paths.splice(0..0, vec!["..".to_string()]);
+                let paths = self.path_repository.list(path.to_str().unwrap());
 
                 let current_path = path.canonicalize().unwrap().to_str().unwrap().to_string();
                 vec![Action::Update {
