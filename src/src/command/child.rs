@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::repository::PathRepository;
@@ -14,7 +15,7 @@ pub struct ChildCommand<'a> {
 }
 
 impl<'a> Command for ChildCommand<'a> {
-    fn actions(&self) -> serde_json::Value {
+    fn actions(&self) -> Vec<Action> {
         let path = Path::new(self.current_path);
 
         match self.current_target {
@@ -31,15 +32,22 @@ impl<'a> Command for ChildCommand<'a> {
                     .children(current_path.to_str().unwrap());
                 paths.splice(0..0, vec!["..".to_string()]);
 
-                json!([{
-                  "name": "update",
-                  "args": paths,
-                  "options": {
-                      "current_path": current_path.canonicalize().unwrap(),
-                      "last_path": path.canonicalize().unwrap(),
-                      "last_line_number": self.line_number,
-                  }
-                }])
+                vec![Action::Update {
+                    args: paths,
+                    options: Action::options(
+                        Some(
+                            current_path
+                                .canonicalize()
+                                .unwrap()
+                                .to_str()
+                                .unwrap()
+                                .to_string(),
+                        ),
+                        Some(path.canonicalize().unwrap().to_str().unwrap().to_string()),
+                        Some(self.line_number),
+                        None,
+                    ),
+                }]
             }
             _ => {
                 let files: Vec<_> = self
@@ -51,31 +59,12 @@ impl<'a> Command for ChildCommand<'a> {
                             .and_then(|metadata| Ok(!metadata.is_dir()))
                             .unwrap_or(false)
                     })
+                    .map(|path| path.to_str().unwrap().to_string())
                     .collect();
 
-                let action_name = match self.opts.layout {
-                    Some(layout) => layout.action(),
-                    None => "open".to_string(),
-                };
-
                 match self.opts.quit {
-                    true => json!([
-                        {
-                            "name": action_name,
-                            "args": files,
-                            "options": {},
-                        },
-                        {
-                            "name": "quit",
-                            "args": [],
-                            "options": {},
-                        }
-                    ]),
-                    false => json!([{
-                      "name": action_name,
-                      "args": files,
-                      "options": {},
-                    }]),
+                    true => vec![self.opts.layout.action(files), Action::Quit {}],
+                    false => vec![self.opts.layout.action(files)],
                 }
             }
         }

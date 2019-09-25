@@ -1,6 +1,7 @@
 use std::fs::rename;
 use std::path::Path;
 
+use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::repository::PathRepository;
@@ -14,7 +15,7 @@ pub struct RenameCommand<'a> {
 }
 
 impl<'a> Command for RenameCommand<'a> {
-    fn actions(&self) -> serde_json::Value {
+    fn actions(&self) -> Vec<Action> {
         let path = Path::new(self.current_path);
 
         match (self.opts.no_confirm, &self.opts.path, &self.current_target) {
@@ -26,25 +27,22 @@ impl<'a> Command for RenameCommand<'a> {
                 let mut paths = self.path_repository.children(path.to_str().unwrap());
                 paths.splice(0..0, vec!["..".to_string()]);
 
-                json!([{
-                    "name": "update",
-                    "args": paths,
-                    "options": {
-                        "current_path": path.canonicalize().unwrap(),
-                        "last_path": path.canonicalize().unwrap(),
-                        "last_line_number": self.line_number,
-                    },
-                }])
+                let current_path = path.canonicalize().unwrap().to_str().unwrap().to_string();
+                vec![Action::Update {
+                    args: paths,
+                    options: Action::options(
+                        Some(current_path.clone()),
+                        Some(current_path),
+                        Some(self.line_number),
+                        None,
+                    ),
+                }]
             }
             (false, _, Some(current_target)) => {
-                let from = path.join(current_target);
-                json!([{
-                    "name": "confirm_rename",
-                    "args": [from],
-                    "options": {},
-                }])
+                let from = path.join(current_target).to_str().unwrap().to_string();
+                vec![Action::ConfirmRename { arg: from }]
             }
-            (_, _, _) => json!([]),
+            (_, _, _) => vec![Action::Unknown {}],
         }
     }
 }

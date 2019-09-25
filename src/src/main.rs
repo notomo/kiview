@@ -92,7 +92,7 @@ fn main() {
             let path_repository = repository::FilePathRepository {};
 
             let actions = match &command_name {
-                CommandName::Quit => box command::NamedCommand { name: command_name },
+                CommandName::Quit => box command::QuitCommand {},
                 CommandName::Parent => box command::ParentCommand {
                     current_path: current_path,
                     line_number: line_number,

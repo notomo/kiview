@@ -1,7 +1,8 @@
-use crate::command::Command;
 use std::fs::{copy, rename};
 use std::path::Path;
 
+use crate::command::Action;
+use crate::command::Command;
 use crate::repository::PathRepository;
 
 pub struct PasteCommand<'a> {
@@ -13,7 +14,7 @@ pub struct PasteCommand<'a> {
 }
 
 impl<'a> Command for PasteCommand<'a> {
-    fn actions(&self) -> serde_json::Value {
+    fn actions(&self) -> Vec<Action> {
         let current_path = Path::new(self.current_path);
 
         let from_paths: Vec<_> = self
@@ -38,21 +39,23 @@ impl<'a> Command for PasteCommand<'a> {
             .children(current_path.to_str().unwrap());
         paths.splice(0..0, vec!["..".to_string()]);
 
-        json!([
-            {
-                "name": "update",
-                "args": paths,
-                "options": {
-                    "current_path": current_path.canonicalize().unwrap(),
-                    "last_path": current_path.canonicalize().unwrap(),
-                    "last_line_number": self.line_number,
-                },
+        let path = current_path
+            .canonicalize()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string();
+        vec![
+            Action::Update {
+                args: paths,
+                options: Action::options(
+                    Some(path.clone()),
+                    Some(path),
+                    Some(self.line_number),
+                    None,
+                ),
             },
-            {
-                "name": "clear_register",
-                "args": [],
-                "options": {},
-            }
-        ])
+            Action::ClearRegister {},
+        ]
     }
 }

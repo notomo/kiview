@@ -4,18 +4,18 @@ function! kiview#action#new_handler(buffer, input_reader) abort
     let input_reader = a:input_reader
     let handler = {
         \ 'funcs': {
-            \ 'open': { args, options -> s:open_targets(args) },
-            \ 'tab_open': { args, options -> s:tab_open_targets(args) },
-            \ 'vertical_open': { args, options -> s:vertical_open_targets(args) },
-            \ 'create': { args, options -> s:create(buffer, args, options) },
-            \ 'update': { args, options -> s:update(buffer, args, options) },
-            \ 'quit': { args, options -> s:quit(buffer) },
-            \ 'confirm_new': { args, options -> s:confirm_new(input_reader) },
-            \ 'confirm_remove': { args, options -> s:confirm_remove(input_reader) },
-            \ 'confirm_rename': { args, options -> s:confirm_rename(args, input_reader) },
-            \ 'copy': { args, options -> s:copy(buffer, args) },
-            \ 'cut': { args, options -> s:cut(buffer, args) },
-            \ 'clear_register': { args, options -> s:clear_register(buffer) },
+            \ 'open': { action -> s:open_targets(action) },
+            \ 'tab_open': { action -> s:tab_open_targets(action) },
+            \ 'vertical_open': { action -> s:vertical_open_targets(action) },
+            \ 'create': { action -> s:create(action, buffer) },
+            \ 'update': { action -> s:update(action, buffer) },
+            \ 'quit': { action -> s:quit(buffer) },
+            \ 'confirm_new': { action -> s:confirm_new(input_reader) },
+            \ 'confirm_remove': { action -> s:confirm_remove(input_reader) },
+            \ 'confirm_rename': { action -> s:confirm_rename(action, input_reader) },
+            \ 'copy': { action -> s:copy(action, buffer) },
+            \ 'cut': { action -> s:cut(action, buffer) },
+            \ 'clear_register': { action -> s:clear_register(buffer) },
         \ },
     \ }
 
@@ -24,42 +24,42 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             return
         endif
 
-        return self.funcs[a:action.name](a:action.args, a:action.options)
+        return self.funcs[a:action.name](a:action)
     endfunction
 
     return handler
 endfunction
 
-function! s:open_targets(args) abort
+function! s:open_targets(action) abort
     wincmd w
-    for arg in a:args
+    for arg in a:action.args
         execute 'edit' arg
     endfor
 endfunction
 
-function! s:tab_open_targets(args) abort
-    for arg in a:args
+function! s:tab_open_targets(action) abort
+    for arg in a:action.args
         execute 'tabedit' arg
     endfor
 endfunction
 
-function! s:vertical_open_targets(args) abort
+function! s:vertical_open_targets(action) abort
     wincmd w
-    for arg in a:args
+    for arg in a:action.args
         execute 'vsplit' arg
     endfor
 endfunction
 
-function! s:create(buffer, args, options) abort
-    call a:buffer.write(a:args)
-    call a:buffer.set(a:options)
+function! s:create(action, buffer) abort
+    call a:buffer.write(a:action.args)
+    call a:buffer.set(a:action.options)
     call a:buffer.open()
 endfunction
 
-function! s:update(buffer, args, options) abort
-    call a:buffer.write(a:args)
-    call a:buffer.restore_cursor(a:options)
-    call a:buffer.set(a:options)
+function! s:update(action, buffer) abort
+    call a:buffer.write(a:action.args)
+    call a:buffer.restore_cursor(a:action.options)
+    call a:buffer.set(a:action.options)
 endfunction
 
 function! s:quit(buffer) abort
@@ -82,8 +82,8 @@ function! s:confirm_remove(input_reader) abort
     return 'remove -no-confirm'
 endfunction
 
-function! s:confirm_rename(args, input_reader) abort
-    let message = printf('rename from %s to: ', a:args[0])
+function! s:confirm_rename(action, input_reader) abort
+    let message = printf('rename from %s to: ', a:action.arg)
     let name = a:input_reader.read(message)
     if empty(name)
         return
@@ -91,12 +91,12 @@ function! s:confirm_rename(args, input_reader) abort
     return 'rename -no-confirm -path=' . name
 endfunction
 
-function! s:copy(buffer, args) abort
-    call a:buffer.save_register(a:args)
+function! s:copy(action, buffer) abort
+    call a:buffer.save_register(a:action.args)
 endfunction
 
-function! s:cut(buffer, args) abort
-    call a:buffer.save_cut_register(a:args)
+function! s:cut(action, buffer) abort
+    call a:buffer.save_cut_register(a:action.args)
 endfunction
 
 function! s:clear_register(buffer) abort

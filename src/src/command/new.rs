@@ -2,6 +2,7 @@ use std::fs::create_dir_all;
 use std::fs::File;
 use std::path::Path;
 
+use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::repository::PathRepository;
@@ -14,7 +15,7 @@ pub struct NewCommand<'a> {
 }
 
 impl<'a> Command for NewCommand<'a> {
-    fn actions(&self) -> serde_json::Value {
+    fn actions(&self) -> Vec<Action> {
         let path = Path::new(self.current_path);
 
         match &self.opts.path {
@@ -29,25 +30,18 @@ impl<'a> Command for NewCommand<'a> {
                 let mut paths = self.path_repository.children(path.to_str().unwrap());
                 paths.splice(0..0, vec!["..".to_string()]);
 
-                json!([{
-                    "name": "update",
-                    "args": paths,
-                    "options": {
-                        "current_path": path.canonicalize().unwrap(),
-                        "last_path": path.canonicalize().unwrap(),
-                        "last_line_number": self.line_number,
-                    },
-                }])
+                let current_path = path.canonicalize().unwrap().to_str().unwrap().to_string();
+                vec![Action::Update {
+                    args: paths,
+                    options: Action::options(
+                        Some(current_path.clone()),
+                        Some(current_path),
+                        Some(self.line_number),
+                        None,
+                    ),
+                }]
             }
-            None => json!([{
-                "name": "confirm_new",
-                "args": [],
-                "options": {
-                    "current_path": path.canonicalize().unwrap(),
-                    "last_path": path.canonicalize().unwrap(),
-                    "last_line_number": self.line_number,
-                },
-            }]),
+            None => vec![Action::ConfirmNew {}],
         }
     }
 }

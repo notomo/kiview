@@ -41,6 +41,7 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
             endfor
         catch
             let err = v:true
+            echoerr v:exception
         finally
             let s:running = !empty(self.parent_id) && !err
         endtry

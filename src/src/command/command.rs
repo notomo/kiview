@@ -1,7 +1,8 @@
+use crate::command::Action;
 use serde_derive::Serialize;
 
 pub trait Command {
-    fn actions(&self) -> serde_json::Value;
+    fn actions(&self) -> Vec<Action>;
 }
 
 #[derive(Debug, Serialize)]
@@ -36,17 +37,18 @@ pub enum CommandName {
 pub enum Layout {
     Tab,
     Vertical,
+    Open,
     Unknown,
 }
 
 impl Layout {
-    pub fn action(&self) -> String {
+    pub fn action(&self, args: Vec<String>) -> Action {
         match self {
-            Layout::Tab => "tab_open",
-            Layout::Vertical => "vertical_open",
-            Layout::Unknown => "open",
+            Layout::Tab => Action::TabOpen { args: args },
+            Layout::Vertical => Action::VerticalOpen { args: args },
+            Layout::Open => Action::Open { args: args },
+            Layout::Unknown => Action::Unknown {},
         }
-        .to_string()
     }
 }
 
@@ -112,7 +114,7 @@ impl From<&str> for CommandOption {
 
 #[derive(Debug)]
 pub struct CommandOptions {
-    pub layout: Option<Layout>,
+    pub layout: Layout,
     pub quit: bool,
     pub path: Option<String>,
     pub no_confirm: bool,
@@ -133,7 +135,7 @@ impl CommandOptions {
             })
             .collect();
 
-        let layout: Option<Layout> = options
+        let layout: Layout = options
             .iter()
             .map(|opt| match &opt {
                 CommandOption::Layout { value } => Some(value.clone()),
@@ -142,7 +144,8 @@ impl CommandOptions {
             .filter(|opt| opt.is_some())
             .collect::<Vec<Option<Layout>>>()
             .get(0)
-            .and_then(|layout| *layout);
+            .and_then(|layout| *layout)
+            .unwrap_or(Layout::Open);
 
         let path: Option<String> = options
             .iter()

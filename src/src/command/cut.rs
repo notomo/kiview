@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::command::Action;
 use crate::command::Command;
 use crate::repository::PathRepository;
 
@@ -11,19 +12,22 @@ pub struct CutCommand<'a> {
 }
 
 impl<'a> Command for CutCommand<'a> {
-    fn actions(&self) -> serde_json::Value {
+    fn actions(&self) -> Vec<Action> {
         let path = Path::new(self.current_path);
 
         let paths: Vec<_> = self
             .targets
             .iter()
-            .map(|target| path.join(target).canonicalize().unwrap())
+            .map(|target| {
+                path.join(target)
+                    .canonicalize()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string()
+            })
             .collect();
 
-        json!([{
-            "name": "cut",
-            "args": paths,
-            "options": {},
-        }])
+        vec![Action::Cut { args: paths }]
     }
 }

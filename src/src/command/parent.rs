@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::command::Action;
 use crate::command::Command;
 use crate::repository::PathRepository;
 
@@ -10,7 +11,7 @@ pub struct ParentCommand<'a> {
 }
 
 impl<'a> Command for ParentCommand<'a> {
-    fn actions(&self) -> serde_json::Value {
+    fn actions(&self) -> Vec<Action> {
         let path = Path::new(self.current_path);
         let last_target: String = path
             .file_name()
@@ -33,17 +34,23 @@ impl<'a> Command for ParentCommand<'a> {
             .map(|(line_number, _)| line_number + 1)
             .collect::<Vec<usize>>();
 
-        let last_path_line_number = numbers.get(0).unwrap_or(&0);
+        let last_path_line_number = *numbers.get(0).unwrap_or(&0) as u64;
 
-        json!([{
-            "name": "update",
-            "args": paths,
-            "options": {
-                "current_path": current_path.canonicalize().unwrap(),
-                "last_path": path.canonicalize().unwrap(),
-                "last_line_number": self.line_number,
-                "last_path_line_number": last_path_line_number,
-            },
-        }])
+        vec![Action::Update {
+            args: paths,
+            options: Action::options(
+                Some(
+                    current_path
+                        .canonicalize()
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .to_string(),
+                ),
+                Some(path.canonicalize().unwrap().to_str().unwrap().to_string()),
+                Some(self.line_number),
+                Some(last_path_line_number),
+            ),
+        }]
     }
 }

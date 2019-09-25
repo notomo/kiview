@@ -7,8 +7,8 @@ pub use parent::ParentCommand;
 mod create;
 pub use create::CreateCommand;
 
-mod named;
-pub use named::NamedCommand;
+mod quit;
+pub use quit::QuitCommand;
 
 mod child;
 pub use child::ChildCommand;
@@ -36,3 +36,6 @@ pub use rename::RenameCommand;
 
 mod unknown;
 pub use unknown::UnknownCommand;
+
+mod action;
+pub use action::Action;

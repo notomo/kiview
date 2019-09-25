@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::command::Action;
 use crate::command::Command;
 use crate::repository::PathRepository;
 
@@ -11,19 +12,22 @@ pub struct CopyCommand<'a> {
 }
 
 impl<'a> Command for CopyCommand<'a> {
-    fn actions(&self) -> serde_json::Value {
+    fn actions(&self) -> Vec<Action> {
         let path = Path::new(self.current_path);
 
         let paths: Vec<_> = self
             .targets
             .iter()
-            .map(|target| path.join(target).canonicalize().unwrap())
+            .map(|target| {
+                path.join(target)
+                    .canonicalize()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string()
+            })
             .collect();
 
-        json!([{
-            "name": "copy",
-            "args": paths,
-            "options": {},
-        }])
+        vec![Action::Copy { args: paths }]
     }
 }

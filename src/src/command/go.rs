@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::repository::PathRepository;
@@ -12,7 +13,7 @@ pub struct GoCommand<'a> {
 }
 
 impl<'a> Command for GoCommand<'a> {
-    fn actions(&self) -> serde_json::Value {
+    fn actions(&self) -> Vec<Action> {
         let path = Path::new(self.current_path);
 
         let current_path = match &self.opts.path {
@@ -25,14 +26,21 @@ impl<'a> Command for GoCommand<'a> {
             .children(current_path.to_str().unwrap());
         paths.splice(0..0, vec!["..".to_string()]);
 
-        json!([{
-            "name": "update",
-            "args": paths,
-            "options": {
-                "current_path": current_path.canonicalize().unwrap(),
-                "last_path": path.canonicalize().unwrap(),
-                "last_line_number": self.line_number,
-            },
-        }])
+        vec![Action::Update {
+            args: paths,
+            options: Action::options(
+                Some(
+                    current_path
+                        .canonicalize()
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .to_string(),
+                ),
+                Some(path.canonicalize().unwrap().to_str().unwrap().to_string()),
+                Some(self.line_number),
+                None,
+            ),
+        }]
     }
 }
