@@ -7,6 +7,7 @@ function! s:new(bufnr, current_path, line_number, current_target, targets) abort
         \ 'current_target': a:current_target,
         \ 'targets': a:targets,
         \ 'logger': kiview#logger#new('buffer'),
+        \ 'register': kiview#register#new(a:bufnr),
     \ }
 
     function! buffer.open() abort
@@ -66,37 +67,6 @@ function! s:new(bufnr, current_path, line_number, current_target, targets) abort
         let line_number = history[current_path]
         call setpos('.', [self.bufnr, line_number, 1, 0])
         call self.logger.logf('restored line number: path=%s, line=%s', current_path, line_number)
-    endfunction
-
-    function! buffer.save_register(args) abort
-        let options = get(b:, 'kiview_options', {})
-        let options['register'] = a:args
-        let options['has_cut'] = v:false
-        call nvim_buf_set_var(self.bufnr, 'kiview_options', options)
-    endfunction
-
-    function! buffer.save_cut_register(args) abort
-        let options = get(b:, 'kiview_options', {})
-        let options['register'] = a:args
-        let options['has_cut'] = v:true
-        call nvim_buf_set_var(self.bufnr, 'kiview_options', options)
-    endfunction
-
-    function! buffer.clear_register() abort
-        let options = get(b:, 'kiview_options', {})
-        let options['register'] = []
-        let options['has_cut'] = v:false
-        call nvim_buf_set_var(self.bufnr, 'kiview_options', options)
-    endfunction
-
-    function! buffer.registered() abort
-        let options = get(b:, 'kiview_options', {})
-        return get(options, 'register', [])
-    endfunction
-
-    function! buffer.has_cut() abort
-        let options = get(b:, 'kiview_options', {})
-        return get(options, 'has_cut', v:false)
     endfunction
 
     return buffer

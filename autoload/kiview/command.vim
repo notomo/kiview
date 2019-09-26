@@ -92,6 +92,7 @@ function! s:build_cmd(buffer, arg) abort
         \ 'current-target': a:buffer.current_target,
         \ 'arg': a:arg,
     \ }
+
     let cmd_options = []
     for [k, v] in items(options)
         if empty(v)
@@ -102,10 +103,12 @@ function! s:build_cmd(buffer, arg) abort
     for target in a:buffer.targets
         call extend(cmd_options, ['--targets', target])
     endfor
-    for target in a:buffer.registered()
-        call extend(cmd_options, ['--registered', target])
+
+    let register = a:buffer.register
+    for path in register.paths
+        call extend(cmd_options, ['--registered', path])
     endfor
-    if a:buffer.has_cut()
+    if register.has_cut
         call add(cmd_options, '--has-cut')
     endif
 

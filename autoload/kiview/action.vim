@@ -92,13 +92,13 @@ function! s:confirm_rename(action, input_reader) abort
 endfunction
 
 function! s:copy(action, buffer) abort
-    call a:buffer.save_register(a:action.args)
+    call a:buffer.register.copy(a:action.args)
 endfunction
 
 function! s:cut(action, buffer) abort
-    call a:buffer.save_cut_register(a:action.args)
+    call a:buffer.register.cut(a:action.args)
 endfunction
 
 function! s:clear_register(buffer) abort
-    call a:buffer.clear_register()
+    call a:buffer.register.clear()
 endfunction
