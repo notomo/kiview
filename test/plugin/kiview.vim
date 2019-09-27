@@ -177,6 +177,9 @@ function! s:suite.history()
     call search('src')
     call s:sync_main('child')
 
+    let lines = s:lines()
+    call s:assert.contains(lines, 'repository/')
+
     call search('repository')
     call s:sync_main('child')
 

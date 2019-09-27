@@ -53,13 +53,26 @@ endfunction
 function! s:create(action, buffer) abort
     call a:buffer.write(a:action.args)
     call a:buffer.set(a:action.options)
+
+    let path = a:action.options.last_path
+    let line_number = a:action.options.last_line_number
+    call a:buffer.history.add(path, line_number)
+
     call a:buffer.open()
 endfunction
 
 function! s:update(action, buffer) abort
     call a:buffer.write(a:action.args)
-    call a:buffer.restore_cursor(a:action.options)
+
+    let path = a:action.options.current_path
+    let line_number = get(a:action.options, 'last_path_line_number', v:null)
+    call a:buffer.history.restore(path, line_number)
+
     call a:buffer.set(a:action.options)
+
+    let path = a:action.options.last_path
+    let line_number = a:action.options.last_line_number
+    call a:buffer.history.add(path, line_number)
 endfunction
 
 function! s:quit(buffer) abort
