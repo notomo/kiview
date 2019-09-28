@@ -27,6 +27,6 @@ impl<'a> Command for CutCommand<'a> {
             })
             .collect();
 
-        vec![Action::Cut { args: paths }]
+        vec![Action::Cut { paths: paths }]
     }
 }

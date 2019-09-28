@@ -27,6 +27,6 @@ impl<'a> Command for CopyCommand<'a> {
             })
             .collect();
 
-        vec![Action::Copy { args: paths }]
+        vec![Action::Copy { paths: paths }]
     }
 }

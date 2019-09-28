@@ -27,19 +27,21 @@ impl<'a> Command for RenameCommand<'a> {
                 let paths = self.path_repository.list(path.to_str().unwrap());
 
                 let current_path = path.canonicalize().unwrap().to_str().unwrap().to_string();
-                vec![Action::Update {
-                    args: paths,
-                    options: Action::options(
-                        Some(current_path.clone()),
-                        Some(current_path),
-                        Some(self.line_number),
-                        None,
-                    ),
-                }]
+                vec![
+                    Action::Write { paths: paths },
+                    Action::RestoreCursor {
+                        path: current_path.clone(),
+                        line_number: None,
+                    },
+                    Action::AddHistory {
+                        path: current_path,
+                        line_number: self.line_number,
+                    },
+                ]
             }
             (false, _, Some(current_target)) => {
                 let from = path.join(current_target).to_str().unwrap().to_string();
-                vec![Action::ConfirmRename { arg: from }]
+                vec![Action::ConfirmRename { path: from }]
             }
             (_, _, _) => vec![Action::Unknown],
         }

@@ -66,11 +66,11 @@ pub enum Layout {
 }
 
 impl Layout {
-    pub fn action(&self, args: Vec<String>) -> Action {
+    pub fn action(&self, paths: Vec<String>) -> Action {
         match self {
-            Layout::Tab => Action::TabOpen { args: args },
-            Layout::Vertical => Action::VerticalOpen { args: args },
-            Layout::Open => Action::Open { args: args },
+            Layout::Tab => Action::TabOpen { paths: paths },
+            Layout::Vertical => Action::VerticalOpen { paths: paths },
+            Layout::Open => Action::Open { paths: paths },
             Layout::Unknown => Action::Unknown,
         }
     }

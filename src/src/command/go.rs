@@ -23,21 +23,21 @@ impl<'a> Command for GoCommand<'a> {
 
         let paths = self.path_repository.list(current_path.to_str().unwrap());
 
-        vec![Action::Update {
-            args: paths,
-            options: Action::options(
-                Some(
-                    current_path
-                        .canonicalize()
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                        .to_string(),
-                ),
-                Some(path.canonicalize().unwrap().to_str().unwrap().to_string()),
-                Some(self.line_number),
-                None,
-            ),
-        }]
+        vec![
+            Action::Write { paths: paths },
+            Action::RestoreCursor {
+                path: current_path
+                    .canonicalize()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string(),
+                line_number: None,
+            },
+            Action::AddHistory {
+                path: path.canonicalize().unwrap().to_str().unwrap().to_string(),
+                line_number: self.line_number,
+            },
+        ]
     }
 }

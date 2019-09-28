@@ -87,9 +87,9 @@ endfunction
 
 function! s:build_cmd(buffer, arg) abort
     let options = {
-        \ 'current-path': a:buffer.current_path,
-        \ 'line-number': a:buffer.line_number,
-        \ 'current-target': a:buffer.current_target,
+        \ 'current-path': a:buffer.current.path,
+        \ 'line-number': a:buffer.current.line_number,
+        \ 'current-target': a:buffer.current.target,
         \ 'arg': a:arg,
     \ }
 
@@ -100,7 +100,7 @@ function! s:build_cmd(buffer, arg) abort
         endif
         call extend(cmd_options, ['--' . k, v])
     endfor
-    for target in a:buffer.targets
+    for target in a:buffer.current.targets
         call extend(cmd_options, ['--targets', target])
     endfor
 

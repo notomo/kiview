@@ -33,21 +33,21 @@ impl<'a> Command for ParentCommand<'a> {
 
         let last_path_line_number = *numbers.get(0).unwrap_or(&0) as u64;
 
-        vec![Action::Update {
-            args: paths,
-            options: Action::options(
-                Some(
-                    current_path
-                        .canonicalize()
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                        .to_string(),
-                ),
-                Some(path.canonicalize().unwrap().to_str().unwrap().to_string()),
-                Some(self.line_number),
-                Some(last_path_line_number),
-            ),
-        }]
+        vec![
+            Action::Write { paths: paths },
+            Action::RestoreCursor {
+                path: current_path
+                    .canonicalize()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string(),
+                line_number: Some(last_path_line_number),
+            },
+            Action::AddHistory {
+                path: path.canonicalize().unwrap().to_str().unwrap().to_string(),
+                line_number: self.line_number,
+            },
+        ]
     }
 }

@@ -42,15 +42,16 @@ impl<'a> Command for PasteCommand<'a> {
             .to_str()
             .unwrap()
             .to_string();
+
         vec![
-            Action::Update {
-                args: paths,
-                options: Action::options(
-                    Some(path.clone()),
-                    Some(path),
-                    Some(self.line_number),
-                    None,
-                ),
+            Action::Write { paths: paths },
+            Action::RestoreCursor {
+                path: path.clone(),
+                line_number: None,
+            },
+            Action::AddHistory {
+                path: path,
+                line_number: self.line_number,
             },
             Action::ClearRegister,
         ]

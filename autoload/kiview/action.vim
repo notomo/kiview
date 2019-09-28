@@ -8,7 +8,9 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             \ 'tab_open': { action -> s:tab_open_targets(action) },
             \ 'vertical_open': { action -> s:vertical_open_targets(action) },
             \ 'create': { action -> s:create(action, buffer) },
-            \ 'update': { action -> s:update(action, buffer) },
+            \ 'add_history': { action -> s:add_history(action, buffer) },
+            \ 'restore_cursor': { action -> s:restore_cursor(action, buffer) },
+            \ 'write': { action -> s:write(action, buffer) },
             \ 'quit': { action -> s:quit(buffer) },
             \ 'confirm_new': { action -> s:confirm_new(input_reader) },
             \ 'confirm_remove': { action -> s:confirm_remove(input_reader) },
@@ -32,47 +34,40 @@ endfunction
 
 function! s:open_targets(action) abort
     wincmd w
-    for arg in a:action.args
-        execute 'edit' arg
+    for path in a:action.paths
+        execute 'edit' path
     endfor
 endfunction
 
 function! s:tab_open_targets(action) abort
-    for arg in a:action.args
-        execute 'tabedit' arg
+    for path in a:action.paths
+        execute 'tabedit' path
     endfor
 endfunction
 
 function! s:vertical_open_targets(action) abort
     wincmd w
-    for arg in a:action.args
-        execute 'vsplit' arg
+    for path in a:action.paths
+        execute 'vsplit' path
     endfor
 endfunction
 
-function! s:create(action, buffer) abort
-    call a:buffer.write(a:action.args)
-    call a:buffer.set(a:action.options)
-
-    let path = a:action.options.last_path
-    let line_number = a:action.options.last_line_number
-    call a:buffer.history.add(path, line_number)
-
-    call a:buffer.open()
+function! s:write(action, buffer) abort
+    call a:buffer.write(a:action.paths)
 endfunction
 
-function! s:update(action, buffer) abort
-    call a:buffer.write(a:action.args)
+function! s:restore_cursor(action, buffer) abort
+    let path = a:action.path
+    call a:buffer.history.restore(path, a:action.line_number)
+    call a:buffer.current.set(path)
+endfunction
 
-    let path = a:action.options.current_path
-    let line_number = get(a:action.options, 'last_path_line_number', v:null)
-    call a:buffer.history.restore(path, line_number)
+function! s:add_history(action, buffer) abort
+    call a:buffer.history.add(a:action.path, a:action.line_number)
+endfunction
 
-    call a:buffer.set(a:action.options)
-
-    let path = a:action.options.last_path
-    let line_number = a:action.options.last_line_number
-    call a:buffer.history.add(path, line_number)
+function! s:create(action, buffer) abort
+    call a:buffer.open()
 endfunction
 
 function! s:quit(buffer) abort
@@ -96,7 +91,7 @@ function! s:confirm_remove(input_reader) abort
 endfunction
 
 function! s:confirm_rename(action, input_reader) abort
-    let message = printf('rename from %s to: ', a:action.arg)
+    let message = printf('rename from %s to: ', a:action.path)
     let name = a:input_reader.read(message)
     if empty(name)
         return
@@ -105,11 +100,11 @@ function! s:confirm_rename(action, input_reader) abort
 endfunction
 
 function! s:copy(action, buffer) abort
-    call a:buffer.register.copy(a:action.args)
+    call a:buffer.register.copy(a:action.paths)
 endfunction
 
 function! s:cut(action, buffer) abort
-    call a:buffer.register.cut(a:action.args)
+    call a:buffer.register.cut(a:action.paths)
 endfunction
 
 function! s:clear_register(buffer) abort

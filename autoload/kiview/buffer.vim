@@ -1,14 +1,11 @@
 
-function! s:new(bufnr, current_path, line_number, current_target, targets) abort
+function! s:new(bufnr, range) abort
     let buffer = {
         \ 'bufnr': a:bufnr,
-        \ 'current_path': a:current_path,
-        \ 'line_number': a:line_number,
-        \ 'current_target': a:current_target,
-        \ 'targets': a:targets,
-        \ 'logger': kiview#logger#new('buffer'),
         \ 'register': kiview#register#new(a:bufnr),
         \ 'history': kiview#history#new(a:bufnr),
+        \ 'current': kiview#current#new(a:bufnr, a:range),
+        \ 'logger': kiview#logger#new('buffer'),
     \ }
 
     function! buffer.open() abort
@@ -31,14 +28,6 @@ function! s:new(bufnr, current_path, line_number, current_target, targets) abort
         call self.logger.buffer_log(self.bufnr)
     endfunction
 
-    function! buffer.set(options) abort
-        let options = get(b:, 'kiview_options', {})
-        let options['current_path'] = a:options['current_path']
-
-        call nvim_buf_set_var(self.bufnr, 'kiview_options', options)
-        call self.logger.log('options: ' . string(options))
-    endfunction
-
     function! buffer.close_windows() abort
         let window_ids = win_findbuf(self.bufnr)
         for id in window_ids
@@ -52,18 +41,9 @@ endfunction
 function! kiview#buffer#find(range) abort
     if &filetype !=? 'kiview'
         let bufnr = nvim_create_buf(v:false, v:true)
-        let current_path = getcwd()
-        let line_number = 1
-        let current_target = v:null
-        let targets = []
-        return s:new(bufnr, current_path, line_number, current_target, targets)
+        return s:new(bufnr, a:range)
     endif
 
     let bufnr = bufnr('%')
-    let options = get(b:, 'kiview_options', {})
-    let current_path = get(options, 'current_path', getcwd())
-    let line_number = line('.')
-    let current_target = getline(line_number)
-    let targets = getbufline('%', a:range[0], a:range[1])
-    return s:new(bufnr, current_path, line_number, current_target, targets)
+    return s:new(bufnr, a:range)
 endfunction
