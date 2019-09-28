@@ -21,7 +21,7 @@ endfunction
 function! s:input_reader(answer) abort
     let input_reader = {'answer': a:answer}
     function! input_reader.read(msg) abort
-        call themis#log('[prompt] ' . a:msg)
+        call themis#log('[prompt] ' . a:msg . self.answer)
         return self.answer
     endfunction
     call kiview#input_reader#set(input_reader)
