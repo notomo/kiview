@@ -11,7 +11,7 @@ pub struct RemoveCommand<'a> {
     pub line_number: u64,
     pub opts: &'a CommandOptions,
     pub targets: Vec<&'a str>,
-    pub path_repository: &'a dyn PathRepository,
+    pub path_repository: &'a dyn PathRepository<'a>,
 }
 
 impl<'a> Command for RemoveCommand<'a> {

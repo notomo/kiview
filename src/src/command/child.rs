@@ -11,7 +11,7 @@ pub struct ChildCommand<'a> {
     pub current_target: Option<&'a str>,
     pub opts: &'a CommandOptions,
     pub targets: Vec<&'a str>,
-    pub path_repository: &'a dyn PathRepository,
+    pub path_repository: &'a dyn PathRepository<'a>,
 }
 
 impl<'a> Command for ChildCommand<'a> {

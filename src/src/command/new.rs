@@ -11,7 +11,7 @@ pub struct NewCommand<'a> {
     pub current_path: &'a str,
     pub line_number: u64,
     pub opts: &'a CommandOptions,
-    pub path_repository: &'a dyn PathRepository,
+    pub path_repository: &'a dyn PathRepository<'a>,
 }
 
 impl<'a> Command for NewCommand<'a> {

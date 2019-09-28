@@ -10,7 +10,7 @@ pub struct RenameCommand<'a> {
     pub current_path: &'a str,
     pub line_number: u64,
     pub current_target: Option<&'a str>,
-    pub path_repository: &'a dyn PathRepository,
+    pub path_repository: &'a dyn PathRepository<'a>,
     pub opts: &'a CommandOptions,
 }
 

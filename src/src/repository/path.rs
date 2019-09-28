@@ -1,12 +1,17 @@
 use std::fs;
 
-pub trait PathRepository {
+pub trait Path {
+    fn join_head(&self, head: &str) -> String;
+}
+
+pub trait PathRepository<'a> {
     fn list(&self, path: &str) -> Vec<String>;
+    fn path<'b: 'a>(&self, path: &'b str) -> Box<(dyn Path + 'a)>;
 }
 
 pub struct FilePathRepository {}
 
-impl PathRepository for FilePathRepository {
+impl<'a> PathRepository<'a> for FilePathRepository {
     fn list(&self, path: &str) -> Vec<String> {
         let parent_directory = vec!["..".to_string()];
 
@@ -23,5 +28,27 @@ impl PathRepository for FilePathRepository {
             .collect();
 
         [&parent_directory[..], &directories[..], &files[..]].concat()
+    }
+
+    fn path<'b: 'a>(&self, path: &'b str) -> Box<(dyn Path + 'a)> {
+        box FilePath {
+            path: std::path::Path::new(path),
+        }
+    }
+}
+
+pub struct FilePath<'a> {
+    path: &'a std::path::Path,
+}
+
+impl<'a> Path for FilePath<'a> {
+    fn join_head(&self, head: &str) -> String {
+        self.path
+            .join(head)
+            .canonicalize()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string()
     }
 }

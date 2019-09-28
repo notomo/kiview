@@ -9,7 +9,7 @@ pub struct PasteCommand<'a> {
     pub current_path: &'a str,
     pub line_number: u64,
     pub registered_targets: Vec<&'a str>,
-    pub path_repository: &'a dyn PathRepository,
+    pub path_repository: &'a dyn PathRepository<'a>,
     pub has_cut: bool,
 }
 

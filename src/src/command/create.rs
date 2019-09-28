@@ -7,7 +7,7 @@ use crate::repository::PathRepository;
 pub struct CreateCommand<'a> {
     pub current_path: &'a str,
     pub line_number: u64,
-    pub path_repository: &'a dyn PathRepository,
+    pub path_repository: &'a dyn PathRepository<'a>,
 }
 
 impl<'a> Command for CreateCommand<'a> {
