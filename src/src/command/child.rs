@@ -60,7 +60,7 @@ impl<'a> Command for ChildCommand<'a> {
                     .collect();
 
                 match self.opts.quit {
-                    true => vec![self.opts.layout.action(files), Action::Quit {}],
+                    true => vec![self.opts.layout.action(files), Action::Quit],
                     false => vec![self.opts.layout.action(files)],
                 }
             }

@@ -41,7 +41,7 @@ impl<'a> Command for RenameCommand<'a> {
                 let from = path.join(current_target).to_str().unwrap().to_string();
                 vec![Action::ConfirmRename { arg: from }]
             }
-            (_, _, _) => vec![Action::Unknown {}],
+            (_, _, _) => vec![Action::Unknown],
         }
     }
 }

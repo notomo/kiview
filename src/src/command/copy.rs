@@ -6,7 +6,6 @@ use crate::repository::PathRepository;
 
 pub struct CopyCommand<'a> {
     pub current_path: &'a str,
-    pub line_number: u64,
     pub targets: Vec<&'a str>,
     pub path_repository: &'a dyn PathRepository,
 }

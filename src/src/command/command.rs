@@ -33,44 +33,6 @@ pub enum CommandName {
     Unknown,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum Layout {
-    Tab,
-    Vertical,
-    Open,
-    Unknown,
-}
-
-impl Layout {
-    pub fn action(&self, args: Vec<String>) -> Action {
-        match self {
-            Layout::Tab => Action::TabOpen { args: args },
-            Layout::Vertical => Action::VerticalOpen { args: args },
-            Layout::Open => Action::Open { args: args },
-            Layout::Unknown => Action::Unknown {},
-        }
-    }
-}
-
-impl From<&str> for Layout {
-    fn from(s: &str) -> Self {
-        match s {
-            "tab" => Layout::Tab,
-            "vertical" => Layout::Vertical,
-            _ => Layout::Unknown,
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum CommandOption {
-    Layout { value: Layout },
-    Path { value: String },
-    Quit,
-    NoConfirm,
-    Unknown,
-}
-
 impl From<&str> for CommandName {
     fn from(arg: &str) -> Self {
         let command_names: Vec<_> = arg
@@ -93,6 +55,44 @@ impl From<&str> for CommandName {
             _ => CommandName::Unknown,
         }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Layout {
+    Tab,
+    Vertical,
+    Open,
+    Unknown,
+}
+
+impl Layout {
+    pub fn action(&self, args: Vec<String>) -> Action {
+        match self {
+            Layout::Tab => Action::TabOpen { args: args },
+            Layout::Vertical => Action::VerticalOpen { args: args },
+            Layout::Open => Action::Open { args: args },
+            Layout::Unknown => Action::Unknown,
+        }
+    }
+}
+
+impl From<&str> for Layout {
+    fn from(s: &str) -> Self {
+        match s {
+            "tab" => Layout::Tab,
+            "vertical" => Layout::Vertical,
+            _ => Layout::Unknown,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum CommandOption {
+    Layout { value: Layout },
+    Path { value: String },
+    Quit,
+    NoConfirm,
+    Unknown,
 }
 
 impl From<&str> for CommandOption {

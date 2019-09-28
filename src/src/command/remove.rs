@@ -61,7 +61,7 @@ impl<'a> Command for RemoveCommand<'a> {
                     ),
                 }]
             }
-            false => vec![Action::ConfirmRemove {}],
+            false => vec![Action::ConfirmRemove],
         }
     }
 }

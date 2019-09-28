@@ -52,7 +52,7 @@ impl<'a> Command for PasteCommand<'a> {
                     None,
                 ),
             },
-            Action::ClearRegister {},
+            Action::ClearRegister,
         ]
     }
 }

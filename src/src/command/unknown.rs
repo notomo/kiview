@@ -5,6 +5,6 @@ pub struct UnknownCommand {}
 
 impl Command for UnknownCommand {
     fn actions(&self) -> Vec<Action> {
-        vec![Action::Unknown {}]
+        vec![Action::Unknown]
     }
 }

@@ -40,7 +40,7 @@ impl<'a> Command for NewCommand<'a> {
                     ),
                 }]
             }
-            None => vec![Action::ConfirmNew {}],
+            None => vec![Action::ConfirmNew],
         }
     }
 }

@@ -15,13 +15,13 @@ pub enum Action {
         options: ActionOptions,
     },
     #[serde(rename = "confirm_remove")]
-    ConfirmRemove {},
+    ConfirmRemove,
     #[serde(rename = "confirm_rename")]
     ConfirmRename { arg: String },
     #[serde(rename = "cut")]
     Cut { args: Vec<String> },
     #[serde(rename = "clear_register")]
-    ClearRegister {},
+    ClearRegister,
     #[serde(rename = "update")]
     Update {
         args: Vec<String>,
@@ -30,11 +30,11 @@ pub enum Action {
     #[serde(rename = "copy")]
     Copy { args: Vec<String> },
     #[serde(rename = "confirm_new")]
-    ConfirmNew {},
+    ConfirmNew,
     #[serde(rename = "unknown")]
-    Unknown {},
+    Unknown,
     #[serde(rename = "quit")]
-    Quit {},
+    Quit,
 }
 
 impl Action {

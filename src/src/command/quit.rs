@@ -5,6 +5,6 @@ pub struct QuitCommand {}
 
 impl Command for QuitCommand {
     fn actions(&self) -> Vec<Action> {
-        vec![Action::Quit {}]
+        vec![Action::Quit]
     }
 }

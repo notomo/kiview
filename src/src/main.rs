@@ -132,13 +132,11 @@ fn main() {
                 } as Box<dyn Command>,
                 CommandName::Copy => box command::CopyCommand {
                     current_path: current_path,
-                    line_number: line_number,
                     targets: targets,
                     path_repository: &path_repository,
                 } as Box<dyn Command>,
                 CommandName::Cut => box command::CutCommand {
                     current_path: current_path,
-                    line_number: line_number,
                     targets: targets,
                     path_repository: &path_repository,
                 } as Box<dyn Command>,
