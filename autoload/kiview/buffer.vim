@@ -20,12 +20,11 @@ function! s:new(bufnr, range) abort
     endfunction
 
     function! buffer.write(lines) abort
-        let length = nvim_buf_line_count(self.bufnr)
         call nvim_buf_set_option(self.bufnr, 'modifiable', v:true)
-        call nvim_buf_set_lines(self.bufnr, 0, length, v:false, a:lines)
+        call nvim_buf_set_lines(self.bufnr, 0, -1, v:true, a:lines)
         call nvim_buf_set_option(self.bufnr, 'modifiable', v:false)
 
-        call self.logger.buffer_log(self.bufnr)
+        call self.logger.label('line').buffer_log(self.bufnr)
     endfunction
 
     function! buffer.close_windows() abort
