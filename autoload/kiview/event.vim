@@ -1,32 +1,40 @@
 
 let s:JOB_FINISHED = 'KiviewJobFinished'
 let s:COMMAND_FINISHED = 'KiviewCommandFinished'
-let s:job_callbacks = {}
-let s:command_callbacks = {}
+
+let s:callbacks = {}
 
 function! kiview#event#service() abort
     let service = {
         \ 'logger': kiview#logger#new('event'),
     \ }
 
-    function! service.on_job_finished(job_id, callback) abort
-        let s:job_callbacks[a:job_id] = a:callback
-        execute printf('autocmd User %s:%s ++nested ++once call s:job_callback(expand("<amatch>"))', s:JOB_FINISHED, a:job_id)
+    function! service.on_job_finished(id, callback) abort
+        call self._on_event(s:JOB_FINISHED, a:id, a:callback)
     endfunction
 
-    function! service.on_command_finished(command_id, callback) abort
-        let s:command_callbacks[a:command_id] = a:callback
-        execute printf('autocmd User %s:%s ++nested ++once call s:command_callback(expand("<amatch>"))', s:COMMAND_FINISHED, a:command_id)
+    function! service.on_command_finished(id, callback) abort
+        call self._on_event(s:COMMAND_FINISHED, a:id, a:callback)
     endfunction
 
-    function! service.job_finished(job_id) abort
-        let event = printf('%s:%s', s:JOB_FINISHED, a:job_id)
-        call self.logger.log(event)
-        execute printf('doautocmd User %s', event)
+    function! service._on_event(event_name, id, callback) abort
+        if !has_key(s:callbacks, a:event_name)
+            let s:callbacks[a:event_name] = {}
+        endif
+        let s:callbacks[a:event_name][a:id] = a:callback
+        execute printf('autocmd User %s:%s ++nested ++once call s:callback(expand("<amatch>"), "%s")', a:event_name, a:id, a:event_name)
     endfunction
 
-    function! service.command_finished(command_id) abort
-        let event = printf('%s:%s', s:COMMAND_FINISHED, a:command_id)
+    function! service.job_finished(id) abort
+        call self._emit(s:JOB_FINISHED, a:id)
+    endfunction
+
+    function! service.command_finished(id) abort
+        call self._emit(s:COMMAND_FINISHED, a:id)
+    endfunction
+
+    function! service._emit(event_name, id) abort
+        let event = printf('%s:%s', a:event_name, a:id)
         call self.logger.log(event)
         execute printf('doautocmd User %s', event)
     endfunction
@@ -34,16 +42,9 @@ function! kiview#event#service() abort
     return service
 endfunction
 
-function! s:job_callback(amatch) abort
-    let [_, id] = split(a:amatch, s:JOB_FINISHED . ':', 'keep')
-    call s:job_callbacks[id](id)
+function! s:callback(amatch, event_name) abort
+    let [_, id] = split(a:amatch, a:event_name . ':', 'keep')
+    call s:callbacks[a:event_name][id](id)
 
-    call remove(s:job_callbacks, id)
-endfunction
-
-function! s:command_callback(amatch) abort
-    let [_, id] = split(a:amatch, s:COMMAND_FINISHED . ':', 'keep')
-    call s:command_callbacks[id](id)
-
-    call remove(s:command_callbacks, id)
+    call remove(s:callbacks[a:event_name], id)
 endfunction
