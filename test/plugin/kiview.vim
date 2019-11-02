@@ -1,6 +1,6 @@
 
 let s:suite = themis#suite('plugin.kiview')
-let s:assert = themis#helper('assert')
+let s:assert = KiviewTestAssert()
 
 function! s:suite.before_each()
     call KiviewTestBeforeEach()
@@ -29,30 +29,6 @@ function! s:input_reader(answer) abort
     return input_reader
 endfunction
 
-function! s:syntax_name() abort
-    return synIDattr(synID(line('.'), col('.'), v:true), 'name')
-endfunction
-
-function! s:count_window() abort
-    return tabpagewinnr(tabpagenr(), '$')
-endfunction
-
-function! s:count_tab() abort
-    return tabpagenr('$')
-endfunction
-
-function! s:file_name() abort
-    return fnamemodify(bufname('%'), ':t')
-endfunction
-
-function! s:assert.contains(haystack, needle) abort
-    call s:assert.true(count(a:haystack, a:needle) != 0, a:needle . ' must be in the haystack')
-endfunction
-
-function! s:assert.not_contains(haystack, needle) abort
-    call s:assert.false(count(a:haystack, a:needle) != 0, a:needle . ' must not be in the haystack')
-endfunction
-
 function! s:main(arg) abort
     let line = line('.')
     return kiview#main([line, line], a:arg)
@@ -75,9 +51,9 @@ function! s:suite.create()
     call s:assert.equals(&filetype, 'kiview')
     call s:assert.false(&modifiable)
 
-    call s:assert.equals(s:syntax_name(), 'KiviewNode')
+    call s:assert.syntax_name('KiviewNode')
     call search('autoload\/')
-    call s:assert.equals(s:syntax_name(), 'KiviewNode')
+    call s:assert.syntax_name('KiviewNode')
 endfunction
 
 function! s:suite.do_parent_child()
@@ -123,7 +99,7 @@ function! s:suite.do_parent_child()
     call search('\.themisrc')
     call s:sync_main('child')
 
-    call s:assert.equals(s:file_name(), '.themisrc')
+    call s:assert.file_name('.themisrc')
     call s:assert.equals(&filetype, 'vim')
 endfunction
 
@@ -131,12 +107,12 @@ function! s:suite.quit()
     call s:sync_main('')
 
     call s:assert.equals(&filetype, 'kiview')
-    call s:assert.equals(s:count_window(), 2)
+    call s:assert.window_count(2)
 
     call s:sync_main('quit')
 
     call s:assert.not_equals('kiview', &filetype)
-    call s:assert.equals(s:count_window(), 1)
+    call s:assert.window_count(1)
 endfunction
 
 function! s:suite.quit_option()
@@ -145,8 +121,8 @@ function! s:suite.quit_option()
     call search('Makefile')
     call s:sync_main('child -quit')
 
-    call s:assert.equals(s:file_name(), 'Makefile')
-    call s:assert.equals(s:count_window(), 1)
+    call s:assert.file_name('Makefile')
+    call s:assert.window_count(1)
 endfunction
 
 function! s:suite.tab_open()
@@ -155,8 +131,8 @@ function! s:suite.tab_open()
     call search('Makefile')
     call s:sync_main('child -layout=tab')
 
-    call s:assert.equals(s:file_name(), 'Makefile')
-    call s:assert.equals(s:count_tab(), 2)
+    call s:assert.file_name('Makefile')
+    call s:assert.tab_count(2)
 endfunction
 
 function! s:suite.vertical()
@@ -165,8 +141,8 @@ function! s:suite.vertical()
     call search('Makefile')
     call s:sync_main('child -layout=vertical')
 
-    call s:assert.equals(s:file_name(), 'Makefile')
-    call s:assert.equals(s:count_window(), 3)
+    call s:assert.file_name('Makefile')
+    call s:assert.window_count(3)
 endfunction
 
 function! s:suite.history()
@@ -223,7 +199,7 @@ function! s:suite.range()
     let command = kiview#main([line, line + 1], 'child -layout=tab')
     call command.wait()
 
-    call s:assert.equals(s:count_tab(), 3)
+    call s:assert.tab_count(3)
 endfunction
 
 function! s:suite.parent_marker()
@@ -265,7 +241,7 @@ function! s:suite.new()
     call search('new_file')
     call s:sync_main('child')
 
-    call s:assert.equals(s:file_name(), 'new_file')
+    call s:assert.file_name('new_file')
 endfunction
 
 function! s:suite.cancel_new()
@@ -349,7 +325,7 @@ function! s:suite.copy_and_paste()
     call search('copy_file')
     call s:sync_main('child')
 
-    call s:assert.equals(s:file_name(), 'copy_file')
+    call s:assert.file_name('copy_file')
 
     call s:sync_main('')
 
@@ -376,7 +352,7 @@ function! s:suite.cut_and_paste()
     call search('cut_file')
     call s:sync_main('child')
 
-    call s:assert.equals(s:file_name(), 'cut_file')
+    call s:assert.file_name('cut_file')
 
     call s:sync_main('')
 

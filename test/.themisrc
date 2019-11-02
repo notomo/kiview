@@ -3,6 +3,44 @@ call themis#option('recursive', 1)
 
 let s:root = getcwd()
 
+function! KiviewTestAssert() abort
+    let assert = themis#helper('assert')
+
+    function! assert.window_count(count) abort
+        let window_count = tabpagewinnr(tabpagenr(), '$')
+        let message = printf('window count must be %s, but actual: %s', a:count, window_count)
+        call self.equals(window_count, a:count, message)
+    endfunction
+
+    function! assert.tab_count(count) abort
+        let tab_count = tabpagenr('$')
+        let message = printf('tab count should be %s, but actual: %s', a:count, tab_count)
+        call self.equals(tab_count, a:count, message)
+    endfunction
+
+    function! assert.contains(haystack, needle) abort
+        call self.true(count(a:haystack, a:needle) != 0, a:needle . ' must be in the haystack')
+    endfunction
+
+    function! assert.not_contains(haystack, needle) abort
+        call self.false(count(a:haystack, a:needle) != 0, a:needle . ' must not be in the haystack')
+    endfunction
+
+    function! assert.file_name(expected) abort
+        let actual = fnamemodify(bufname('%'), ':t')
+        let message = printf('syntax name should be %s, but actual: %s', a:expected, actual)
+        call self.equals(a:expected, actual, message)
+    endfunction
+
+    function! assert.syntax_name(expected) abort
+        let actual = synIDattr(synID(line('.'), col('.'), v:true), 'name')
+        let message = printf('syntax name should be %s, but actual: %s', a:expected, actual)
+        call self.equals(a:expected, actual, message)
+    endfunction
+
+    return assert
+endfunction
+
 function! KiviewTestBeforeEach() abort
     execute 'cd' s:root
     call s:clear_test_data()
