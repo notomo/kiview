@@ -48,7 +48,7 @@ function! s:suite.create()
     call s:assert.equals(lines[0], '..')
     call s:assert.contains(lines, 'autoload/')
     call s:assert.not_contains(lines, '')
-    call s:assert.equals(&filetype, 'kiview')
+    call s:assert.filetype('kiview')
     call s:assert.false(&modifiable)
 
     call s:assert.syntax_name('KiviewNode')
@@ -65,7 +65,7 @@ function! s:suite.do_parent_child()
     call s:assert.not_empty(lines)
     call s:assert.contains(lines, 'kiview.vim')
     call s:assert.not_contains(lines, '')
-    call s:assert.equals(&filetype, 'kiview')
+    call s:assert.filetype('kiview')
 
     call s:sync_main('parent')
 
@@ -74,7 +74,7 @@ function! s:suite.do_parent_child()
     call s:assert.equals(lines[0], '..')
     call s:assert.contains(test_lines, 'plugin/')
     call s:assert.not_contains(test_lines, '')
-    call s:assert.equals(&filetype, 'kiview')
+    call s:assert.filetype('kiview')
     call s:assert.false(&modifiable)
 
     call s:sync_main('parent')
@@ -83,7 +83,7 @@ function! s:suite.do_parent_child()
     call s:assert.not_empty(lines)
     call s:assert.contains(lines, 'autoload/')
     call s:assert.not_contains(lines, '')
-    call s:assert.equals(&filetype, 'kiview')
+    call s:assert.filetype('kiview')
 
     call search('test/')
     call s:sync_main('child')
@@ -93,25 +93,25 @@ function! s:suite.do_parent_child()
     call s:assert.equals(lines[0], '..')
     call s:assert.contains(test_lines, 'plugin/')
     call s:assert.not_contains(test_lines, '')
-    call s:assert.equals(&filetype, 'kiview')
+    call s:assert.filetype('kiview')
     call s:assert.equals(lines, test_lines)
 
     call search('\.themisrc')
     call s:sync_main('child')
 
     call s:assert.file_name('.themisrc')
-    call s:assert.equals(&filetype, 'vim')
+    call s:assert.filetype('vim')
 endfunction
 
 function! s:suite.quit()
     call s:sync_main('')
 
-    call s:assert.equals(&filetype, 'kiview')
+    call s:assert.filetype('kiview')
     call s:assert.window_count(2)
 
     call s:sync_main('quit')
 
-    call s:assert.not_equals('kiview', &filetype)
+    call s:assert.filetype('')
     call s:assert.window_count(1)
 endfunction
 
