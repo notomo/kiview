@@ -18,7 +18,7 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
     \ }
 
     function! command.start() abort
-        call s:limitter.start({ -> self._start() }, self.id, self.parent_id)
+        call s:limitter.start({ -> self._start() }, self.id, self.parent_id, { id, callback -> self.event_service.on_command_finished(id, callback) })
     endfunction
 
     function! command._start() abort
@@ -41,14 +41,11 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
                 call child.start()
             endfor
         catch
-            call s:limitter.finish()
             echoerr v:exception
+        finally
+            call self.event_service.command_finished(self.id)
         endtry
 
-        if empty(self.parent_id)
-            call s:limitter.finish()
-        endif
-        call self.event_service.command_finished(self.id)
         call self.logger.log('finished')
     endfunction
 
