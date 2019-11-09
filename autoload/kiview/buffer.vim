@@ -15,6 +15,7 @@ function! s:new(bufnr, range) abort
         setlocal filetype=kiview
         setlocal nonumber
         call nvim_win_set_width(win_getid(), 38)
+        call nvim_buf_set_option(self.bufnr, 'bufhidden', 'wipe')
 
         call self.logger.log('opend bufnr: ' . self.bufnr)
     endfunction

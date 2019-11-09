@@ -32,6 +32,14 @@ function! kiview#history#new(bufnr) abort
     endfunction
 
     let s:histories[a:bufnr] = history
+    execute printf('autocmd BufWipeout <buffer=%s> ++nested call s:clean("%s")', a:bufnr, a:bufnr)
 
     return history
+endfunction
+
+function! s:clean(bufnr) abort
+    if !has_key(s:histories, a:bufnr)
+        return
+    endif
+    call remove(s:histories, a:bufnr)
 endfunction

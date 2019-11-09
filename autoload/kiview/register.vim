@@ -33,6 +33,14 @@ function! kiview#register#new(bufnr) abort
     endfunction
 
     let s:registers[a:bufnr] = register
+    execute printf('autocmd BufWipeout <buffer=%s> ++nested call s:clean("%s")', a:bufnr, a:bufnr)
 
     return register
+endfunction
+
+function! s:clean(bufnr) abort
+    if !has_key(s:registers, a:bufnr)
+        return
+    endif
+    call remove(s:registers, a:bufnr)
 endfunction
