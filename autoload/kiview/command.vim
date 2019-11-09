@@ -1,5 +1,5 @@
 
-let s:running = v:false
+let s:limitter = kiview#limitter#new()
 let s:id = 0
 
 function! kiview#command#new(buffer, action_handler, event_service, arg, parent_id) abort
@@ -14,48 +14,42 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
         \ 'event_service': a:event_service,
         \ 'action_handler': a:action_handler,
         \ 'children': [],
-        \ 'child_ids': {},
-        \ 'logger': kiview#logger#new('command'),
+        \ 'logger': kiview#logger#new('command: ' . s:id).label('parent: ' . a:parent_id),
     \ }
 
     function! command.start() abort
-        if s:running && empty(self.parent_id)
-            call self.logger.log('cannot execute more than one command at the same time')
-            return
-        endif
+        call s:limitter.start({ -> self._start() }, self.id, self.parent_id)
+    endfunction
+
+    function! command._start() abort
+        call self.logger.log('start')
         call self.event_service.on_job_finished(self.job.id, { id -> self.on_job_finished(id) })
         call self.job.start()
-        let s:running = v:true
     endfunction
 
     function! command.on_job_finished(id) abort
-        let err = v:false
         try
             let json = json_decode(join(self.job.stdout, ''))
             for action in json['actions']
-                let child_arg = self.action_handler.handle(action)
-                if empty(child_arg)
+                let arg = self.action_handler.handle(action)
+                if empty(arg)
                     continue
                 endif
-                call self.start_child(child_arg)
+
+                let child = kiview#command#new(self.buffer, self.action_handler, self.event_service, arg, self.id)
+                call add(self.children, child)
+                call child.start()
             endfor
         catch
-            let err = v:true
+            call s:limitter.finish()
             echoerr v:exception
-        finally
-            let s:running = !empty(self.parent_id) && !err
         endtry
 
-        if !empty(self.parent_id)
-            call self.event_service.command_finished(self.id)
+        if empty(self.parent_id)
+            call s:limitter.finish()
         endif
-
-        call self.logger.log('finished callback on job finished')
-    endfunction
-
-    function! command.on_child_finished(id) abort
-        call remove(self.child_ids, a:id)
-        let s:running = !empty(self.parent_id) && !empty(self.child_ids)
+        call self.event_service.command_finished(self.id)
+        call self.logger.log('finished')
     endfunction
 
     function! command.wait(...) abort
@@ -69,17 +63,6 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
         for child in self.children
             call child.wait(timeout_msec)
         endfor
-    endfunction
-
-    function! command.start_child(arg) abort
-        let child = kiview#command#new(self.buffer, self.action_handler, self.event_service, a:arg, self.id)
-        call self.event_service.on_command_finished(child.id, { id -> self.on_child_finished(id) })
-        call add(self.children, child)
-        let self.child_ids[child.id] = v:true
-
-        call self.logger.log('child_ids: ' . string(self.child_ids))
-
-        call child.start()
     endfunction
 
     return command

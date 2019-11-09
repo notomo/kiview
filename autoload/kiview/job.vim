@@ -7,7 +7,7 @@ function! kiview#job#new(cmd, event_service) abort
     let job = {
         \ 'id': s:id,
         \ 'cmd': a:cmd,
-        \ 'logger': kiview#logger#new('job'),
+        \ 'logger': kiview#logger#new('job: ' . s:id),
         \ 'stdout': [],
         \ 'stderr': [],
         \ 'started': v:false,
