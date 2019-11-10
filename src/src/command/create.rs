@@ -11,13 +11,13 @@ pub struct CreateCommand<'a> {
 }
 
 impl<'a> Command for CreateCommand<'a> {
-    fn actions(&self) -> Vec<Action> {
+    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let path = Path::new(self.current_path);
-        let paths = self.path_repository.list(path.to_str().unwrap());
+        let paths = self.path_repository.list(path.to_str()?)?;
 
-        let current_path = path.canonicalize().unwrap().to_str().unwrap().to_string();
+        let current_path = path.canonicalize()?.to_str()?.to_string();
 
-        vec![
+        Ok(vec![
             Action::Write { paths: paths },
             Action::RestoreCursor {
                 path: current_path.clone(),
@@ -28,6 +28,6 @@ impl<'a> Command for CreateCommand<'a> {
                 line_number: self.line_number,
             },
             Action::Create,
-        ]
+        ])
     }
 }

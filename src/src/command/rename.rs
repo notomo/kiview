@@ -15,35 +15,37 @@ pub struct RenameCommand<'a> {
 }
 
 impl<'a> Command for RenameCommand<'a> {
-    fn actions(&self) -> Vec<Action> {
+    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let path = Path::new(self.current_path);
 
-        match (self.opts.no_confirm, &self.opts.path, &self.current_target) {
-            (true, Some(opt_path), Some(current_target)) => {
-                let from = path.join(current_target);
-                let to = path.join(opt_path);
-                rename(from, to).and_then(|_| Ok(())).unwrap();
+        Ok(
+            match (self.opts.no_confirm, &self.opts.path, &self.current_target) {
+                (true, Some(opt_path), Some(current_target)) => {
+                    let from = path.join(current_target);
+                    let to = path.join(opt_path);
+                    rename(from, to).and_then(|_| Ok(()))?;
 
-                let paths = self.path_repository.list(path.to_str().unwrap());
+                    let paths = self.path_repository.list(path.to_str()?)?;
 
-                let current_path = path.canonicalize().unwrap().to_str().unwrap().to_string();
-                vec![
-                    Action::Write { paths: paths },
-                    Action::RestoreCursor {
-                        path: current_path.clone(),
-                        line_number: None,
-                    },
-                    Action::AddHistory {
-                        path: current_path,
-                        line_number: self.line_number,
-                    },
-                ]
-            }
-            (false, _, Some(current_target)) => {
-                let from = path.join(current_target).to_str().unwrap().to_string();
-                vec![Action::ConfirmRename { path: from }]
-            }
-            (_, _, _) => vec![Action::Unknown],
-        }
+                    let current_path = path.canonicalize()?.to_str()?.to_string();
+                    vec![
+                        Action::Write { paths: paths },
+                        Action::RestoreCursor {
+                            path: current_path.clone(),
+                            line_number: None,
+                        },
+                        Action::AddHistory {
+                            path: current_path,
+                            line_number: self.line_number,
+                        },
+                    ]
+                }
+                (false, _, Some(current_target)) => {
+                    let from = path.join(current_target).to_str()?.to_string();
+                    vec![Action::ConfirmRename { path: from }]
+                }
+                (_, _, _) => vec![Action::Unknown],
+            },
+        )
     }
 }

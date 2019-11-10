@@ -9,7 +9,7 @@ pub struct CutCommand<'a> {
 }
 
 impl<'a> Command for CutCommand<'a> {
-    fn actions(&self) -> Vec<Action> {
+    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let path = self.path_repository.path(self.current_path);
 
         let paths = self
@@ -18,6 +18,6 @@ impl<'a> Command for CutCommand<'a> {
             .map(|target| path.join_head(target))
             .collect();
 
-        vec![Action::Cut { paths: paths }]
+        Ok(vec![Action::Cut { paths: paths }])
     }
 }

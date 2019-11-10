@@ -22,15 +22,15 @@ function! kiview#event#service() abort
             let s:callbacks[a:event_name] = {}
         endif
         let s:callbacks[a:event_name][a:id] = a:callback
-        execute printf('autocmd User %s:%s ++nested ++once call s:callback(expand("<amatch>"), "%s")', a:event_name, a:id, a:event_name)
+        execute printf('autocmd User %s:%s:* ++nested ++once call s:callback(expand("<amatch>"), "%s")', a:event_name, a:id, a:event_name)
     endfunction
 
-    function! service.job_finished(id) abort
-        call self._emit(s:JOB_FINISHED, a:id)
+    function! service.job_finished(id, err) abort
+        call self._emit(s:JOB_FINISHED, a:id . ':' . a:err)
     endfunction
 
     function! service.command_finished(id) abort
-        call self._emit(s:COMMAND_FINISHED, a:id)
+        call self._emit(s:COMMAND_FINISHED, a:id . ':')
     endfunction
 
     function! service._emit(event_name, id) abort
@@ -43,8 +43,11 @@ function! kiview#event#service() abort
 endfunction
 
 function! s:callback(amatch, event_name) abort
-    let [_, id] = split(a:amatch, a:event_name . ':', 'keep')
-    call s:callbacks[a:event_name][id](id)
+    let id_err = a:amatch[stridx(a:amatch, a:event_name . ':'):]
+    let index = stridx(id_err, ':', len(a:event_name . ':'))
+    let id = id_err[len(a:event_name . ':') : index - 1]
+    let err = id_err[index + 1 :]
+    call s:callbacks[a:event_name][id](id, err)
 
     call remove(s:callbacks[a:event_name], id)
 endfunction

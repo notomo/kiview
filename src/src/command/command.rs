@@ -2,7 +2,7 @@ use crate::command::Action;
 use serde_derive::Serialize;
 
 pub trait Command {
-    fn actions(&self) -> Vec<Action>;
+    fn actions(&self) -> Result<Vec<Action>, crate::command::Error>;
 }
 
 #[derive(Debug, Serialize)]

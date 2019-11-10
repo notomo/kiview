@@ -15,10 +15,10 @@ pub struct RemoveCommand<'a> {
 }
 
 impl<'a> Command for RemoveCommand<'a> {
-    fn actions(&self) -> Vec<Action> {
+    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let path = Path::new(self.current_path);
 
-        match self.opts.no_confirm {
+        Ok(match self.opts.no_confirm {
             true => {
                 let files: Vec<_> = self
                     .targets
@@ -45,12 +45,12 @@ impl<'a> Command for RemoveCommand<'a> {
                     })
                     .collect();
                 for dir in &dirs {
-                    remove_dir_all(dir).unwrap();
+                    remove_dir_all(dir)?;
                 }
 
-                let paths = self.path_repository.list(path.to_str().unwrap());
+                let paths = self.path_repository.list(path.to_str()?)?;
 
-                let current_path = path.canonicalize().unwrap().to_str().unwrap().to_string();
+                let current_path = path.canonicalize()?.to_str()?.to_string();
                 vec![
                     Action::Write { paths: paths },
                     Action::RestoreCursor {
@@ -64,6 +64,6 @@ impl<'a> Command for RemoveCommand<'a> {
                 ]
             }
             false => vec![Action::ConfirmRemove],
-        }
+        })
     }
 }

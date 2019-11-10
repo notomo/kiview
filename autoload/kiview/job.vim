@@ -55,7 +55,7 @@ function! kiview#job#new(cmd, event_service) abort
 
     function! job.on_finished() abort
         let self.done = v:true
-        call self.event_service.job_finished(self.id)
+        call self.event_service.job_finished(self.id, join(self.stderr, "\n"))
     endfunction
 
     return job

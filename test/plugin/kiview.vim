@@ -374,3 +374,8 @@ function! s:suite.rename()
     call s:assert.contains(lines, 'renamed_file')
     call s:assert.not_contains(lines, 'rename_file')
 endfunction
+
+function! s:suite.go_error()
+    call s:sync_main('')
+    call s:sync_main('go -path=./not_found')
+endfunction

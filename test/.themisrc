@@ -53,6 +53,7 @@ function! KiviewTestBeforeEach() abort
     call s:make_test_data()
 
     call kiview#logger#set_func({ msg -> themis#log(msg) })
+    call kiview#messenger#set_func({ msg -> themis#log('[test messenger] ' . msg) })
     call themis#log('')
 endfunction
 

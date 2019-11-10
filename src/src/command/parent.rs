@@ -11,7 +11,7 @@ pub struct ParentCommand<'a> {
 }
 
 impl<'a> Command for ParentCommand<'a> {
-    fn actions(&self) -> Vec<Action> {
+    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let path = Path::new(self.current_path);
         let last_target: String = path
             .file_name()
@@ -22,7 +22,7 @@ impl<'a> Command for ParentCommand<'a> {
         let current_path = path
             .parent()
             .unwrap_or_else(|| Path::new(self.current_path));
-        let paths = self.path_repository.list(current_path.to_str().unwrap());
+        let paths = self.path_repository.list(current_path.to_str()?)?;
 
         let numbers = &paths
             .iter()
@@ -33,7 +33,7 @@ impl<'a> Command for ParentCommand<'a> {
 
         let last_path_line_number = *numbers.get(0).unwrap_or(&0) as u64;
 
-        vec![
+        Ok(vec![
             Action::Write { paths: paths },
             Action::RestoreCursor {
                 path: current_path
@@ -48,6 +48,6 @@ impl<'a> Command for ParentCommand<'a> {
                 path: path.canonicalize().unwrap().to_str().unwrap().to_string(),
                 line_number: self.line_number,
             },
-        ]
+        ])
     }
 }

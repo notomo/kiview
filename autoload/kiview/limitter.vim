@@ -13,7 +13,7 @@ function! kiview#limitter#new() abort
         endif
 
         let parent_id = a:parent_id
-        call a:set_receiver(a:id, { id -> self._on_finished(id, parent_id) })
+        call a:set_receiver(a:id, { id, _ -> self._on_finished(id, parent_id) })
 
         if !empty(a:parent_id)
             if !has_key(self._children, a:parent_id)

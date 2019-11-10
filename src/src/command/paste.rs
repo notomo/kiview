@@ -14,7 +14,7 @@ pub struct PasteCommand<'a> {
 }
 
 impl<'a> Command for PasteCommand<'a> {
-    fn actions(&self) -> Vec<Action> {
+    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let current_path = Path::new(self.current_path);
 
         let from_paths: Vec<_> = self
@@ -25,25 +25,19 @@ impl<'a> Command for PasteCommand<'a> {
 
         // FIXME: when already exists
         for from in &from_paths {
-            let to_name = from.file_name().unwrap();
+            let to_name = from.file_name()?;
             let to = current_path.join(to_name);
             match self.has_cut {
                 true => rename(from, to).and_then(|_| Ok(())),
                 false => copy(from, to).and_then(|_| Ok(())),
-            }
-            .unwrap();
+            }?;
         }
 
-        let paths = self.path_repository.list(current_path.to_str().unwrap());
+        let paths = self.path_repository.list(current_path.to_str()?)?;
 
-        let path = current_path
-            .canonicalize()
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string();
+        let path = current_path.canonicalize()?.to_str()?.to_string();
 
-        vec![
+        Ok(vec![
             Action::Write { paths: paths },
             Action::RestoreCursor {
                 path: path.clone(),
@@ -54,6 +48,6 @@ impl<'a> Command for PasteCommand<'a> {
                 line_number: self.line_number,
             },
             Action::ClearRegister,
-        ]
+        ])
     }
 }

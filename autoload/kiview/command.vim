@@ -23,11 +23,17 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
 
     function! command._start() abort
         call self.logger.log('start')
-        call self.event_service.on_job_finished(self.job.id, { id -> self.on_job_finished(id) })
+        call self.event_service.on_job_finished(self.job.id, { id, err -> self.on_job_finished(id, err) })
         call self.job.start()
     endfunction
 
-    function! command.on_job_finished(id) abort
+    function! command.on_job_finished(id, err) abort
+        if !empty(a:err)
+            call kiview#messenger#new().error(a:err)
+            call self.event_service.command_finished(self.id)
+            return
+        endif
+
         try
             let json = json_decode(join(self.job.stdout, ''))
             for action in json['actions']

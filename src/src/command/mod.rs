@@ -39,3 +39,6 @@ pub use unknown::UnknownCommand;
 
 mod action;
 pub use action::Action;
+
+mod error;
+pub use error::{Error, ErrorKind};

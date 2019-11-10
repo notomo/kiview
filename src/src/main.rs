@@ -1,4 +1,5 @@
 #![feature(box_syntax)]
+#![feature(try_trait)]
 
 use clap::{App, Arg, SubCommand};
 
@@ -158,11 +159,18 @@ fn main() {
             }
             .actions();
 
-            let output = json!({
-                "actions": actions,
-            });
-
-            println!("{}", serde_json::to_string_pretty(&output).unwrap());
+            match actions {
+                Ok(actions) => {
+                    let output = json!({
+                        "actions": actions,
+                    });
+                    println!("{}", serde_json::to_string_pretty(&output).unwrap());
+                }
+                Err(err) => {
+                    eprintln!("{}", err);
+                    std::process::exit(1);
+                }
+            }
         }
         ("complete", Some(cmd)) => {
             let arg = cmd.value_of("arg").unwrap();

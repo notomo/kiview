@@ -15,7 +15,7 @@ pub struct ChildCommand<'a> {
 }
 
 impl<'a> Command for ChildCommand<'a> {
-    fn actions(&self) -> Vec<Action> {
+    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let path = Path::new(self.current_path);
 
         match self.current_target {
@@ -27,24 +27,19 @@ impl<'a> Command for ChildCommand<'a> {
                     .unwrap_or(false) =>
             {
                 let current_path = path.join(current_target);
-                let paths = self.path_repository.list(current_path.to_str().unwrap());
+                let paths = self.path_repository.list(current_path.to_str()?)?;
 
-                vec![
+                Ok(vec![
                     Action::Write { paths: paths },
                     Action::RestoreCursor {
-                        path: current_path
-                            .canonicalize()
-                            .unwrap()
-                            .to_str()
-                            .unwrap()
-                            .to_string(),
+                        path: current_path.canonicalize()?.to_str()?.to_string(),
                         line_number: None,
                     },
                     Action::AddHistory {
-                        path: path.canonicalize().unwrap().to_str().unwrap().to_string(),
+                        path: path.canonicalize()?.to_str()?.to_string(),
                         line_number: self.line_number,
                     },
-                ]
+                ])
             }
             _ => {
                 let files: Vec<_> = self
@@ -59,10 +54,10 @@ impl<'a> Command for ChildCommand<'a> {
                     .map(|path| path.to_str().unwrap().to_string())
                     .collect();
 
-                match self.opts.quit {
-                    true => vec![self.opts.layout.action(files), Action::Quit],
+                Ok(match self.opts.quit {
+                    true => (vec![self.opts.layout.action(files), Action::Quit]),
                     false => vec![self.opts.layout.action(files)],
-                }
+                })
             }
         }
     }

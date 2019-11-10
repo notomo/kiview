@@ -15,21 +15,20 @@ pub struct NewCommand<'a> {
 }
 
 impl<'a> Command for NewCommand<'a> {
-    fn actions(&self) -> Vec<Action> {
+    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let path = Path::new(self.current_path);
 
-        match &self.opts.path {
+        Ok(match &self.opts.path {
             Some(opt_path) => {
                 let new_path = path.join(opt_path);
                 match opt_path.ends_with("/") {
                     true => create_dir_all(new_path).and_then(|_| Ok(())),
                     false => File::create(new_path).and_then(|_| Ok(())),
-                }
-                .unwrap();
+                }?;
 
-                let paths = self.path_repository.list(path.to_str().unwrap());
+                let paths = self.path_repository.list(path.to_str()?)?;
 
-                let current_path = path.canonicalize().unwrap().to_str().unwrap().to_string();
+                let current_path = path.canonicalize()?.to_str()?.to_string();
 
                 vec![
                     Action::Write { paths: paths },
@@ -44,6 +43,6 @@ impl<'a> Command for NewCommand<'a> {
                 ]
             }
             None => vec![Action::ConfirmNew],
-        }
+        })
     }
 }
