@@ -6,16 +6,16 @@ let s:root = getcwd()
 function! KiviewTestAssert() abort
     let assert = themis#helper('assert')
 
-    function! assert.window_count(count) abort
-        let window_count = tabpagewinnr(tabpagenr(), '$')
-        let message = printf('window count must be %s, but actual: %s', a:count, window_count)
-        call self.equals(window_count, a:count, message)
+    function! assert.window_count(expected) abort
+        let actual = tabpagewinnr(tabpagenr(), '$')
+        let message = printf('window count must be %s, but actual: %s', a:expected, actual)
+        call self.equals(actual, a:expected, message)
     endfunction
 
-    function! assert.tab_count(count) abort
-        let tab_count = tabpagenr('$')
-        let message = printf('tab count should be %s, but actual: %s', a:count, tab_count)
-        call self.equals(tab_count, a:count, message)
+    function! assert.tab_count(expected) abort
+        let actual = tabpagenr('$')
+        let message = printf('tab count should be %s, but actual: %s', a:expected, actual)
+        call self.equals(actual, a:expected, message)
     endfunction
 
     function! assert.contains(haystack, needle) abort
@@ -29,19 +29,19 @@ function! KiviewTestAssert() abort
     function! assert.file_name(expected) abort
         let actual = fnamemodify(bufname('%'), ':t')
         let message = printf('file name should be %s, but actual: %s', a:expected, actual)
-        call self.equals(a:expected, actual, message)
+        call self.equals(actual, a:expected, message)
     endfunction
 
     function! assert.syntax_name(expected) abort
         let actual = synIDattr(synID(line('.'), col('.'), v:true), 'name')
         let message = printf('syntax name should be %s, but actual: %s', a:expected, actual)
-        call self.equals(a:expected, actual, message)
+        call self.equals(actual, a:expected, message)
     endfunction
 
     function! assert.filetype(expected) abort
         let actual = &filetype
         let message = printf('&filetype should be %s, but actual: %s', a:expected, actual)
-        call self.equals(a:expected, actual, message)
+        call self.equals(actual, a:expected, message)
     endfunction
 
     return assert
