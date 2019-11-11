@@ -155,7 +155,9 @@ fn main() {
                     path_repository: &path_repository,
                     opts: &command_opts,
                 } as Box<dyn Command>,
-                CommandName::Unknown => box command::UnknownCommand {} as Box<dyn Command>,
+                CommandName::Unknown => {
+                    box command::UnknownCommand { command_name: &arg } as Box<dyn Command>
+                }
             }
             .actions();
 

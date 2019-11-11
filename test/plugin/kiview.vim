@@ -377,5 +377,26 @@ endfunction
 
 function! s:suite.go_error()
     call s:sync_main('')
+
+    let f = {'called': ''}
+    function! f.echo(message) abort
+        call kiview#logger#new('output').log(': ' . a:message)
+        let self.called = a:message
+    endfunction
+    call kiview#messenger#set_func({ msg -> f.echo(msg) })
+
     call s:sync_main('go -path=./not_found')
+    call s:assert.not_empty(f.called)
+endfunction
+
+function! s:suite.unknown_command()
+    let f = {'called': ''}
+    function! f.echo(message) abort
+        call kiview#logger#new('output').log(': ' . a:message)
+        let self.called = a:message
+    endfunction
+    call kiview#messenger#set_func({ msg -> f.echo(msg) })
+
+    call s:sync_main('invalid_command_name')
+    call s:assert.not_empty(f.called)
 endfunction

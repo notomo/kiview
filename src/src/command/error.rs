@@ -11,6 +11,8 @@ pub enum ErrorKind {
     IO { message: String },
     #[fail(display = "Internal error: {}", message)]
     Internal { message: String },
+    #[fail(display = "Unknown command: {}", command_name)]
+    Unknown { command_name: String },
 }
 
 #[derive(Debug)]
