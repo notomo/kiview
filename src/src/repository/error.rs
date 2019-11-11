@@ -3,8 +3,8 @@ use std::io::Error as IOError;
 
 #[derive(Fail, Debug)]
 pub enum ErrorKind {
-    #[fail(display = "Internal error")]
-    Internal,
+    #[fail(display = "IO error: {}", message)]
+    IO { message: String },
 }
 
 #[derive(Debug)]
@@ -15,7 +15,9 @@ pub struct Error {
 impl From<IOError> for Error {
     fn from(error: IOError) -> Error {
         Error {
-            inner: error.context(ErrorKind::Internal),
+            inner: Context::new(ErrorKind::IO {
+                message: error.to_string(),
+            }),
         }
     }
 }

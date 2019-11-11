@@ -5,10 +5,12 @@ use std::fmt::Display;
 use std::io::Error as IOError;
 use std::option::NoneError;
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Fail)]
+#[derive(Clone, Eq, PartialEq, Debug, Fail)]
 pub enum ErrorKind {
-    #[fail(display = "internal error")]
-    Internal,
+    #[fail(display = "IO error: {}", message)]
+    IO { message: String },
+    #[fail(display = "Internal error: {}", message)]
+    Internal { message: String },
 }
 
 #[derive(Debug)]
@@ -49,7 +51,9 @@ impl From<Context<ErrorKind>> for Error {
 impl From<IOError> for Error {
     fn from(error: IOError) -> Error {
         Error {
-            inner: error.context(ErrorKind::Internal),
+            inner: Context::new(ErrorKind::IO {
+                message: error.to_string(),
+            }),
         }
     }
 }
@@ -57,15 +61,19 @@ impl From<IOError> for Error {
 impl From<NoneError> for Error {
     fn from(_error: NoneError) -> Error {
         Error {
-            inner: Context::new(ErrorKind::Internal),
+            inner: Context::new(ErrorKind::Internal {
+                message: String::from("NoneError"),
+            }),
         }
     }
 }
 
 impl From<RepositoryError> for Error {
-    fn from(_error: RepositoryError) -> Error {
+    fn from(error: RepositoryError) -> Error {
         Error {
-            inner: Context::new(ErrorKind::Internal),
+            inner: Context::new(ErrorKind::Internal {
+                message: error.inner.get_context().to_string(),
+            }),
         }
     }
 }
