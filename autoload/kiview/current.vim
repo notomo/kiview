@@ -22,6 +22,14 @@ function! kiview#current#new(bufnr, range) abort
     endfunction
 
     let s:currents[a:bufnr] = current
+    execute printf('autocmd BufWipeout <buffer=%s> call s:clean("%s")', a:bufnr, a:bufnr)
 
     return current
+endfunction
+
+function! s:clean(bufnr) abort
+    if !has_key(s:currents, a:bufnr)
+        return
+    endif
+    call remove(s:currents, a:bufnr)
 endfunction
