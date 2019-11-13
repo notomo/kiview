@@ -53,9 +53,8 @@ function! s:get_target(line_number) abort
         let prev_indent = indent(line_number)
         if prev_indent < indent
             let target = getline(line_number)[prev_indent :] . target
+            let indent = prev_indent
         endif
-
-        let indent = prev_indent
     endwhile
 
     return target
