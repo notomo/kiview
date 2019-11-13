@@ -10,6 +10,7 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             \ 'create': { action -> s:create(action, buffer) },
             \ 'add_history': { action -> s:add_history(action, buffer) },
             \ 'restore_cursor': { action -> s:restore_cursor(action, buffer) },
+            \ 'write_all': { action -> s:write_all(action, buffer) },
             \ 'write': { action -> s:write(action, buffer) },
             \ 'quit': { action -> s:quit(buffer) },
             \ 'confirm_new': { action -> s:confirm_new(input_reader) },
@@ -52,8 +53,12 @@ function! s:vertical_open_targets(action) abort
     endfor
 endfunction
 
+function! s:write_all(action, buffer) abort
+    call a:buffer.write_all(a:action.paths)
+endfunction
+
 function! s:write(action, buffer) abort
-    call a:buffer.write(a:action.paths)
+    call a:buffer.write(a:action.paths, a:action.start, a:action.end)
 endfunction
 
 function! s:restore_cursor(action, buffer) abort

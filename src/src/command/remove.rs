@@ -52,7 +52,7 @@ impl<'a> Command for RemoveCommand<'a> {
 
                 let current_path = path.canonicalize()?.to_str()?.to_string();
                 vec![
-                    Action::Write { paths: paths },
+                    Action::WriteAll { paths: paths },
                     Action::RestoreCursor {
                         path: current_path.clone(),
                         line_number: None,

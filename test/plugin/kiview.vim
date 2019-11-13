@@ -400,3 +400,29 @@ function! s:suite.unknown_command()
     call s:sync_main('invalid_command_name')
     call s:assert.not_empty(f.called)
 endfunction
+
+function! s:suite.toggle_tree()
+    call s:sync_main('')
+
+    call search('autoload/')
+
+    call s:sync_main('toggle_tree')
+    call s:sync_main('toggle_tree')
+    call s:sync_main('toggle_tree')
+
+    call search('kiview.vim')
+    call s:sync_main('child')
+
+    call s:assert.file_name('kiview.vim')
+endfunction
+
+function! s:suite.cannot_toggle_parent_node()
+    call s:sync_main('')
+
+    let lines = s:lines()
+
+    normal! gg
+    call s:sync_main('toggle_tree')
+
+    call s:assert.equals(lines, s:lines())
+endfunction

@@ -24,7 +24,7 @@ impl<'a> Command for GoCommand<'a> {
         let paths = self.path_repository.list(current_path.to_str()?)?;
 
         Ok(vec![
-            Action::Write { paths: paths },
+            Action::WriteAll { paths: paths },
             Action::RestoreCursor {
                 path: current_path.canonicalize()?.to_str()?.to_string(),
                 line_number: None,

@@ -38,7 +38,7 @@ impl<'a> Command for PasteCommand<'a> {
         let path = current_path.canonicalize()?.to_str()?.to_string();
 
         Ok(vec![
-            Action::Write { paths: paths },
+            Action::WriteAll { paths: paths },
             Action::RestoreCursor {
                 path: path.clone(),
                 line_number: None,

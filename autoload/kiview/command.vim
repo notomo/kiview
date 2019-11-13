@@ -76,6 +76,8 @@ function! s:build_cmd(buffer, arg) abort
         \ 'current-path': a:buffer.current.path,
         \ 'line-number': a:buffer.current.line_number,
         \ 'current-target': a:buffer.current.target,
+        \ 'next-sibling-line-number': a:buffer.current.next_sibling_line_number,
+        \ 'depth': a:buffer.current.depth,
         \ 'arg': a:arg,
     \ }
 

@@ -20,12 +20,16 @@ function! s:new(bufnr, range) abort
         call self.logger.log('opend bufnr: ' . self.bufnr)
     endfunction
 
-    function! buffer.write(lines) abort
+    function! buffer.write(lines, start, end) abort
         call nvim_buf_set_option(self.bufnr, 'modifiable', v:true)
-        call nvim_buf_set_lines(self.bufnr, 0, -1, v:true, a:lines)
+        call nvim_buf_set_lines(self.bufnr, a:start, a:end, v:true, a:lines)
         call nvim_buf_set_option(self.bufnr, 'modifiable', v:false)
 
         call self.logger.label('line').buffer_log(self.bufnr)
+    endfunction
+
+    function! buffer.write_all(lines) abort
+        call self.write(a:lines, 0, -1)
     endfunction
 
     function! buffer.close_windows() abort

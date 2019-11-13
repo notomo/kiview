@@ -34,6 +34,12 @@ pub enum Action {
         path: String,
         line_number: Option<u64>,
     },
+    #[serde(rename = "write_all")]
+    WriteAll { paths: Vec<String> },
     #[serde(rename = "write")]
-    Write { paths: Vec<String> },
+    Write {
+        paths: Vec<String>,
+        start: usize,
+        end: usize,
+    },
 }

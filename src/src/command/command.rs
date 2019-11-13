@@ -29,6 +29,8 @@ pub enum CommandName {
     Paste,
     #[serde(rename = "rename")]
     Rename,
+    #[serde(rename = "toggle_tree")]
+    ToggleTree,
     #[serde(rename = "unknown")]
     Unknown,
 }
@@ -51,6 +53,7 @@ impl From<&str> for CommandName {
             ["cut"] => CommandName::Cut,
             ["paste"] => CommandName::Paste,
             ["rename"] => CommandName::Rename,
+            ["toggle_tree"] => CommandName::ToggleTree,
             [] => CommandName::Create,
             _ => CommandName::Unknown,
         }

@@ -34,7 +34,7 @@ impl<'a> Command for ParentCommand<'a> {
         let last_path_line_number = *numbers.get(0).unwrap_or(&0) as u64;
 
         Ok(vec![
-            Action::Write { paths: paths },
+            Action::WriteAll { paths: paths },
             Action::RestoreCursor {
                 path: current_path
                     .canonicalize()

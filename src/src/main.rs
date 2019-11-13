@@ -61,6 +61,20 @@ fn main() {
                         .long("has-cut")
                         .takes_value(false)
                         .required(false),
+                )
+                .arg(
+                    Arg::with_name("next_sibling_line_number")
+                        .long("next-sibling-line-number")
+                        .takes_value(true)
+                        .default_value("1")
+                        .required(false),
+                )
+                .arg(
+                    Arg::with_name("depth")
+                        .long("depth")
+                        .takes_value(true)
+                        .default_value("0")
+                        .required(false),
                 ),
         )
         .subcommand(
@@ -89,6 +103,12 @@ fn main() {
                 .unwrap_or_default()
                 .collect();
             let has_cut = cmd.is_present("has_cut");
+            let next_sibling_line_number = cmd
+                .value_of("next_sibling_line_number")
+                .unwrap()
+                .parse()
+                .unwrap();
+            let depth = cmd.value_of("depth").unwrap().parse().unwrap();
 
             let path_repository = repository::FilePathRepository {};
 
@@ -154,6 +174,16 @@ fn main() {
                     current_target: current_target,
                     path_repository: &path_repository,
                     opts: &command_opts,
+                } as Box<dyn Command>,
+                CommandName::ToggleTree => box command::ToggleTreeCommand {
+                    current_path: current_path,
+                    line_number: line_number,
+                    current_target: current_target,
+                    targets: targets,
+                    opts: &command_opts,
+                    path_repository: &path_repository,
+                    next_sibling_line_number: next_sibling_line_number,
+                    depth: depth,
                 } as Box<dyn Command>,
                 CommandName::Unknown => {
                     box command::UnknownCommand { command_name: &arg } as Box<dyn Command>
