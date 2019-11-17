@@ -1,10 +1,18 @@
 
+let s:buffers = {}
+
 function! s:new(bufnr, range) abort
+    if has_key(s:buffers, a:bufnr)
+        let buffer = s:buffers[a:bufnr]
+        call buffer.current.update(a:range)
+        return buffer
+    endif
+
     let buffer = {
         \ 'bufnr': a:bufnr,
-        \ 'register': kiview#register#new(a:bufnr),
+        \ 'register': kiview#register#new(),
         \ 'history': kiview#history#new(a:bufnr),
-        \ 'current': kiview#current#new(a:bufnr, a:range),
+        \ 'current': kiview#current#new(a:bufnr),
         \ 'logger': kiview#logger#new('buffer'),
     \ }
 
@@ -39,6 +47,9 @@ function! s:new(bufnr, range) abort
         endfor
     endfunction
 
+    let s:buffers[a:bufnr] = buffer
+    execute printf('autocmd BufWipeout <buffer=%s> call s:clean("%s")', a:bufnr, a:bufnr)
+
     return buffer
 endfunction
 
@@ -50,4 +61,11 @@ function! kiview#buffer#find(range) abort
 
     let bufnr = bufnr('%')
     return s:new(bufnr, a:range)
+endfunction
+
+function! s:clean(bufnr) abort
+    if !has_key(s:buffers, a:bufnr)
+        return
+    endif
+    call remove(s:buffers, a:bufnr)
 endfunction

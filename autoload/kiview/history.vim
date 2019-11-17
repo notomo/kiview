@@ -1,11 +1,5 @@
 
-let s:histories = {}
-
 function! kiview#history#new(bufnr) abort
-    if has_key(s:histories, a:bufnr)
-        return s:histories[a:bufnr]
-    endif
-
     let history = {
         \ 'line_numbers': {},
         \ 'bufnr': a:bufnr,
@@ -31,15 +25,5 @@ function! kiview#history#new(bufnr) abort
         call self.logger.logf('restore: path=%s, line=%s', a:path, line_number)
     endfunction
 
-    let s:histories[a:bufnr] = history
-    execute printf('autocmd BufWipeout <buffer=%s> call s:clean("%s")', a:bufnr, a:bufnr)
-
     return history
-endfunction
-
-function! s:clean(bufnr) abort
-    if !has_key(s:histories, a:bufnr)
-        return
-    endif
-    call remove(s:histories, a:bufnr)
 endfunction

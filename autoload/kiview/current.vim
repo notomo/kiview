@@ -1,19 +1,5 @@
 
-let s:currents = {}
-
-function! kiview#current#new(bufnr, range) abort
-    if has_key(s:currents, a:bufnr)
-        let current = s:currents[a:bufnr]
-        let current.line_number = line('.')
-        let pattern = '^' . repeat(' ', indent(current.line_number)) . '\S'
-        let current.next_sibling_line_number = search(pattern, 'nW')
-        let current.depth = indent(current.line_number)
-
-        let current.target = s:get_target(current.line_number)
-        let current.targets = map(range(a:range[0], a:range[1]), { _, line_number -> s:get_target(line_number) })
-        return current
-    endif
-
+function! kiview#current#new(bufnr) abort
     let current = {
         \ 'path': getcwd(),
         \ 'line_number': 1,
@@ -27,17 +13,20 @@ function! kiview#current#new(bufnr, range) abort
         let self.path = a:path
     endfunction
 
-    let s:currents[a:bufnr] = current
-    execute printf('autocmd BufWipeout <buffer=%s> call s:clean("%s")', a:bufnr, a:bufnr)
+    function! current.update(range) abort
+        let self.line_number = line('.')
+        let pattern = '^' . repeat(' ', indent(self.line_number)) . '\S'
+        let self.next_sibling_line_number = search(pattern, 'nW')
+        if self.next_sibling_line_number == 0
+            let self.next_sibling_line_number = self.line_number + 1
+        endif
+        let self.depth = indent(self.line_number)
+
+        let self.target = s:get_target(self.line_number)
+        let self.targets = map(range(a:range[0], a:range[1]), { _, line_number -> s:get_target(line_number) })
+    endfunction
 
     return current
-endfunction
-
-function! s:clean(bufnr) abort
-    if !has_key(s:currents, a:bufnr)
-        return
-    endif
-    call remove(s:currents, a:bufnr)
 endfunction
 
 function! s:get_target(line_number) abort
