@@ -54,6 +54,16 @@ function! kiview#logger#new(...) abort
         call self.logs(lines)
     endfunction
 
+    function! logger.trace(throwpoint) abort
+        call self.log(a:throwpoint)
+        let last = matchstr(a:throwpoint, '\v.*\.\.\zs\d+\ze, line \d+$')
+        if !empty(last)
+            let excmd = printf('function {%s}', last)
+            let output = execute(excmd)
+            call self.log(output)
+        endif
+    endfunction
+
     return logger
 endfunction
 
@@ -74,6 +84,9 @@ function! s:nop_logger(...) abort
     endfunction
 
     function! logger.buffer_log(bufnr) abort
+    endfunction
+
+    function! logger.trace(throwpoint) abort
     endfunction
 
     return logger

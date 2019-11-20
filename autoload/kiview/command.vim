@@ -47,6 +47,7 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
                 call child.start()
             endfor
         catch
+            call self.logger.trace(v:throwpoint)
             echoerr v:exception
         finally
             call self.event_service.command_finished(self.id)
