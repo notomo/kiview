@@ -54,11 +54,11 @@ function! s:vertical_open_targets(action) abort
 endfunction
 
 function! s:write_all(action, buffer) abort
-    call a:buffer.write_all(a:action.paths)
+    call a:buffer.write_all(a:action.lines, a:action.props)
 endfunction
 
 function! s:write(action, buffer) abort
-    call a:buffer.write(a:action.paths, a:action.start, a:action.end)
+    call a:buffer.write(a:action.lines, a:action.props, a:action.start, a:action.end)
 endfunction
 
 function! s:restore_cursor(action, buffer) abort

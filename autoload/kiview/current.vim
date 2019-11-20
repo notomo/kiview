@@ -1,4 +1,6 @@
 
+let s:namespace = nvim_create_namespace('kiview')
+
 function! kiview#current#new(bufnr) abort
     let current = {
         \ 'path': getcwd(),
@@ -7,6 +9,9 @@ function! kiview#current#new(bufnr) abort
         \ 'targets': [],
         \ 'next_sibling_line_number': 1,
         \ 'depth': 0,
+        \ 'bufnr': a:bufnr,
+        \ 'props': {},
+        \ 'logger': kiview#logger#new('current'),
     \ }
 
     function! current.set(path) abort
@@ -22,29 +27,36 @@ function! kiview#current#new(bufnr) abort
         endif
         let self.depth = indent(self.line_number)
 
-        let self.target = s:get_target(self.line_number)
-        let self.targets = map(range(a:range[0], a:range[1]), { _, line_number -> s:get_target(line_number) })
+        let self.target = self._get_targets(self.line_number - 1, self.line_number - 1)[0]
+        let self.targets = self._get_targets(a:range[0] - 1, a:range[1] - 1)
+    endfunction
+
+    function! current.delete_marks(start, end) abort
+        let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:start, 0], [a:end, 0], {})
+        for [id, _, _] in mark_ids
+            call nvim_buf_del_extmark(self.bufnr, s:namespace, id)
+            call remove(self.props, id)
+        endfor
+    endfunction
+
+    function! current.set_props(props, start) abort
+        let line_number = a:start
+        for prop in a:props
+            let id = nvim_buf_set_extmark(self.bufnr, s:namespace, 0, line_number, 0, {})
+            let self.props[id] = prop
+            let line_number += 1
+        endfor
+    endfunction
+
+    function! current._get_targets(start, end) abort
+        let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:start, 0], [a:end, 0], {})
+        let targets = []
+        for [id, _, _] in mark_ids
+            let prop = self.props[id]
+            call add(targets, prop.path)
+        endfor
+        return targets
     endfunction
 
     return current
-endfunction
-
-function! s:get_target(line_number) abort
-    let line_number = a:line_number
-    let indent = indent(line_number)
-    let target = getline(line_number)[indent :]
-    while line_number > 0
-        if indent == 0
-            break
-        endif
-
-        let line_number = line_number - 1
-        let prev_indent = indent(line_number)
-        if prev_indent < indent
-            let target = getline(line_number)[prev_indent :] . target
-            let indent = prev_indent
-        endif
-    endwhile
-
-    return target
 endfunction

@@ -3,6 +3,7 @@ use std::path::Path;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
+use crate::command::Paths;
 use crate::repository::PathRepository;
 
 pub struct ToggleTreeCommand<'a> {
@@ -26,7 +27,8 @@ impl<'a> Command for ToggleTreeCommand<'a> {
 
         if self.next_sibling_line_number > self.line_number + 1 {
             return Ok(vec![Action::Write {
-                paths: vec![],
+                props: vec![],
+                lines: vec![],
                 start: self.line_number as usize,
                 end: (self.next_sibling_line_number - 1) as usize,
             }]);
@@ -40,24 +42,21 @@ impl<'a> Command for ToggleTreeCommand<'a> {
                     .and_then(|metadata| Ok(metadata.is_dir()))
                     .unwrap_or(false) =>
             {
-                let indent = std::iter::repeat(" ")
-                    .take(self.depth as usize)
-                    .collect::<String>();
-
                 let target_path = path.join(current_target);
-                let child_paths = self
+                let child_paths: Paths = self
                     .path_repository
                     .list(target_path.to_str()?)?
                     .iter()
                     .skip(1)
-                    .map(|p| format!("{}  {}", indent, p))
-                    .collect::<Vec<String>>();
+                    .collect::<Vec<_>>()
+                    .into();
 
-                Ok(vec![Action::Write {
-                    paths: child_paths,
-                    start: self.line_number as usize,
-                    end: self.line_number as usize,
-                }])
+                Ok(vec![child_paths
+                    .add_indent(self.depth as usize)
+                    .to_write_action(
+                        self.line_number as usize,
+                        self.line_number as usize,
+                    )])
             }
             _ => Ok(vec![]),
         }

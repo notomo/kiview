@@ -33,8 +33,13 @@ function! kiview#logger#new(...) abort
     endfunction
 
     function! logger.log(message) abort
+        if type(a:message) == v:t_list || type(a:message) == v:t_dict
+            let message = string(a:message)
+        else
+            let message = a:message
+        endif
         " FIXME: REMOVE ANSI
-        let message = substitute(a:message, "\<ESC>\\[\\d*[a-zA-Z]", '', 'g')
+        let message = substitute(message, "\<ESC>\\[\\d*[a-zA-Z]", '', 'g')
         call self.func(self._label . message)
     endfunction
 

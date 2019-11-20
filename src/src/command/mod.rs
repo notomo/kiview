@@ -41,7 +41,7 @@ mod unknown;
 pub use unknown::UnknownCommand;
 
 mod action;
-pub use action::Action;
+pub use action::{Action, Paths};
 
 mod error;
 pub use error::{Error, ErrorKind};

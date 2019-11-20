@@ -2,6 +2,7 @@ use std::path::Path;
 
 use crate::command::Action;
 use crate::command::Command;
+use crate::command::Paths;
 use crate::repository::PathRepository;
 
 pub struct CreateCommand<'a> {
@@ -13,12 +14,13 @@ pub struct CreateCommand<'a> {
 impl<'a> Command for CreateCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let path = Path::new(self.current_path);
-        let paths = self.path_repository.list(path.to_str()?)?;
+
+        let paths: Paths = self.path_repository.list(path.to_str()?)?.into();
 
         let current_path = path.canonicalize()?.to_str()?.to_string();
 
         Ok(vec![
-            Action::WriteAll { paths: paths },
+            paths.to_write_all_action(),
             Action::RestoreCursor {
                 path: current_path.clone(),
                 line_number: None,

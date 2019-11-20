@@ -3,6 +3,7 @@ use std::path::Path;
 
 use crate::command::Action;
 use crate::command::Command;
+use crate::command::Paths;
 use crate::repository::PathRepository;
 
 pub struct PasteCommand<'a> {
@@ -33,12 +34,12 @@ impl<'a> Command for PasteCommand<'a> {
             }?;
         }
 
-        let paths = self.path_repository.list(current_path.to_str()?)?;
+        let paths: Paths = self.path_repository.list(current_path.to_str()?)?.into();
 
         let path = current_path.canonicalize()?.to_str()?.to_string();
 
         Ok(vec![
-            Action::WriteAll { paths: paths },
+            paths.to_write_all_action(),
             Action::RestoreCursor {
                 path: path.clone(),
                 line_number: None,

@@ -14,6 +14,7 @@ function! s:new(bufnr, range) abort
         \ 'history': kiview#history#new(a:bufnr),
         \ 'current': kiview#current#new(a:bufnr),
         \ 'logger': kiview#logger#new('buffer'),
+        \ 'props': {},
     \ }
 
     function! buffer.open() abort
@@ -28,16 +29,20 @@ function! s:new(bufnr, range) abort
         call self.logger.log('opend bufnr: ' . self.bufnr)
     endfunction
 
-    function! buffer.write(lines, start, end) abort
+    function! buffer.write(lines, props, start, end) abort
+        call self.current.delete_marks(a:start, a:end)
+
         call nvim_buf_set_option(self.bufnr, 'modifiable', v:true)
         call nvim_buf_set_lines(self.bufnr, a:start, a:end, v:true, a:lines)
         call nvim_buf_set_option(self.bufnr, 'modifiable', v:false)
 
+        call self.current.set_props(a:props, a:start)
+
         call self.logger.label('line').buffer_log(self.bufnr)
     endfunction
 
-    function! buffer.write_all(lines) abort
-        call self.write(a:lines, 0, -1)
+    function! buffer.write_all(lines, props) abort
+        call self.write(a:lines, a:props, 0, -1)
     endfunction
 
     function! buffer.close_windows() abort

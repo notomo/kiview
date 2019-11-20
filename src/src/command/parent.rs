@@ -2,6 +2,7 @@ use std::path::Path;
 
 use crate::command::Action;
 use crate::command::Command;
+use crate::command::Paths;
 use crate::repository::PathRepository;
 
 pub struct ParentCommand<'a> {
@@ -22,30 +23,26 @@ impl<'a> Command for ParentCommand<'a> {
         let current_path = path
             .parent()
             .unwrap_or_else(|| Path::new(self.current_path));
-        let paths = self.path_repository.list(current_path.to_str()?)?;
+        let paths: Paths = self.path_repository.list(current_path.to_str()?)?.into();
+        let write_all = paths.to_write_all_action();
 
         let numbers = &paths
-            .iter()
+            .into_iter()
             .enumerate()
-            .filter(|(_, path)| *path == &last_target)
+            .filter(|(_, path)| &path.name == &last_target)
             .map(|(line_number, _)| line_number + 1)
             .collect::<Vec<usize>>();
 
         let last_path_line_number = *numbers.get(0).unwrap_or(&0) as u64;
 
         Ok(vec![
-            Action::WriteAll { paths: paths },
+            write_all,
             Action::RestoreCursor {
-                path: current_path
-                    .canonicalize()
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string(),
+                path: current_path.canonicalize()?.to_str()?.to_string(),
                 line_number: Some(last_path_line_number),
             },
             Action::AddHistory {
-                path: path.canonicalize().unwrap().to_str().unwrap().to_string(),
+                path: path.canonicalize()?.to_str()?.to_string(),
                 line_number: self.line_number,
             },
         ])

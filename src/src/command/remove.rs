@@ -4,6 +4,7 @@ use std::path::Path;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
+use crate::command::Paths;
 use crate::repository::PathRepository;
 
 pub struct RemoveCommand<'a> {
@@ -48,11 +49,11 @@ impl<'a> Command for RemoveCommand<'a> {
                     remove_dir_all(dir)?;
                 }
 
-                let paths = self.path_repository.list(path.to_str()?)?;
+                let paths: Paths = self.path_repository.list(path.to_str()?)?.into();
 
                 let current_path = path.canonicalize()?.to_str()?.to_string();
                 vec![
-                    Action::WriteAll { paths: paths },
+                    paths.to_write_all_action(),
                     Action::RestoreCursor {
                         path: current_path.clone(),
                         line_number: None,
