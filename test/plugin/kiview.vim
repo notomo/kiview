@@ -306,9 +306,7 @@ function! s:suite.no_remove()
 endfunction
 
 function! s:suite.copy_and_paste()
-    cd ./test/plugin/_test_data
-
-    call s:sync_main('')
+    call s:sync_main('go -path=test/plugin/_test_data')
 
     call search('copy_file')
     call s:sync_main('cut')
@@ -327,16 +325,15 @@ function! s:suite.copy_and_paste()
 
     call s:assert.file_name('copy_file')
 
-    call s:sync_main('')
+    wincmd p
+    call s:sync_main('parent')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'copy_file')
 endfunction
 
 function! s:suite.cut_and_paste()
-    cd ./test/plugin/_test_data
-
-    call s:sync_main('')
+    call s:sync_main('go -path=test/plugin/_test_data')
 
     call search('cut_file')
     call s:sync_main('cut')
@@ -354,7 +351,8 @@ function! s:suite.cut_and_paste()
 
     call s:assert.file_name('cut_file')
 
-    call s:sync_main('')
+    wincmd p
+    call s:sync_main('parent')
 
     let lines = s:lines()
     call s:assert.not_contains(lines, 'cut_file')

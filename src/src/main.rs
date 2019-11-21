@@ -63,6 +63,12 @@ fn main() {
                         .required(false),
                 )
                 .arg(
+                    Arg::with_name("created")
+                        .long("created")
+                        .takes_value(false)
+                        .required(false),
+                )
+                .arg(
                     Arg::with_name("next_sibling_line_number")
                         .long("next-sibling-line-number")
                         .takes_value(true)
@@ -103,6 +109,7 @@ fn main() {
                 .unwrap_or_default()
                 .collect();
             let has_cut = cmd.is_present("has_cut");
+            let created = cmd.is_present("created");
             let next_sibling_line_number = cmd
                 .value_of("next_sibling_line_number")
                 .unwrap()
@@ -127,16 +134,12 @@ fn main() {
                     opts: &command_opts,
                     path_repository: &path_repository,
                 } as Box<dyn Command>,
-                CommandName::Create => box command::CreateCommand {
-                    current_path: current_path,
-                    line_number: line_number,
-                    path_repository: &path_repository,
-                } as Box<dyn Command>,
                 CommandName::Go => box command::GoCommand {
                     current_path: current_path,
                     line_number: line_number,
                     opts: &command_opts,
                     path_repository: &path_repository,
+                    created: created,
                 } as Box<dyn Command>,
                 CommandName::New => box command::NewCommand {
                     current_path: current_path,
@@ -151,16 +154,12 @@ fn main() {
                     targets: targets,
                     path_repository: &path_repository,
                 } as Box<dyn Command>,
-                CommandName::Copy => box command::CopyCommand {
-                    current_path: current_path,
-                    targets: targets,
-                    path_repository: &path_repository,
-                } as Box<dyn Command>,
-                CommandName::Cut => box command::CutCommand {
-                    current_path: current_path,
-                    targets: targets,
-                    path_repository: &path_repository,
-                } as Box<dyn Command>,
+                CommandName::Copy => {
+                    box command::CopyCommand { targets: targets } as Box<dyn Command>
+                }
+                CommandName::Cut => {
+                    box command::CutCommand { targets: targets } as Box<dyn Command>
+                }
                 CommandName::Paste => box command::PasteCommand {
                     current_path: current_path,
                     line_number: line_number,

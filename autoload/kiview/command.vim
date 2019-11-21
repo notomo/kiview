@@ -101,5 +101,9 @@ function! s:build_cmd(buffer, arg) abort
         call add(cmd_options, '--has-cut')
     endif
 
+    if a:buffer.current.created
+        call add(cmd_options, '--created')
+    endif
+
     return extend(['kiview', 'do'], cmd_options)
 endfunction

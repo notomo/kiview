@@ -11,6 +11,7 @@ pub struct GoCommand<'a> {
     pub line_number: u64,
     pub opts: &'a CommandOptions,
     pub path_repository: &'a dyn PathRepository<'a>,
+    pub created: bool,
 }
 
 impl<'a> Command for GoCommand<'a> {
@@ -24,7 +25,7 @@ impl<'a> Command for GoCommand<'a> {
 
         let paths: Paths = self.path_repository.list(current_path.to_str()?)?.into();
 
-        Ok(vec![
+        let mut actions = vec![
             paths.to_write_all_action(),
             Action::RestoreCursor {
                 path: current_path.canonicalize()?.to_str()?.to_string(),
@@ -34,6 +35,11 @@ impl<'a> Command for GoCommand<'a> {
                 path: path.canonicalize()?.to_str()?.to_string(),
                 line_number: self.line_number,
             },
-        ])
+        ];
+        if !self.created {
+            actions.push(Action::Create);
+        }
+
+        Ok(actions)
     }
 }

@@ -1,18 +1,20 @@
 
 let s:buffers = {}
 
-function! s:new(bufnr, range) abort
-    if has_key(s:buffers, a:bufnr)
-        let buffer = s:buffers[a:bufnr]
+function! kiview#buffer#new(range) abort
+    let bufnr = bufnr('%')
+    if has_key(s:buffers, bufnr)
+        let buffer = s:buffers[bufnr]
         call buffer.current.update(a:range)
         return buffer
     endif
 
+    let bufnr = nvim_create_buf(v:false, v:true)
     let buffer = {
-        \ 'bufnr': a:bufnr,
+        \ 'bufnr': bufnr,
         \ 'register': kiview#register#new(),
-        \ 'history': kiview#history#new(a:bufnr),
-        \ 'current': kiview#current#new(a:bufnr),
+        \ 'history': kiview#history#new(bufnr),
+        \ 'current': kiview#current#new(bufnr),
         \ 'logger': kiview#logger#new('buffer'),
         \ 'props': {},
     \ }
@@ -52,20 +54,10 @@ function! s:new(bufnr, range) abort
         endfor
     endfunction
 
-    let s:buffers[a:bufnr] = buffer
-    execute printf('autocmd BufWipeout <buffer=%s> call s:clean("%s")', a:bufnr, a:bufnr)
+    let s:buffers[bufnr] = buffer
+    execute printf('autocmd BufWipeout <buffer=%s> call s:clean("%s")', bufnr, bufnr)
 
     return buffer
-endfunction
-
-function! kiview#buffer#find(range) abort
-    if &filetype !=? 'kiview'
-        let bufnr = nvim_create_buf(v:false, v:true)
-        return s:new(bufnr, a:range)
-    endif
-
-    let bufnr = bufnr('%')
-    return s:new(bufnr, a:range)
 endfunction
 
 function! s:clean(bufnr) abort

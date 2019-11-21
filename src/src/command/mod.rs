@@ -4,9 +4,6 @@ pub use command::{Command, CommandName, CommandOptions};
 mod parent;
 pub use parent::ParentCommand;
 
-mod create;
-pub use create::CreateCommand;
-
 mod quit;
 pub use quit::QuitCommand;
 

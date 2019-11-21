@@ -10,6 +10,7 @@ function! kiview#current#new(bufnr) abort
         \ 'next_sibling_line_number': 1,
         \ 'depth': 0,
         \ 'bufnr': a:bufnr,
+        \ 'created': v:false,
         \ 'props': {},
         \ 'logger': kiview#logger#new('current'),
     \ }
@@ -26,6 +27,7 @@ function! kiview#current#new(bufnr) abort
             let self.next_sibling_line_number = self.line_number + 1
         endif
         let self.depth = indent(self.line_number)
+        let self.created = v:true
 
         let self.target = self._get_targets(self.line_number - 1, self.line_number - 1)[0]
         let self.targets = self._get_targets(a:range[0] - 1, a:range[1] - 1)

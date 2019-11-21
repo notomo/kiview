@@ -1,6 +1,6 @@
 
 function! kiview#main(range, arg) abort
-    let buffer = kiview#buffer#find(a:range)
+    let buffer = kiview#buffer#new(a:range)
     let input_reader = kiview#input_reader#new()
     let action_handler = kiview#action#new_handler(buffer, input_reader)
 

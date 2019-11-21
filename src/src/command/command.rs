@@ -13,8 +13,6 @@ pub enum CommandName {
     Parent,
     #[serde(rename = "child")]
     Child,
-    #[serde(rename = "create")]
-    Create,
     #[serde(rename = "go")]
     Go,
     #[serde(rename = "new")]
@@ -54,7 +52,7 @@ impl From<&str> for CommandName {
             ["paste"] => CommandName::Paste,
             ["rename"] => CommandName::Rename,
             ["toggle_tree"] => CommandName::ToggleTree,
-            [] => CommandName::Create,
+            [] => CommandName::Go,
             _ => CommandName::Unknown,
         }
     }
