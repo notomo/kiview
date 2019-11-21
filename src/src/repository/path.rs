@@ -16,6 +16,7 @@ impl<'a> PathRepository<'a> for FilePathRepository {
         let parent_directory = vec![FullPath {
             name: String::from(".."),
             path: std::path::Path::new(&path)
+                .parent()?
                 .canonicalize()?
                 .to_str()?
                 .to_string(),
