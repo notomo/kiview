@@ -49,6 +49,10 @@ endfunction
 
 function! KiviewTestBeforeEach() abort
     execute 'cd' s:root
+
+    " FIXME: workaround for `ml_get: invalid lnum: 2`
+    edit Makefile
+
     call s:clear_test_data()
     call s:make_test_data()
 
