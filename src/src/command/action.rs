@@ -30,11 +30,12 @@ pub enum Action {
     Quit,
     #[serde(rename = "add_history")]
     AddHistory { path: String, line_number: u64 },
-    #[serde(rename = "restore_cursor")]
-    RestoreCursor {
-        path: String,
-        line_number: Option<u64>,
-    },
+    #[serde(rename = "try_to_restore_cursor")]
+    TryToRestoreCursor { path: String },
+    #[serde(rename = "set_cursor")]
+    SetCursor { line_number: u64 },
+    #[serde(rename = "set_path")]
+    SetPath { path: String },
     #[serde(rename = "write_all")]
     WriteAll {
         lines: Vec<String>,

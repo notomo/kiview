@@ -27,9 +27,8 @@ impl<'a> Command for RenameCommand<'a> {
 
                 Ok(vec![
                     paths.to_write_all_action(),
-                    Action::RestoreCursor {
+                    Action::TryToRestoreCursor {
                         path: self.current_path.to_string(),
-                        line_number: None,
                     },
                     Action::AddHistory {
                         path: self.current_path.to_string(),

@@ -9,7 +9,9 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             \ 'vertical_open': { action -> s:vertical_open_targets(action) },
             \ 'create': { action -> s:create(action, buffer) },
             \ 'add_history': { action -> s:add_history(action, buffer) },
-            \ 'restore_cursor': { action -> s:restore_cursor(action, buffer) },
+            \ 'try_to_restore_cursor': { action -> s:try_to_restore_cursor(action, buffer) },
+            \ 'set_cursor': { action -> s:set_cursor(action, buffer) },
+            \ 'set_path': { action -> s:set_path(action, buffer) },
             \ 'write_all': { action -> s:write_all(action, buffer) },
             \ 'write': { action -> s:write(action, buffer) },
             \ 'quit': { action -> s:quit(buffer) },
@@ -61,10 +63,17 @@ function! s:write(action, buffer) abort
     call a:buffer.write(a:action.lines, a:action.props, a:action.start, a:action.end)
 endfunction
 
-function! s:restore_cursor(action, buffer) abort
-    let path = a:action.path
-    call a:buffer.history.restore(path, a:action.line_number)
-    call a:buffer.current.set(path)
+function! s:try_to_restore_cursor(action, buffer) abort
+    call a:buffer.history.restore(a:action.path)
+    call a:buffer.current.set(a:action.path)
+endfunction
+
+function! s:set_path(action, buffer) abort
+    call a:buffer.current.set(a:action.path)
+endfunction
+
+function! s:set_cursor(action, buffer) abort
+    call a:buffer.current.set_cursor(a:action.line_number)
 endfunction
 
 function! s:add_history(action, buffer) abort

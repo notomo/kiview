@@ -19,6 +19,10 @@ function! kiview#current#new(bufnr) abort
         let self.path = a:path
     endfunction
 
+    function! current.set_cursor(line_number) abort
+        call setpos('.', [self.bufnr, a:line_number, 1, 0])
+    endfunction
+
     function! current.update(range) abort
         let self.line_number = line('.')
         let pattern = '^' . repeat(' ', indent(self.line_number)) . '\S'

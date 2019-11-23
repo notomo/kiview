@@ -27,9 +27,8 @@ impl<'a> Command for ChildCommand<'a> {
 
                 Ok(vec![
                     paths.to_write_all_action(),
-                    Action::RestoreCursor {
+                    Action::TryToRestoreCursor {
                         path: target.to_string(),
-                        line_number: None,
                     },
                     Action::AddHistory {
                         path: target.to_string(),

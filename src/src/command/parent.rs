@@ -13,23 +13,18 @@ pub struct ParentCommand<'a> {
 
 impl<'a> Command for ParentCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        let path = Path::new(self.current_path);
-        let last_target: String = path
-            .file_name()
-            .and_then(|name| name.to_str())
-            .map(|name| format!("{}/", name))
-            .unwrap_or_else(|| "".to_string());
-
-        let current_path = path
+        let current_path = Path::new(self.current_path)
             .parent()
-            .unwrap_or_else(|| Path::new(self.current_path));
-        let paths: Paths = self.path_repository.list(current_path.to_str()?)?.into();
+            .and_then(|p| p.to_str())
+            .unwrap_or(self.current_path);
+
+        let paths: Paths = self.path_repository.list(current_path)?.into();
         let write_all = paths.to_write_all_action();
 
         let numbers = &paths
             .into_iter()
             .enumerate()
-            .filter(|(_, path)| &path.name == &last_target)
+            .filter(|(_, p)| &p.path == self.current_path)
             .map(|(line_number, _)| line_number + 1)
             .collect::<Vec<usize>>();
 
@@ -37,9 +32,11 @@ impl<'a> Command for ParentCommand<'a> {
 
         Ok(vec![
             write_all,
-            Action::RestoreCursor {
-                path: current_path.canonicalize()?.to_str()?.to_string(),
-                line_number: Some(last_path_line_number),
+            Action::SetCursor {
+                line_number: last_path_line_number,
+            },
+            Action::SetPath {
+                path: current_path.to_string(),
             },
             Action::AddHistory {
                 path: self.current_path.to_string(),

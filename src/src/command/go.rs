@@ -25,9 +25,8 @@ impl<'a> Command for GoCommand<'a> {
 
         let mut actions = vec![
             paths.to_write_all_action(),
-            Action::RestoreCursor {
+            Action::TryToRestoreCursor {
                 path: current_path.canonicalize()?.to_str()?.to_string(),
-                line_number: None,
             },
             Action::AddHistory {
                 path: self.current_path.to_string(),
