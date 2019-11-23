@@ -127,7 +127,6 @@ fn main() {
                     path_repository: &path_repository,
                 } as Box<dyn Command>,
                 CommandName::Child => box command::ChildCommand {
-                    current_path: current_path,
                     line_number: line_number,
                     current_target: current_target,
                     targets: targets,

@@ -42,7 +42,7 @@ impl<'a> Command for ParentCommand<'a> {
                 line_number: Some(last_path_line_number),
             },
             Action::AddHistory {
-                path: path.canonicalize()?.to_str()?.to_string(),
+                path: self.current_path.to_string(),
                 line_number: self.line_number,
             },
         ])

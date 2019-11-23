@@ -7,7 +7,6 @@ use crate::command::Paths;
 use crate::repository::PathRepository;
 
 pub struct ChildCommand<'a> {
-    pub current_path: &'a str,
     pub line_number: u64,
     pub current_target: Option<&'a str>,
     pub opts: &'a CommandOptions,
@@ -17,27 +16,23 @@ pub struct ChildCommand<'a> {
 
 impl<'a> Command for ChildCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        let path = Path::new(self.current_path);
-
         match self.current_target {
-            Some(current_target)
-                if path
-                    .join(current_target)
+            Some(target)
+                if Path::new(target)
                     .metadata()
                     .and_then(|metadata| Ok(metadata.is_dir()))
                     .unwrap_or(false) =>
             {
-                let current_path = path.join(current_target);
-                let paths: Paths = self.path_repository.list(current_path.to_str()?)?.into();
+                let paths: Paths = self.path_repository.list(target)?.into();
 
                 Ok(vec![
                     paths.to_write_all_action(),
                     Action::RestoreCursor {
-                        path: current_path.canonicalize()?.to_str()?.to_string(),
+                        path: target.to_string(),
                         line_number: None,
                     },
                     Action::AddHistory {
-                        path: path.canonicalize()?.to_str()?.to_string(),
+                        path: target.to_string(),
                         line_number: self.line_number,
                     },
                 ])
@@ -46,17 +41,17 @@ impl<'a> Command for ChildCommand<'a> {
                 let files: Vec<_> = self
                     .targets
                     .iter()
-                    .map(|target| path.join(target))
-                    .filter(|path| {
-                        path.metadata()
+                    .filter(|target| {
+                        Path::new(target)
+                            .metadata()
                             .and_then(|metadata| Ok(!metadata.is_dir()))
                             .unwrap_or(false)
                     })
-                    .map(|path| path.to_str().unwrap().to_string())
+                    .map(|target| target.to_string())
                     .collect();
 
                 Ok(match self.opts.quit {
-                    true => (vec![self.opts.layout.action(files), Action::Quit]),
+                    true => vec![self.opts.layout.action(files), Action::Quit],
                     false => vec![self.opts.layout.action(files)],
                 })
             }

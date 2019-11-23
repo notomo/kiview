@@ -16,11 +16,9 @@ pub struct GoCommand<'a> {
 
 impl<'a> Command for GoCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        let path = Path::new(self.current_path);
-
         let current_path = match &self.opts.path {
             Some(opt_path) => Path::new(opt_path),
-            None => path,
+            None => Path::new(self.current_path),
         };
 
         let paths: Paths = self.path_repository.list(current_path.to_str()?)?.into();
@@ -32,7 +30,7 @@ impl<'a> Command for GoCommand<'a> {
                 line_number: None,
             },
             Action::AddHistory {
-                path: path.canonicalize()?.to_str()?.to_string(),
+                path: self.current_path.to_string(),
                 line_number: self.line_number,
             },
         ];

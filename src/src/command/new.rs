@@ -17,33 +17,29 @@ pub struct NewCommand<'a> {
 
 impl<'a> Command for NewCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        let path = Path::new(self.current_path);
-
-        Ok(match &self.opts.path {
+        match &self.opts.path {
             Some(opt_path) => {
-                let new_path = path.join(opt_path);
+                let new_path = Path::new(self.current_path).join(opt_path);
                 match opt_path.ends_with("/") {
                     true => create_dir_all(new_path).and_then(|_| Ok(())),
                     false => File::create(new_path).and_then(|_| Ok(())),
                 }?;
 
-                let paths: Paths = self.path_repository.list(path.to_str()?)?.into();
+                let paths: Paths = self.path_repository.list(self.current_path)?.into();
 
-                let current_path = path.canonicalize()?.to_str()?.to_string();
-
-                vec![
+                Ok(vec![
                     paths.to_write_all_action(),
                     Action::RestoreCursor {
-                        path: current_path.clone(),
+                        path: self.current_path.to_string(),
                         line_number: None,
                     },
                     Action::AddHistory {
-                        path: current_path,
+                        path: self.current_path.to_string(),
                         line_number: self.line_number,
                     },
-                ]
+                ])
             }
-            None => vec![Action::ConfirmNew],
-        })
+            None => Ok(vec![Action::ConfirmNew]),
+        }
     }
 }
