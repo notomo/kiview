@@ -19,29 +19,23 @@ impl<'a> Command for RemoveCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         match self.opts.no_confirm {
             true => {
-                let files: Vec<_> = self
+                let paths: Vec<_> = self
                     .targets
                     .iter()
                     .map(|target| Path::new(target))
-                    .filter(|path| {
-                        path.metadata()
-                            .and_then(|metadata| Ok(!metadata.is_dir()))
-                            .unwrap_or(false)
-                    })
+                    .collect();
+
+                let files: Vec<_> = paths
+                    .iter()
+                    .filter(|path| !path.to_path_buf().is_dir())
                     .collect();
                 for file in &files {
-                    remove_file(file).unwrap();
+                    remove_file(file)?;
                 }
 
-                let dirs: Vec<_> = self
-                    .targets
+                let dirs: Vec<_> = paths
                     .iter()
-                    .map(|target| Path::new(target))
-                    .filter(|path| {
-                        path.metadata()
-                            .and_then(|metadata| Ok(metadata.is_dir()))
-                            .unwrap_or(false)
-                    })
+                    .filter(|path| path.to_path_buf().is_dir())
                     .collect();
                 for dir in &dirs {
                     remove_dir_all(dir)?;

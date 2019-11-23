@@ -19,8 +19,6 @@ pub struct ToggleTreeCommand<'a> {
 
 impl<'a> Command for ToggleTreeCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        let path = Path::new(self.current_path);
-
         if self.line_number == 1 {
             return Ok(vec![]);
         }
@@ -35,17 +33,10 @@ impl<'a> Command for ToggleTreeCommand<'a> {
         }
 
         match self.current_target {
-            Some(current_target)
-                if path
-                    .join(current_target)
-                    .metadata()
-                    .and_then(|metadata| Ok(metadata.is_dir()))
-                    .unwrap_or(false) =>
-            {
-                let target_path = path.join(current_target);
+            Some(current_target) if Path::new(current_target).to_path_buf().is_dir() => {
                 let child_paths: Paths = self
                     .path_repository
-                    .list(target_path.to_str()?)?
+                    .list(current_target)?
                     .iter()
                     .skip(1)
                     .collect::<Vec<_>>()

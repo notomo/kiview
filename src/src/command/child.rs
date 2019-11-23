@@ -17,12 +17,7 @@ pub struct ChildCommand<'a> {
 impl<'a> Command for ChildCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         match self.current_target {
-            Some(target)
-                if Path::new(target)
-                    .metadata()
-                    .and_then(|metadata| Ok(metadata.is_dir()))
-                    .unwrap_or(false) =>
-            {
+            Some(target) if Path::new(target).to_path_buf().is_dir() => {
                 let paths: Paths = self.path_repository.list(target)?.into();
 
                 Ok(vec![
@@ -40,12 +35,7 @@ impl<'a> Command for ChildCommand<'a> {
                 let files: Vec<_> = self
                     .targets
                     .iter()
-                    .filter(|target| {
-                        Path::new(target)
-                            .metadata()
-                            .and_then(|metadata| Ok(!metadata.is_dir()))
-                            .unwrap_or(false)
-                    })
+                    .filter(|target| !Path::new(target).to_path_buf().is_dir())
                     .map(|target| target.to_string())
                     .collect();
 
