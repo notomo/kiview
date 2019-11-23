@@ -13,6 +13,8 @@ pub enum ErrorKind {
     Internal { message: String },
     #[fail(display = "Unknown command: {}", command_name)]
     Unknown { command_name: String },
+    #[fail(display = "Invalid command: {}", message)]
+    Invalid { message: String },
 }
 
 #[derive(Debug)]

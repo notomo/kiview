@@ -24,8 +24,6 @@ pub enum Action {
     Copy { paths: Vec<String> },
     #[serde(rename = "confirm_new")]
     ConfirmNew,
-    #[serde(rename = "unknown")]
-    Unknown,
     #[serde(rename = "quit")]
     Quit,
     #[serde(rename = "add_history")]

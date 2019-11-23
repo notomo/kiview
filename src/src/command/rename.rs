@@ -40,7 +40,10 @@ impl<'a> Command for RenameCommand<'a> {
                 let from = current_target.to_string();
                 Ok(vec![Action::ConfirmRename { path: from }])
             }
-            (_, _, _) => Ok(vec![Action::Unknown]),
+            _ => Err(crate::command::ErrorKind::Invalid {
+                message: String::from("no confirm rename required -path and -current-target"),
+            }
+            .into()),
         }
     }
 }

@@ -63,7 +63,6 @@ pub enum Layout {
     Tab,
     Vertical,
     Open,
-    Unknown,
 }
 
 impl Layout {
@@ -72,7 +71,6 @@ impl Layout {
             Layout::Tab => Action::TabOpen { paths: paths },
             Layout::Vertical => Action::VerticalOpen { paths: paths },
             Layout::Open => Action::Open { paths: paths },
-            Layout::Unknown => Action::Unknown,
         }
     }
 }
@@ -82,7 +80,7 @@ impl From<&str> for Layout {
         match s {
             "tab" => Layout::Tab,
             "vertical" => Layout::Vertical,
-            _ => Layout::Unknown,
+            _ => Layout::Open,
         }
     }
 }
