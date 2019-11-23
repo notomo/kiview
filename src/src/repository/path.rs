@@ -18,39 +18,41 @@ impl<'a> PathRepository<'a> for FilePathRepository {
                 .to_string(),
         }];
 
-        let directories: Vec<_> = fs::read_dir(path)?
-            .filter(|p| p.as_ref().unwrap().metadata().unwrap().is_dir())
-            .map(|p| FullPath {
-                name: format!(
-                    "{}/",
-                    p.as_ref().unwrap().file_name().clone().to_str().unwrap()
-                ),
-                path: p
-                    .as_ref()
-                    .unwrap()
-                    .path()
-                    .canonicalize()
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string(),
-            })
+        let paths: Vec<_> = fs::read_dir(path)?
+            .filter(|result| result.is_ok())
+            .map(|result| result.unwrap().path())
             .collect();
 
-        let files: Vec<_> = fs::read_dir(path)?
-            .filter(|path| !path.as_ref().unwrap().metadata().unwrap().is_dir())
+        let directories: Vec<_> = paths
+            .iter()
+            .filter(|p| p.is_dir())
             .map(|p| FullPath {
+                name: p
+                    .file_name()
+                    .and_then(|name| name.to_str().and_then(|name| Some(format!("{}/", name))))
+                    .unwrap_or(String::from("")),
                 path: p
-                    .as_ref()
-                    .unwrap()
-                    .path()
                     .canonicalize()
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string(),
-                name: format!("{}", p.as_ref().unwrap().file_name().to_str().unwrap()),
+                    .and_then(|p| Ok(p.to_str().unwrap_or("").to_string()))
+                    .unwrap_or(String::from("")),
             })
+            .filter(|p| p.name != "" && p.path != "")
+            .collect();
+
+        let files: Vec<_> = paths
+            .iter()
+            .filter(|p| !p.is_dir())
+            .map(|p| FullPath {
+                name: p
+                    .file_name()
+                    .and_then(|name| name.to_str().and_then(|name| Some(String::from(name))))
+                    .unwrap_or(String::from("")),
+                path: p
+                    .canonicalize()
+                    .and_then(|p| Ok(p.to_str().unwrap_or("").to_string()))
+                    .unwrap_or(String::from("")),
+            })
+            .filter(|p| p.name != "" && p.path != "")
             .collect();
 
         Ok([&parent_directory[..], &directories[..], &files[..]].concat())
