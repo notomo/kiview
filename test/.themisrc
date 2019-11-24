@@ -32,6 +32,12 @@ function! KiviewTestAssert() abort
         call self.equals(actual, a:expected, message)
     endfunction
 
+    function! assert.path(expected) abort
+        let actual = fnamemodify(expand('%:p'), ':.')
+        let message = printf('file path should be %s, but actual: %s', a:expected, actual)
+        call self.equals(actual, a:expected, message)
+    endfunction
+
     function! assert.syntax_name(expected) abort
         let actual = synIDattr(synID(line('.'), col('.'), v:true), 'name')
         let message = printf('syntax name should be %s, but actual: %s', a:expected, actual)
@@ -41,6 +47,12 @@ function! KiviewTestAssert() abort
     function! assert.filetype(expected) abort
         let actual = &filetype
         let message = printf('&filetype should be %s, but actual: %s', a:expected, actual)
+        call self.equals(actual, a:expected, message)
+    endfunction
+
+    function! assert.lines(expected) abort
+        let actual = getbufline('%', 1, '$')
+        let message = printf('lines should be %s, but actual: %s', a:expected, actual)
         call self.equals(actual, a:expected, message)
     endfunction
 

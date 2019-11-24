@@ -94,7 +94,7 @@ function! s:suite.do_parent_child()
     call s:assert.contains(test_lines, 'plugin/')
     call s:assert.not_contains(test_lines, '')
     call s:assert.filetype('kiview')
-    call s:assert.equals(lines, test_lines)
+    call s:assert.lines(test_lines)
 
     call search('\.themisrc')
     call s:sync_main('child')
@@ -404,8 +404,11 @@ function! s:suite.toggle_tree()
 
     call search('autoload/')
 
+    let lines = s:lines()
     call s:sync_main('toggle_tree')
     call s:sync_main('toggle_tree')
+    call s:assert.lines(lines)
+
     call s:sync_main('toggle_tree')
 
     call search('kiview.vim')
@@ -422,5 +425,46 @@ function! s:suite.cannot_toggle_parent_node()
     normal! gg
     call s:sync_main('toggle_tree')
 
-    call s:assert.equals(lines, s:lines())
+    call s:assert.lines(lines)
+endfunction
+
+function! s:suite.toggle_multi_trees()
+    call s:sync_main('')
+
+    call search('autoload\/')
+    call s:sync_main('toggle_tree')
+
+    call search('plugin\/')
+    call s:sync_main('toggle_tree')
+
+    call search('kiview\.vim')
+    call s:sync_main('child')
+
+    call s:assert.path('plugin/kiview.vim')
+endfunction
+
+function! s:suite.toggle_last_dir()
+    call s:sync_main('go -path=./test/plugin/_test_data/depth0')
+
+    let lines = s:lines()
+
+    call search('depth1\/')
+    call s:sync_main('toggle_tree')
+    call s:sync_main('toggle_tree')
+
+    call s:assert.lines(lines)
+endfunction
+
+function! s:suite.toggle_single_dir()
+    call s:sync_main('go -path=./test/plugin/_test_data')
+
+    call search('depth0\/')
+    call s:sync_main('toggle_tree')
+
+    let lines = s:lines()
+    call search('depth1\/')
+    call s:sync_main('toggle_tree')
+    call s:sync_main('toggle_tree')
+
+    call s:assert.lines(lines)
 endfunction

@@ -39,26 +39,21 @@ pub enum Action {
         lines: Vec<String>,
         props: Vec<Prop>,
     },
-    #[serde(rename = "write")]
-    Write {
+    #[serde(rename = "open_tree")]
+    OpenTree {
         lines: Vec<String>,
         props: Vec<Prop>,
-        start: usize,
-        end: usize,
+        root: usize,
+        count: usize,
     },
+    #[serde(rename = "close_tree")]
+    CloseTree { root: usize, count: usize },
 }
 
 #[derive(Debug, Serialize)]
 pub struct Prop {
     path: String,
-}
-
-impl From<&FullPath> for Prop {
-    fn from(full: &FullPath) -> Prop {
-        Prop {
-            path: full.path.clone(),
-        }
-    }
+    depth: usize,
 }
 
 impl From<Vec<FullPath>> for Paths {
@@ -90,32 +85,44 @@ impl IntoIterator for Paths {
 }
 
 impl Paths {
-    pub fn to_write_action(&self, start: usize, end: usize) -> Action {
-        Action::Write {
-            lines: self.paths.iter().map(|p| p.name.clone()).collect(),
-            props: self.paths.iter().map(|p| p.into()).collect::<Vec<Prop>>(),
-            start: start,
-            end: end,
+    pub fn to_open_tree_action(&self, root: usize, current_depth: usize) -> Action {
+        let indent = std::iter::repeat(" ")
+            .take(current_depth)
+            .collect::<String>();
+        let lines: Vec<_> = self
+            .paths
+            .iter()
+            .map(|p| format!("{}  {}", indent, p.name))
+            .collect();
+
+        let depth = current_depth + 2;
+
+        Action::OpenTree {
+            count: (&lines).len(),
+            lines: lines,
+            props: self
+                .paths
+                .iter()
+                .map(|p| Prop {
+                    path: p.path.clone(),
+                    depth: depth,
+                })
+                .collect::<Vec<Prop>>(),
+            root: root,
         }
     }
 
     pub fn to_write_all_action(&self) -> Action {
         Action::WriteAll {
             lines: self.paths.iter().map(|p| p.name.clone()).collect(),
-            props: self.paths.iter().map(|p| p.into()).collect::<Vec<Prop>>(),
+            props: self
+                .paths
+                .iter()
+                .map(|p| Prop {
+                    path: p.path.clone(),
+                    depth: 0 as usize,
+                })
+                .collect::<Vec<Prop>>(),
         }
-    }
-
-    pub fn add_indent(&self, depth: usize) -> Self {
-        let indent = std::iter::repeat(" ").take(depth).collect::<String>();
-
-        self.paths
-            .iter()
-            .map(|p| FullPath {
-                name: format!("{}  {}", indent, p.name),
-                path: p.path.clone(),
-            })
-            .collect::<Vec<FullPath>>()
-            .into()
     }
 }

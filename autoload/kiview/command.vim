@@ -76,7 +76,7 @@ function! s:build_cmd(buffer, arg) abort
     let options = {
         \ 'current-path': a:buffer.current.path,
         \ 'line-number': a:buffer.current.line_number,
-        \ 'current-target': a:buffer.current.target,
+        \ 'current-target': a:buffer.current.target.path,
         \ 'next-sibling-line-number': a:buffer.current.next_sibling_line_number,
         \ 'depth': a:buffer.current.depth,
         \ 'arg': a:arg,
@@ -101,8 +101,8 @@ function! s:build_cmd(buffer, arg) abort
         call add(cmd_options, '--has-cut')
     endif
 
-    if a:buffer.current.created
-        call add(cmd_options, '--created')
+    if has_key(a:buffer.current.target, 'opened') && a:buffer.current.target.opened
+        call add(cmd_options, '--opened')
     endif
 
     return extend(['kiview', 'do'], cmd_options)

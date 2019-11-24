@@ -13,6 +13,7 @@ pub struct ToggleTreeCommand<'a> {
     pub path_repository: &'a dyn PathRepository<'a>,
     pub dispatcher: Dispatcher,
     pub next_sibling_line_number: u64,
+    pub opened: bool,
     pub depth: u64,
 }
 
@@ -22,12 +23,10 @@ impl<'a> Command for ToggleTreeCommand<'a> {
             return Ok(vec![]);
         }
 
-        if self.next_sibling_line_number > self.line_number + 1 {
-            return Ok(vec![Action::Write {
-                props: vec![],
-                lines: vec![],
-                start: self.line_number as usize,
-                end: (self.next_sibling_line_number - 1) as usize,
+        if self.opened && self.next_sibling_line_number > self.line_number {
+            return Ok(vec![Action::CloseTree {
+                root: self.line_number as usize,
+                count: (self.next_sibling_line_number - self.line_number - 1) as usize,
             }]);
         }
 
@@ -41,12 +40,10 @@ impl<'a> Command for ToggleTreeCommand<'a> {
                     .collect::<Vec<_>>()
                     .into();
 
-                Ok(vec![child_paths
-                    .add_indent(self.depth as usize)
-                    .to_write_action(
-                        self.line_number as usize,
-                        self.line_number as usize,
-                    )])
+                Ok(vec![child_paths.to_open_tree_action(
+                    self.line_number as usize,
+                    self.depth as usize,
+                )])
             }
             _ => Ok(vec![]),
         }

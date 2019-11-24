@@ -13,7 +13,8 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             \ 'set_cursor': { action -> s:set_cursor(action, buffer) },
             \ 'set_path': { action -> s:set_path(action, buffer) },
             \ 'write_all': { action -> s:write_all(action, buffer) },
-            \ 'write': { action -> s:write(action, buffer) },
+            \ 'open_tree': { action -> s:open_tree(action, buffer) },
+            \ 'close_tree': { action -> s:close_tree(action, buffer) },
             \ 'quit': { action -> s:quit(buffer) },
             \ 'confirm_new': { action -> s:confirm_new(input_reader) },
             \ 'confirm_remove': { action -> s:confirm_remove(input_reader) },
@@ -56,11 +57,30 @@ function! s:vertical_open_targets(action) abort
 endfunction
 
 function! s:write_all(action, buffer) abort
-    call a:buffer.write_all(a:action.lines, a:action.props)
+    call a:buffer.current.unset_props_all()
+    call a:buffer.write_all(a:action.lines)
+    call a:buffer.current.set_props(a:action.props, 1)
 endfunction
 
-function! s:write(action, buffer) abort
-    call a:buffer.write(a:action.lines, a:action.props, a:action.start, a:action.end)
+function! s:open_tree(action, buffer) abort
+    call a:buffer.current.toggle_tree(a:action.root, v:true)
+    if a:action.count == 0
+        return
+    endif
+    let start = a:action.root + 1
+    call a:buffer.write(a:action.lines, start, start)
+    call a:buffer.current.set_props(a:action.props, start)
+endfunction
+
+function! s:close_tree(action, buffer) abort
+    call a:buffer.current.toggle_tree(a:action.root, v:false)
+    if a:action.count == 0
+        return
+    endif
+    let start = a:action.root + 1
+    let end = a:action.root + a:action.count
+    call a:buffer.current.unset_props(start, end)
+    call a:buffer.write([], start, end + 1)
 endfunction
 
 function! s:try_to_restore_cursor(action, buffer) abort

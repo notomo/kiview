@@ -69,6 +69,12 @@ fn main() {
                         .required(false),
                 )
                 .arg(
+                    Arg::with_name("opened")
+                        .long("opened")
+                        .takes_value(false)
+                        .required(false),
+                )
+                .arg(
                     Arg::with_name("next_sibling_line_number")
                         .long("next-sibling-line-number")
                         .takes_value(true)
@@ -110,6 +116,7 @@ fn main() {
                 .collect();
             let has_cut = cmd.is_present("has_cut");
             let created = cmd.is_present("created");
+            let opened = cmd.is_present("opened");
             let next_sibling_line_number = cmd
                 .value_of("next_sibling_line_number")
                 .unwrap()
@@ -186,6 +193,7 @@ fn main() {
                     path_repository: &path_repository,
                     dispatcher: dispatcher,
                     next_sibling_line_number: next_sibling_line_number,
+                    opened: opened,
                     depth: depth,
                 } as Box<dyn Command>,
                 CommandName::Unknown => {
