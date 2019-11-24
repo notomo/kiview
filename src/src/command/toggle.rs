@@ -1,10 +1,8 @@
-use std::path::Path;
-
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Paths;
-use crate::repository::PathRepository;
+use crate::repository::{Dispatcher, PathRepository};
 
 pub struct ToggleTreeCommand<'a> {
     pub current_path: &'a str,
@@ -13,6 +11,7 @@ pub struct ToggleTreeCommand<'a> {
     pub opts: &'a CommandOptions,
     pub targets: Vec<&'a str>,
     pub path_repository: &'a dyn PathRepository<'a>,
+    pub dispatcher: Dispatcher,
     pub next_sibling_line_number: u64,
     pub depth: u64,
 }
@@ -33,7 +32,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
         }
 
         match self.current_target {
-            Some(current_target) if Path::new(current_target).to_path_buf().is_dir() => {
+            Some(current_target) if self.dispatcher.path(current_target).is_group_node() => {
                 let child_paths: Paths = self
                     .path_repository
                     .list(current_target)?

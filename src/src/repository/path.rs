@@ -70,3 +70,41 @@ impl std::fmt::Display for FullPath {
         write!(f, "{}: {}", self.name, self.path)
     }
 }
+
+pub struct Dispatcher {}
+
+impl Dispatcher {
+    pub fn path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a> {
+        box FilePath {
+            path: std::path::Path::new(path),
+        }
+    }
+}
+
+pub trait Path {
+    fn is_group_node(&self) -> bool;
+    fn parent(&self) -> Option<String>;
+    fn canonicalize(&self) -> Result<String, crate::repository::Error>;
+}
+
+pub struct FilePath<'a> {
+    path: &'a std::path::Path,
+}
+
+impl<'a> Path for FilePath<'a> {
+    fn is_group_node(&self) -> bool {
+        self.path.is_dir()
+    }
+
+    fn parent(&self) -> Option<String> {
+        self.path
+            .parent()
+            .and_then(|p| p.to_str())
+            .and_then(|p| Some(p.to_string()))
+    }
+
+    fn canonicalize(&self) -> Result<String, crate::repository::Error> {
+        let fulll_path = self.path.to_path_buf().canonicalize()?;
+        Ok(fulll_path.to_str()?.to_string())
+    }
+}

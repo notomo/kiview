@@ -1,5 +1,5 @@
 mod path;
-pub use path::{FilePathRepository, FullPath, PathRepository};
+pub use path::{Dispatcher, FilePathRepository, FullPath, PathRepository};
 
 mod error;
 pub use error::{Error, ErrorKind};

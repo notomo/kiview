@@ -1,27 +1,27 @@
-use std::path::Path;
-
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::Paths;
-use crate::repository::PathRepository;
+use crate::repository::{Dispatcher, PathRepository};
 
 pub struct ParentCommand<'a> {
     pub current_path: &'a str,
     pub line_number: u64,
     pub path_repository: &'a dyn PathRepository<'a>,
+    pub dispatcher: Dispatcher,
 }
 
 impl<'a> Command for ParentCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        let current_path = Path::new(self.current_path)
+        let current_path = self
+            .dispatcher
+            .path(self.current_path)
             .parent()
-            .and_then(|p| p.to_str())
-            .unwrap_or(self.current_path);
+            .unwrap_or_else(|| self.current_path.to_string());
 
-        let paths: Paths = self.path_repository.list(current_path)?.into();
+        let paths: Paths = self.path_repository.list(&current_path)?.into();
         let write_all = paths.to_write_all_action();
 
-        let numbers = &paths
+        let numbers = paths
             .into_iter()
             .enumerate()
             .filter(|(_, p)| &p.path == self.current_path)
@@ -35,9 +35,7 @@ impl<'a> Command for ParentCommand<'a> {
             Action::SetCursor {
                 line_number: last_path_line_number,
             },
-            Action::SetPath {
-                path: current_path.to_string(),
-            },
+            Action::SetPath { path: current_path },
             Action::AddHistory {
                 path: self.current_path.to_string(),
                 line_number: self.line_number,

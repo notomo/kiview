@@ -118,6 +118,7 @@ fn main() {
             let depth = cmd.value_of("depth").unwrap().parse().unwrap();
 
             let path_repository = repository::FilePathRepository {};
+            let dispatcher = repository::Dispatcher {};
 
             let actions = match &command_name {
                 CommandName::Quit => box command::QuitCommand {},
@@ -125,6 +126,7 @@ fn main() {
                     current_path: current_path,
                     line_number: line_number,
                     path_repository: &path_repository,
+                    dispatcher: dispatcher,
                 } as Box<dyn Command>,
                 CommandName::Child => box command::ChildCommand {
                     line_number: line_number,
@@ -132,12 +134,14 @@ fn main() {
                     targets: targets,
                     opts: &command_opts,
                     path_repository: &path_repository,
+                    dispatcher: dispatcher,
                 } as Box<dyn Command>,
                 CommandName::Go => box command::GoCommand {
                     current_path: current_path,
                     line_number: line_number,
                     opts: &command_opts,
                     path_repository: &path_repository,
+                    dispatcher: dispatcher,
                     created: created,
                 } as Box<dyn Command>,
                 CommandName::New => box command::NewCommand {
@@ -180,6 +184,7 @@ fn main() {
                     targets: targets,
                     opts: &command_opts,
                     path_repository: &path_repository,
+                    dispatcher: dispatcher,
                     next_sibling_line_number: next_sibling_line_number,
                     depth: depth,
                 } as Box<dyn Command>,
