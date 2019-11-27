@@ -5,7 +5,7 @@ let s:id = 0
 function! kiview#command#new(buffer, action_handler, event_service, arg, parent_id) abort
     let s:id += 1
 
-    let cmd = s:build_cmd(a:buffer, a:arg)
+    let cmd = ['kiview', 'do', '--arg', a:arg]
     let command = {
         \ 'id': s:id,
         \ 'parent_id': a:parent_id,
@@ -24,7 +24,8 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
     function! command._start() abort
         call self.logger.log('start')
         call self.event_service.on_job_finished(self.job.id, { id, err -> self.on_job_finished(id, err) })
-        call self.job.start()
+        let input = s:build_input(self.buffer)
+        call self.job.start(input)
     endfunction
 
     function! command.on_job_finished(id, err) abort
@@ -72,38 +73,19 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
     return command
 endfunction
 
-function! s:build_cmd(buffer, arg) abort
-    let options = {
-        \ 'current-path': a:buffer.current.path,
-        \ 'line-number': a:buffer.current.line_number,
-        \ 'current-target': a:buffer.current.target.path,
-        \ 'next-sibling-line-number': a:buffer.current.next_sibling_line_number,
+function! s:build_input(buffer) abort
+    let input = {
+        \ 'path': a:buffer.current.path,
+        \ 'line_number': a:buffer.current.line_number,
+        \ 'target': a:buffer.current.target.path,
+        \ 'next_sibling_line_number': a:buffer.current.next_sibling_line_number,
         \ 'depth': a:buffer.current.depth,
-        \ 'arg': a:arg,
+        \ 'targets': a:buffer.current.targets,
+        \ 'registered_targets': a:buffer.register.paths,
+        \ 'has_cut': a:buffer.register.has_cut,
+        \ 'opened': has_key(a:buffer.current.target, 'opened') && a:buffer.current.target.opened ? v:true : v:false,
+        \ 'created': a:buffer.current.created,
     \ }
 
-    let cmd_options = []
-    for [k, v] in items(options)
-        if empty(v)
-            continue
-        endif
-        call extend(cmd_options, ['--' . k, v])
-    endfor
-    for target in a:buffer.current.targets
-        call extend(cmd_options, ['--targets', target])
-    endfor
-
-    let register = a:buffer.register
-    for path in register.paths
-        call extend(cmd_options, ['--registered', path])
-    endfor
-    if register.has_cut
-        call add(cmd_options, '--has-cut')
-    endif
-
-    if has_key(a:buffer.current.target, 'opened') && a:buffer.current.target.opened
-        call add(cmd_options, '--opened')
-    endif
-
-    return extend(['kiview', 'do'], cmd_options)
+    return json_encode(input)
 endfunction

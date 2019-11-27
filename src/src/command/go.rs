@@ -1,16 +1,15 @@
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
+use crate::command::Current;
 use crate::command::Paths;
 use crate::repository::{Dispatcher, PathRepository};
 
 pub struct GoCommand<'a> {
-    pub current_path: &'a str,
-    pub line_number: u64,
+    pub current: Current<'a>,
     pub opts: &'a CommandOptions,
     pub path_repository: &'a dyn PathRepository<'a>,
     pub dispatcher: Dispatcher,
-    pub created: bool,
 }
 
 impl<'a> Command for GoCommand<'a> {
@@ -19,7 +18,7 @@ impl<'a> Command for GoCommand<'a> {
             .dispatcher
             .path(match &self.opts.path {
                 Some(opt_path) => opt_path.as_str(),
-                None => self.current_path,
+                None => self.current.path,
             })
             .canonicalize()?;
 
@@ -29,11 +28,11 @@ impl<'a> Command for GoCommand<'a> {
             paths.to_write_all_action(),
             Action::TryToRestoreCursor { path: current_path },
             Action::AddHistory {
-                path: self.current_path.to_string(),
-                line_number: self.line_number,
+                path: self.current.path.to_string(),
+                line_number: self.current.line_number,
             },
         ];
-        if !self.created {
+        if !self.current.created {
             actions.push(Action::Create);
         }
 

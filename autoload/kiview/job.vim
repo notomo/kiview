@@ -15,7 +15,7 @@ function! kiview#job#new(cmd, event_service) abort
         \ 'event_service': a:event_service,
     \ }
 
-    function! job.start() abort
+    function! job.start(input) abort
         let options = {
             \ 'on_exit': function('s:handle_exit'),
             \ 'on_stdout': function('s:handle_stdout'),
@@ -28,6 +28,11 @@ function! kiview#job#new(cmd, event_service) abort
         if self.internal_job_id <= 0
             call self.logger.label('error').log('internal_job_id=' . self.internal_job_id)
             throw 'failed to start job: ' . self.internal_job_id
+        endif
+        call self.logger.log(a:input)
+        let written = chansend(self.internal_job_id, [a:input, ''])
+        if written == 0
+            throw 'failed to chansend()'
         endif
         let self.started = v:true
     endfunction

@@ -1,5 +1,36 @@
 use crate::command::Action;
+use serde_derive::Deserialize;
 use serde_derive::Serialize;
+
+#[derive(Debug, Deserialize)]
+pub struct Current<'a> {
+    pub path: &'a str,
+
+    pub line_number: u64,
+
+    #[serde(default)]
+    pub depth: u64,
+
+    #[serde(default)]
+    pub next_sibling_line_number: u64,
+
+    #[serde(default)]
+    pub opened: bool,
+
+    #[serde(default)]
+    pub created: bool,
+
+    #[serde(default)]
+    pub has_cut: bool,
+
+    pub target: Option<&'a str>,
+
+    #[serde(default)]
+    pub targets: Vec<&'a str>,
+
+    #[serde(default)]
+    pub registered_targets: Vec<&'a str>,
+}
 
 pub trait Command {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error>;
