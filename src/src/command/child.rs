@@ -3,12 +3,11 @@ use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Paths;
-use crate::repository::{Dispatcher, PathRepository};
+use crate::repository::Dispatcher;
 
 pub struct ChildCommand<'a> {
     pub current: Current<'a>,
     pub opts: &'a CommandOptions,
-    pub path_repository: &'a dyn PathRepository<'a>,
     pub dispatcher: Dispatcher,
 }
 
@@ -16,7 +15,7 @@ impl<'a> Command for ChildCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         match self.current.target {
             Some(target) if self.dispatcher.path(target).is_group_node() => {
-                let paths: Paths = self.path_repository.list(target)?.into();
+                let paths: Paths = self.dispatcher.path_repository().list(target)?.into();
 
                 Ok(vec![
                     paths.to_write_all_action(),

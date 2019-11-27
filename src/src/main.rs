@@ -45,37 +45,33 @@ fn main() {
             std::io::stdin().lock().read_line(&mut line).unwrap();
             let current: Current = serde_json::from_str(&line).unwrap();
 
-            let path_repository = repository::FilePathRepository {};
             let dispatcher = repository::Dispatcher {};
 
             let actions = match &command_name {
                 CommandName::Quit => box command::QuitCommand {},
                 CommandName::Parent => box command::ParentCommand {
                     current: current,
-                    path_repository: &path_repository,
                     dispatcher: dispatcher,
                 } as Box<dyn Command>,
                 CommandName::Child => box command::ChildCommand {
                     current: current,
-                    opts: &command_opts,
-                    path_repository: &path_repository,
                     dispatcher: dispatcher,
+                    opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::Go => box command::GoCommand {
                     current: current,
-                    opts: &command_opts,
-                    path_repository: &path_repository,
                     dispatcher: dispatcher,
+                    opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::New => box command::NewCommand {
                     current: current,
+                    dispatcher: dispatcher,
                     opts: &command_opts,
-                    path_repository: &path_repository,
                 } as Box<dyn Command>,
                 CommandName::Remove => box command::RemoveCommand {
                     current: current,
+                    dispatcher: dispatcher,
                     opts: &command_opts,
-                    path_repository: &path_repository,
                 } as Box<dyn Command>,
                 CommandName::Copy => {
                     box command::CopyCommand { current: current } as Box<dyn Command>
@@ -85,18 +81,17 @@ fn main() {
                 }
                 CommandName::Paste => box command::PasteCommand {
                     current: current,
-                    path_repository: &path_repository,
+                    dispatcher: dispatcher,
                 } as Box<dyn Command>,
                 CommandName::Rename => box command::RenameCommand {
                     current: current,
-                    path_repository: &path_repository,
+                    dispatcher: dispatcher,
                     opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::ToggleTree => box command::ToggleTreeCommand {
                     current: current,
-                    opts: &command_opts,
-                    path_repository: &path_repository,
                     dispatcher: dispatcher,
+                    opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::Unknown => {
                     box command::UnknownCommand { command_name: &arg } as Box<dyn Command>

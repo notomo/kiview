@@ -3,12 +3,11 @@ use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Paths;
-use crate::repository::{Dispatcher, PathRepository};
+use crate::repository::Dispatcher;
 
 pub struct GoCommand<'a> {
     pub current: Current<'a>,
     pub opts: &'a CommandOptions,
-    pub path_repository: &'a dyn PathRepository<'a>,
     pub dispatcher: Dispatcher,
 }
 
@@ -22,7 +21,11 @@ impl<'a> Command for GoCommand<'a> {
             })
             .canonicalize()?;
 
-        let paths: Paths = self.path_repository.list(&current_path)?.into();
+        let paths: Paths = self
+            .dispatcher
+            .path_repository()
+            .list(&current_path)?
+            .into();
 
         let mut actions = vec![
             paths.to_write_all_action(),

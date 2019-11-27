@@ -3,13 +3,12 @@ use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Paths;
-use crate::repository::{Dispatcher, PathRepository};
+use crate::repository::Dispatcher;
 
 pub struct ToggleTreeCommand<'a> {
     pub current: Current<'a>,
-    pub opts: &'a CommandOptions,
-    pub path_repository: &'a dyn PathRepository<'a>,
     pub dispatcher: Dispatcher,
+    pub opts: &'a CommandOptions,
 }
 
 impl<'a> Command for ToggleTreeCommand<'a> {
@@ -29,7 +28,8 @@ impl<'a> Command for ToggleTreeCommand<'a> {
         match self.current.target {
             Some(current_target) if self.dispatcher.path(current_target).is_group_node() => {
                 let child_paths: Paths = self
-                    .path_repository
+                    .dispatcher
+                    .path_repository()
                     .list(current_target)?
                     .iter()
                     .skip(1)

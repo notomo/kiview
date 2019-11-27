@@ -5,11 +5,11 @@ use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
 use crate::command::Paths;
-use crate::repository::PathRepository;
+use crate::repository::Dispatcher;
 
 pub struct PasteCommand<'a> {
     pub current: Current<'a>,
-    pub path_repository: &'a dyn PathRepository<'a>,
+    pub dispatcher: Dispatcher,
 }
 
 impl<'a> Command for PasteCommand<'a> {
@@ -31,7 +31,11 @@ impl<'a> Command for PasteCommand<'a> {
             }?;
         }
 
-        let paths: Paths = self.path_repository.list(self.current.path)?.into();
+        let paths: Paths = self
+            .dispatcher
+            .path_repository()
+            .list(self.current.path)?
+            .into();
 
         Ok(vec![
             paths.to_write_all_action(),

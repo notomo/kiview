@@ -7,12 +7,12 @@ use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Paths;
-use crate::repository::PathRepository;
+use crate::repository::Dispatcher;
 
 pub struct NewCommand<'a> {
     pub current: Current<'a>,
+    pub dispatcher: Dispatcher,
     pub opts: &'a CommandOptions,
-    pub path_repository: &'a dyn PathRepository<'a>,
 }
 
 impl<'a> Command for NewCommand<'a> {
@@ -25,7 +25,11 @@ impl<'a> Command for NewCommand<'a> {
                     false => File::create(new_path).and_then(|_| Ok(())),
                 }?;
 
-                let paths: Paths = self.path_repository.list(self.current.path)?.into();
+                let paths: Paths = self
+                    .dispatcher
+                    .path_repository()
+                    .list(self.current.path)?
+                    .into();
 
                 Ok(vec![
                     paths.to_write_all_action(),

@@ -6,11 +6,11 @@ use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Paths;
-use crate::repository::PathRepository;
+use crate::repository::Dispatcher;
 
 pub struct RenameCommand<'a> {
     pub current: Current<'a>,
-    pub path_repository: &'a dyn PathRepository<'a>,
+    pub dispatcher: Dispatcher,
     pub opts: &'a CommandOptions,
 }
 
@@ -22,7 +22,11 @@ impl<'a> Command for RenameCommand<'a> {
                 let to = Path::new(self.current.path).join(opt_path);
                 rename(from, to)?;
 
-                let paths: Paths = self.path_repository.list(self.current.path)?.into();
+                let paths: Paths = self
+                    .dispatcher
+                    .path_repository()
+                    .list(self.current.path)?
+                    .into();
 
                 Ok(vec![
                     paths.to_write_all_action(),

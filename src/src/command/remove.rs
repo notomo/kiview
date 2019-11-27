@@ -6,12 +6,12 @@ use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Paths;
-use crate::repository::PathRepository;
+use crate::repository::Dispatcher;
 
 pub struct RemoveCommand<'a> {
     pub current: Current<'a>,
+    pub dispatcher: Dispatcher,
     pub opts: &'a CommandOptions,
-    pub path_repository: &'a dyn PathRepository<'a>,
 }
 
 impl<'a> Command for RemoveCommand<'a> {
@@ -41,7 +41,11 @@ impl<'a> Command for RemoveCommand<'a> {
                     remove_dir_all(dir)?;
                 }
 
-                let paths: Paths = self.path_repository.list(self.current.path)?.into();
+                let paths: Paths = self
+                    .dispatcher
+                    .path_repository()
+                    .list(self.current.path)?
+                    .into();
 
                 Ok(vec![
                     paths.to_write_all_action(),

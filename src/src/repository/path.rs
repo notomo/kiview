@@ -1,12 +1,12 @@
 use std::fs;
 
-pub trait PathRepository<'a> {
+pub trait PathRepository {
     fn list(&self, path: &str) -> Result<Vec<FullPath>, crate::repository::Error>;
 }
 
 pub struct FilePathRepository {}
 
-impl<'a> PathRepository<'a> for FilePathRepository {
+impl PathRepository for FilePathRepository {
     fn list(&self, path: &str) -> Result<Vec<FullPath>, crate::repository::Error> {
         let parent_directory = vec![FullPath {
             name: String::from(".."),
@@ -78,6 +78,10 @@ impl Dispatcher {
         box FilePath {
             path: std::path::Path::new(path),
         }
+    }
+
+    pub fn path_repository(&self) -> Box<dyn PathRepository> {
+        box FilePathRepository {}
     }
 }
 

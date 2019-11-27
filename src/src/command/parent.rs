@@ -2,11 +2,10 @@ use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
 use crate::command::Paths;
-use crate::repository::{Dispatcher, PathRepository};
+use crate::repository::Dispatcher;
 
 pub struct ParentCommand<'a> {
     pub current: Current<'a>,
-    pub path_repository: &'a dyn PathRepository<'a>,
     pub dispatcher: Dispatcher,
 }
 
@@ -18,7 +17,11 @@ impl<'a> Command for ParentCommand<'a> {
             .parent()
             .unwrap_or_else(|| self.current.path.to_string());
 
-        let paths: Paths = self.path_repository.list(&current_path)?.into();
+        let paths: Paths = self
+            .dispatcher
+            .path_repository()
+            .list(&current_path)?
+            .into();
         let write_all = paths.to_write_all_action();
 
         let numbers = paths
