@@ -56,6 +56,12 @@ function! KiviewTestAssert() abort
         call self.equals(actual, a:expected, message)
     endfunction
 
+    function! assert.line_number(expected) abort
+        let actual = line('.')
+        let message = printf('line_number should be %s, but actual: %s', a:expected, actual)
+        call self.equals(actual, a:expected, message)
+    endfunction
+
     return assert
 endfunction
 

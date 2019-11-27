@@ -468,3 +468,16 @@ function! s:suite.toggle_single_dir()
 
     call s:assert.lines(lines)
 endfunction
+
+function! s:suite.open_root()
+    call s:sync_main('go -path=/')
+    let lines = s:lines()
+
+    normal! 2j
+    let line_number = line('.')
+
+    call s:sync_main('parent')
+
+    call s:assert.lines(lines)
+    call s:assert.line_number(line_number)
+endfunction
