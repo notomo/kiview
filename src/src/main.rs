@@ -93,6 +93,9 @@ fn main() {
                     dispatcher: dispatcher,
                     opts: &command_opts,
                 } as Box<dyn Command>,
+                CommandName::ToggleSelection => {
+                    box command::ToggleSelectionCommand { current: current } as Box<dyn Command>
+                }
                 CommandName::Unknown => {
                     box command::UnknownCommand { command_name: &arg } as Box<dyn Command>
                 }

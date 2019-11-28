@@ -23,13 +23,37 @@ pub struct Current<'a> {
     #[serde(default)]
     pub has_cut: bool,
 
-    pub target: Option<&'a str>,
+    pub target: Option<Target>,
 
     #[serde(default)]
-    pub targets: Vec<&'a str>,
+    pub targets: Vec<Target>,
+
+    #[serde(default)]
+    pub selected_targets: Vec<Target>,
 
     #[serde(default)]
     pub registered_targets: Vec<&'a str>,
+}
+
+impl<'a> Current<'a> {
+    pub fn targets(&self) -> Vec<Target> {
+        if self.selected_targets.len() != 0 {
+            return self.selected_targets.clone();
+        }
+        self.targets.clone()
+    }
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct Target {
+    pub id: u64,
+    pub path: String,
+}
+
+impl Target {
+    pub fn to_string(&self) -> String {
+        self.path.clone()
+    }
 }
 
 pub trait Command {
@@ -60,6 +84,8 @@ pub enum CommandName {
     Rename,
     #[serde(rename = "toggle_tree")]
     ToggleTree,
+    #[serde(rename = "toggle_selection")]
+    ToggleSelection,
     #[serde(rename = "unknown")]
     Unknown,
 }
@@ -83,6 +109,7 @@ impl From<&str> for CommandName {
             ["paste"] => CommandName::Paste,
             ["rename"] => CommandName::Rename,
             ["toggle_tree"] => CommandName::ToggleTree,
+            ["toggle_selection"] => CommandName::ToggleSelection,
             [] => CommandName::Go,
             _ => CommandName::Unknown,
         }

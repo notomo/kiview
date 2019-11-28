@@ -2,19 +2,19 @@ use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
 
-pub struct CutCommand<'a> {
+pub struct ToggleSelectionCommand<'a> {
     pub current: Current<'a>,
 }
 
-impl<'a> Command for CutCommand<'a> {
+impl<'a> Command for ToggleSelectionCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        let paths = self
+        let ids = self
             .current
-            .targets()
+            .targets
             .iter()
-            .map(|target| target.to_string())
+            .map(|target| target.id)
             .collect();
 
-        Ok(vec![Action::Cut { paths: paths }])
+        Ok(vec![Action::ToggleSelection { ids: ids }])
     }
 }

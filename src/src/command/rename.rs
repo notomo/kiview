@@ -18,7 +18,7 @@ impl<'a> Command for RenameCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         match (self.opts.no_confirm, &self.opts.path, &self.current.target) {
             (true, Some(opt_path), Some(current_target)) => {
-                let from = Path::new(current_target);
+                let from = Path::new(&current_target.path);
                 let to = Path::new(self.current.path).join(opt_path);
                 rename(from, to)?;
 

@@ -6,3 +6,4 @@ let g:loaded_kiview = 1
 command! -range -nargs=* Kiview call kiview#main([<line1>, <line2>], <q-args>)
 
 highlight default link KiviewNode String
+highlight default link KiviewSelected Statement

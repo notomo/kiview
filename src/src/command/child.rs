@@ -13,9 +13,9 @@ pub struct ChildCommand<'a> {
 
 impl<'a> Command for ChildCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        match self.current.target {
-            Some(target) if self.dispatcher.path(target).is_group_node() => {
-                let paths: Paths = self.dispatcher.path_repository().list(target)?.into();
+        match &self.current.target {
+            Some(target) if self.dispatcher.path(&target.path).is_group_node() => {
+                let paths: Paths = self.dispatcher.path_repository().list(&target.path)?.into();
 
                 Ok(vec![
                     paths.to_write_all_action(),
@@ -31,9 +31,9 @@ impl<'a> Command for ChildCommand<'a> {
             _ => {
                 let leaves: Vec<_> = self
                     .current
-                    .targets
+                    .targets()
                     .iter()
-                    .filter(|target| !self.dispatcher.path(target).is_group_node())
+                    .filter(|target| !self.dispatcher.path(&target.path).is_group_node())
                     .map(|target| target.to_string())
                     .collect();
 

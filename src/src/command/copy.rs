@@ -10,7 +10,7 @@ impl<'a> Command for CopyCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let paths = self
             .current
-            .targets
+            .targets()
             .iter()
             .map(|target| target.to_string())
             .collect();

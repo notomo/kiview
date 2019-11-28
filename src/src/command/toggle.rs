@@ -25,12 +25,12 @@ impl<'a> Command for ToggleTreeCommand<'a> {
             }]);
         }
 
-        match self.current.target {
-            Some(current_target) if self.dispatcher.path(current_target).is_group_node() => {
+        match &self.current.target {
+            Some(current_target) if self.dispatcher.path(&current_target.path).is_group_node() => {
                 let child_paths: Paths = self
                     .dispatcher
                     .path_repository()
-                    .list(current_target)?
+                    .list(&current_target.path)?
                     .iter()
                     .skip(1)
                     .collect::<Vec<_>>()

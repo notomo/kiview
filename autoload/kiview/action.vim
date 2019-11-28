@@ -4,9 +4,9 @@ function! kiview#action#new_handler(buffer, input_reader) abort
     let input_reader = a:input_reader
     let handler = {
         \ 'funcs': {
-            \ 'open': { action -> s:open_targets(action) },
-            \ 'tab_open': { action -> s:tab_open_targets(action) },
-            \ 'vertical_open': { action -> s:vertical_open_targets(action) },
+            \ 'open': { action -> s:open_targets(action, buffer) },
+            \ 'tab_open': { action -> s:tab_open_targets(action, buffer) },
+            \ 'vertical_open': { action -> s:vertical_open_targets(action, buffer) },
             \ 'create': { action -> s:create(action, buffer) },
             \ 'add_history': { action -> s:add_history(action, buffer) },
             \ 'try_to_restore_cursor': { action -> s:try_to_restore_cursor(action, buffer) },
@@ -22,6 +22,7 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             \ 'copy': { action -> s:copy(action, buffer) },
             \ 'cut': { action -> s:cut(action, buffer) },
             \ 'clear_register': { action -> s:clear_register(buffer) },
+            \ 'toggle_selection': { action -> s:toggle_selection(action, buffer) },
         \ },
     \ }
 
@@ -36,30 +37,34 @@ function! kiview#action#new_handler(buffer, input_reader) abort
     return handler
 endfunction
 
-function! s:open_targets(action) abort
+function! s:open_targets(action, buffer) abort
     wincmd w
     for path in a:action.paths
         execute 'edit' path
     endfor
+    call a:buffer.current.clear_selection()
 endfunction
 
-function! s:tab_open_targets(action) abort
+function! s:tab_open_targets(action, buffer) abort
     for path in a:action.paths
         execute 'tabedit' path
     endfor
+    call a:buffer.current.clear_selection()
 endfunction
 
-function! s:vertical_open_targets(action) abort
+function! s:vertical_open_targets(action, buffer) abort
     wincmd w
     for path in a:action.paths
         execute 'vsplit' path
     endfor
+    call a:buffer.current.clear_selection()
 endfunction
 
 function! s:write_all(action, buffer) abort
     call a:buffer.current.unset_props_all()
     call a:buffer.write_all(a:action.lines)
     call a:buffer.current.set_props(a:action.props, 1)
+    call a:buffer.current.clear_selection()
 endfunction
 
 function! s:open_tree(action, buffer) abort
@@ -135,12 +140,18 @@ endfunction
 
 function! s:copy(action, buffer) abort
     call a:buffer.register.copy(a:action.paths)
+    call a:buffer.current.clear_selection()
 endfunction
 
 function! s:cut(action, buffer) abort
     call a:buffer.register.cut(a:action.paths)
+    call a:buffer.current.clear_selection()
 endfunction
 
 function! s:clear_register(buffer) abort
     call a:buffer.register.clear()
+endfunction
+
+function! s:toggle_selection(action, buffer) abort
+    call a:buffer.current.toggle_selection(a:action.ids)
 endfunction

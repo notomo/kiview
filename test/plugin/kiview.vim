@@ -481,3 +481,21 @@ function! s:suite.open_root()
     call s:assert.lines(lines)
     call s:assert.line_number(line_number)
 endfunction
+
+function! s:suite.toggle_selection()
+    call s:sync_main('')
+
+    call search('src\/')
+    call s:sync_main('child')
+
+    call search('\.gitignore')
+    call s:sync_main('toggle_selection')
+
+    call search('Cargo\.toml')
+    call s:sync_main('toggle_selection')
+
+    call s:sync_main('child -layout=tab')
+
+    call s:assert.tab_count(3)
+    call s:assert.file_name('Cargo.toml')
+endfunction

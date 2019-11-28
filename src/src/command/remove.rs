@@ -18,11 +18,10 @@ impl<'a> Command for RemoveCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         match self.opts.no_confirm {
             true => {
-                let paths: Vec<_> = self
-                    .current
-                    .targets
+                let targets = self.current.targets();
+                let paths: Vec<_> = targets
                     .iter()
-                    .map(|target| Path::new(target))
+                    .map(|target| Path::new(&target.path))
                     .collect();
 
                 let files: Vec<_> = paths

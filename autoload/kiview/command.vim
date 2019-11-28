@@ -77,13 +77,14 @@ function! s:build_input(buffer) abort
     let input = {
         \ 'path': a:buffer.current.path,
         \ 'line_number': a:buffer.current.line_number,
-        \ 'target': a:buffer.current.target.path,
+        \ 'target': !empty(a:buffer.current.target) ? {'id': a:buffer.current.target.id, 'path': a:buffer.current.target.path} : v:null,
         \ 'next_sibling_line_number': a:buffer.current.next_sibling_line_number,
         \ 'depth': a:buffer.current.depth,
         \ 'targets': a:buffer.current.targets,
+        \ 'selected_targets': a:buffer.current.selected_targets,
         \ 'registered_targets': a:buffer.register.paths,
         \ 'has_cut': a:buffer.register.has_cut,
-        \ 'opened': has_key(a:buffer.current.target, 'opened') && a:buffer.current.target.opened ? v:true : v:false,
+        \ 'opened': !empty(a:buffer.current.target) && has_key(a:buffer.current.target, 'opened') && a:buffer.current.target.opened ? v:true : v:false,
         \ 'created': a:buffer.current.created,
     \ }
 

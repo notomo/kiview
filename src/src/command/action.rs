@@ -22,6 +22,8 @@ pub enum Action {
     ClearRegister,
     #[serde(rename = "copy")]
     Copy { paths: Vec<String> },
+    #[serde(rename = "toggle_selection")]
+    ToggleSelection { ids: Vec<u64> },
     #[serde(rename = "confirm_new")]
     ConfirmNew,
     #[serde(rename = "quit")]

@@ -1,18 +1,21 @@
 
 let s:namespace = nvim_create_namespace('kiview')
+let s:hl_namespace = nvim_create_namespace('kiview_highlight')
 
 function! kiview#current#new(bufnr) abort
     let current = {
         \ 'path': getcwd(),
         \ 'line_number': 1,
-        \ 'target': {'path': v:null},
+        \ 'target': v:null,
         \ 'targets': [],
+        \ 'selected_targets': [],
         \ 'next_sibling_line_number': 1,
         \ 'depth': 0,
         \ 'bufnr': a:bufnr,
         \ 'created': v:false,
         \ 'opened': v:false,
         \ 'props': {},
+        \ 'selected': {},
         \ 'logger': kiview#logger#new('current'),
     \ }
 
@@ -32,6 +35,7 @@ function! kiview#current#new(bufnr) abort
 
         let self.target = self._get_target(self.line_number)
         let self.targets = self._get_targets(a:range[0], a:range[1])
+        let self.selected_targets = self._get_selected_targets()
     endfunction
 
     function! current._get_next_sibling_line_number(line_number, depth) abort
@@ -71,6 +75,23 @@ function! kiview#current#new(bufnr) abort
         let prop.opened = a:opened
     endfunction
 
+    function! current.toggle_selection(ids) abort
+        for mark_id in a:ids
+            if !has_key(self.props, mark_id)
+                throw 'invalid mark id: ' . mark_id
+            endif
+
+            let [row, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, mark_id)
+            if has_key(self.selected, mark_id)
+                call nvim_buf_clear_namespace(self.bufnr, s:hl_namespace, row, row + 1)
+                call remove(self.selected, mark_id)
+                continue
+            endif
+            call nvim_buf_add_highlight(self.bufnr, s:hl_namespace, 'KiviewSelected', row, 0, -1)
+            let self.selected[mark_id] = v:true
+        endfor
+    endfunction
+
     function! current.set_props(props, start) abort
         let line_number = a:start - 1
         for prop in a:props
@@ -80,10 +101,17 @@ function! kiview#current#new(bufnr) abort
         endfor
     endfunction
 
+    function! current.clear_selection() abort
+        call nvim_buf_clear_namespace(self.bufnr, s:hl_namespace, 0, -1)
+        let self.selected = {}
+    endfunction
+
     function! current._get_target(line_number) abort
         let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:line_number -1 , 0], [a:line_number - 1, 0], {})
         for [id, _, _] in mark_ids
-            return copy(self.props[id])
+            let target = copy(self.props[id])
+            let target.id = id
+            return target
         endfor
     endfunction
 
@@ -92,7 +120,17 @@ function! kiview#current#new(bufnr) abort
         let targets = []
         for [id, _, _] in mark_ids
             let prop = self.props[id]
-            call add(targets, prop.path)
+            call add(targets, {'id': id, 'path': prop.path})
+        endfor
+        return targets
+    endfunction
+
+    function! current._get_selected_targets() abort
+        let mark_ids = keys(self.selected)
+        let targets = []
+        for id in mark_ids
+            let prop = self.props[id]
+            call add(targets, {'id': str2nr(id), 'path': prop.path})
         endfor
         return targets
     endfunction
