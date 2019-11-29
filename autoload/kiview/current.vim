@@ -61,6 +61,9 @@ function! kiview#current#new(bufnr) abort
         for [id, _, _] in mark_ids
             call nvim_buf_del_extmark(self.bufnr, s:namespace, id)
             call remove(self.props, id)
+            if has_key(self.selected, id)
+                call remove(self.selected, id)
+            endif
         endfor
     endfunction
 
