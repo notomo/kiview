@@ -16,7 +16,7 @@ impl<'a> Command for PasteCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         let from_paths: Vec<_> = self
             .current
-            .registered_targets
+            .registered_paths
             .iter()
             .map(|target| Path::new(target))
             .collect();
