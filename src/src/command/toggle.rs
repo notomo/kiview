@@ -13,10 +13,6 @@ pub struct ToggleTreeCommand<'a> {
 
 impl<'a> Command for ToggleTreeCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        if self.current.line_number == 1 {
-            return Ok(vec![]);
-        }
-
         if self.current.opened && self.current.next_sibling_line_number > self.current.line_number {
             return Ok(vec![Action::CloseTree {
                 root: self.current.line_number as usize,
@@ -26,11 +22,13 @@ impl<'a> Command for ToggleTreeCommand<'a> {
         }
 
         match &self.current.target {
-            Some(current_target) if self.dispatcher.path(&current_target.path).is_group_node() => {
+            Some(target)
+                if !target.is_parent_node && self.dispatcher.path(&target.path).is_group_node() =>
+            {
                 let child_paths: Paths = self
                     .dispatcher
                     .path_repository()
-                    .list(&current_target.path)?
+                    .list(&target.path)?
                     .iter()
                     .skip(1)
                     .collect::<Vec<_>>()
