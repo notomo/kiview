@@ -64,6 +64,10 @@ impl PathRepository for FilePathRepository {
             false => fs::File::create(path).and_then(|_| Ok(())),
         }?)
     }
+
+    fn rename(&self, from: &str, to: &str) -> Result<(), crate::repository::Error> {
+        Ok(fs::rename(from, to)?)
+    }
 }
 
 pub struct FilePath<'a> {
@@ -89,5 +93,9 @@ impl<'a> Path for FilePath<'a> {
 
     fn join(&self, path: &str) -> Result<String, crate::repository::Error> {
         Ok(self.path.join(path).to_str()?.to_string())
+    }
+
+    fn to_string(&self) -> Result<String, crate::repository::Error> {
+        Ok(self.path.to_str()?.to_string())
     }
 }

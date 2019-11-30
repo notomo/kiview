@@ -1,6 +1,3 @@
-use std::fs::rename;
-use std::path::Path;
-
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
@@ -17,10 +14,18 @@ pub struct RenameCommand<'a> {
 impl<'a> Command for RenameCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         match (self.opts.no_confirm, &self.opts.path, &self.current.target) {
-            (true, Some(opt_path), Some(current_target)) => {
-                let from = Path::new(&current_target.path);
-                let to = Path::new(self.current.path).join(opt_path);
-                rename(from, to)?;
+            (true, Some(opt_path), Some(target)) => {
+                let from = self.dispatcher.path(&target.path).to_string()?;
+                let target_group_path = match target.is_parent_node {
+                    false => self
+                        .dispatcher
+                        .path(&target.path)
+                        .parent()
+                        .unwrap_or(target.path.clone()),
+                    true => self.current.path.to_string(),
+                };
+                let to = self.dispatcher.path(&target_group_path).join(opt_path)?;
+                self.dispatcher.path_repository().rename(&from, &to)?;
 
                 let paths: Paths = self
                     .dispatcher
@@ -39,8 +44,8 @@ impl<'a> Command for RenameCommand<'a> {
                     },
                 ])
             }
-            (false, _, Some(current_target)) => {
-                let from = current_target.to_string();
+            (false, _, Some(target)) => {
+                let from = target.to_string();
                 Ok(vec![Action::ConfirmRename { path: from }])
             }
             _ => Err(crate::command::ErrorKind::Invalid {

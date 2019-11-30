@@ -17,6 +17,7 @@ impl Dispatcher {
 pub trait PathRepository {
     fn list(&self, path: &str) -> Result<Vec<FullPath>, crate::repository::Error>;
     fn create(&self, path: &str) -> Result<(), crate::repository::Error>;
+    fn rename(&self, from: &str, to: &str) -> Result<(), crate::repository::Error>;
 }
 
 pub trait Path {
@@ -24,6 +25,7 @@ pub trait Path {
     fn parent(&self) -> Option<String>;
     fn canonicalize(&self) -> Result<String, crate::repository::Error>;
     fn join(&self, path: &str) -> Result<String, crate::repository::Error>;
+    fn to_string(&self) -> Result<String, crate::repository::Error>;
 }
 
 #[derive(Debug, Clone)]
