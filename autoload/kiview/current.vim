@@ -123,7 +123,7 @@ function! kiview#current#new(bufnr) abort
         let targets = []
         for [id, _, _] in mark_ids
             let prop = self.props[id]
-            call add(targets, {'id': id, 'path': prop.path})
+            call add(targets, {'id': id, 'path': prop.path, 'is_parent_node': prop.is_parent_node})
         endfor
         return targets
     endfunction
@@ -133,7 +133,7 @@ function! kiview#current#new(bufnr) abort
         let targets = []
         for id in mark_ids
             let prop = self.props[id]
-            call add(targets, {'id': str2nr(id), 'path': prop.path})
+            call add(targets, {'id': str2nr(id), 'path': prop.path, 'is_parent_node': prop.is_parent_node})
         endfor
         return targets
     endfunction

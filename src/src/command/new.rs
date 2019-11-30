@@ -1,7 +1,3 @@
-use std::fs::create_dir_all;
-use std::fs::File;
-use std::path::Path;
-
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
@@ -19,11 +15,17 @@ impl<'a> Command for NewCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         match &self.opts.path {
             Some(opt_path) => {
-                let new_path = Path::new(self.current.path).join(opt_path);
-                match opt_path.ends_with("/") {
-                    true => create_dir_all(new_path).and_then(|_| Ok(())),
-                    false => File::create(new_path).and_then(|_| Ok(())),
-                }?;
+                let target_group_path = match &self.current.target {
+                    Some(target) if !target.is_parent_node => self
+                        .dispatcher
+                        .path(&target.path)
+                        .parent()
+                        .unwrap_or(target.path.clone()),
+                    Some(_) | None => self.current.path.to_string(),
+                };
+                let new_path = self.dispatcher.path(&target_group_path).join(opt_path)?;
+
+                self.dispatcher.path_repository().create(&new_path)?;
 
                 let paths: Paths = self
                     .dispatcher

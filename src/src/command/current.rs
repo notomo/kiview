@@ -46,6 +46,7 @@ impl<'a> Current<'a> {
 pub struct Target {
     pub id: u64,
     pub path: String,
+    pub is_parent_node: bool,
 }
 
 impl Target {

@@ -56,6 +56,7 @@ pub enum Action {
 pub struct Prop {
     path: String,
     depth: usize,
+    is_parent_node: bool,
 }
 
 impl From<Vec<FullPath>> for Paths {
@@ -108,6 +109,7 @@ impl Paths {
                 .map(|p| Prop {
                     path: p.path.clone(),
                     depth: depth,
+                    is_parent_node: p.is_parent_node,
                 })
                 .collect::<Vec<Prop>>(),
             root: root,
@@ -123,6 +125,7 @@ impl Paths {
                 .map(|p| Prop {
                     path: p.path.clone(),
                     depth: 0 as usize,
+                    is_parent_node: p.is_parent_node,
                 })
                 .collect::<Vec<Prop>>(),
         }

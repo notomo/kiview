@@ -2,6 +2,7 @@ use std::fs;
 
 pub trait PathRepository {
     fn list(&self, path: &str) -> Result<Vec<FullPath>, crate::repository::Error>;
+    fn create(&self, path: &str) -> Result<(), crate::repository::Error>;
 }
 
 pub struct FilePathRepository {}
@@ -16,6 +17,7 @@ impl PathRepository for FilePathRepository {
                 .canonicalize()?
                 .to_str()?
                 .to_string(),
+            is_parent_node: true,
         }];
 
         let paths: Vec<_> = fs::read_dir(path)?
@@ -35,6 +37,7 @@ impl PathRepository for FilePathRepository {
                     .canonicalize()
                     .and_then(|p| Ok(p.to_str().unwrap_or("").to_string()))
                     .unwrap_or(String::from("")),
+                is_parent_node: false,
             })
             .filter(|p| p.name != "" && p.path != "")
             .collect();
@@ -51,11 +54,19 @@ impl PathRepository for FilePathRepository {
                     .canonicalize()
                     .and_then(|p| Ok(p.to_str().unwrap_or("").to_string()))
                     .unwrap_or(String::from("")),
+                is_parent_node: false,
             })
             .filter(|p| p.name != "" && p.path != "")
             .collect();
 
         Ok([&parent_directory[..], &directories[..], &files[..]].concat())
+    }
+
+    fn create(&self, path: &str) -> Result<(), crate::repository::Error> {
+        Ok(match path.ends_with("/") {
+            true => fs::create_dir_all(path).and_then(|_| Ok(())),
+            false => fs::File::create(path).and_then(|_| Ok(())),
+        }?)
     }
 }
 
@@ -63,6 +74,7 @@ impl PathRepository for FilePathRepository {
 pub struct FullPath {
     pub name: String,
     pub path: String,
+    pub is_parent_node: bool,
 }
 
 impl std::fmt::Display for FullPath {
@@ -89,6 +101,7 @@ pub trait Path {
     fn is_group_node(&self) -> bool;
     fn parent(&self) -> Option<String>;
     fn canonicalize(&self) -> Result<String, crate::repository::Error>;
+    fn join(&self, path: &str) -> Result<String, crate::repository::Error>;
 }
 
 pub struct FilePath<'a> {
@@ -110,5 +123,9 @@ impl<'a> Path for FilePath<'a> {
     fn canonicalize(&self) -> Result<String, crate::repository::Error> {
         let fulll_path = self.path.to_path_buf().canonicalize()?;
         Ok(fulll_path.to_str()?.to_string())
+    }
+
+    fn join(&self, path: &str) -> Result<String, crate::repository::Error> {
+        Ok(self.path.join(path).to_str()?.to_string())
     }
 }

@@ -77,7 +77,7 @@ function! s:build_input(buffer) abort
     let input = {
         \ 'path': a:buffer.current.path,
         \ 'line_number': a:buffer.current.line_number,
-        \ 'target': !empty(a:buffer.current.target) ? {'id': a:buffer.current.target.id, 'path': a:buffer.current.target.path} : v:null,
+        \ 'target': !empty(a:buffer.current.target) ? {'id': a:buffer.current.target.id, 'path': a:buffer.current.target.path, 'is_parent_node': a:buffer.current.target.is_parent_node} : v:null,
         \ 'next_sibling_line_number': a:buffer.current.next_sibling_line_number,
         \ 'depth': a:buffer.current.depth,
         \ 'targets': a:buffer.current.targets,
