@@ -68,6 +68,26 @@ impl PathRepository for FilePathRepository {
     fn rename(&self, from: &str, to: &str) -> Result<(), crate::repository::Error> {
         Ok(fs::rename(from, to)?)
     }
+
+    fn remove(&self, paths: Vec<String>) -> Result<(), crate::repository::Error> {
+        let files: Vec<_> = paths
+            .iter()
+            .filter(|path| !std::path::Path::new(path).is_dir())
+            .collect();
+        for file in &files {
+            fs::remove_file(file)?;
+        }
+
+        let dirs: Vec<_> = paths
+            .iter()
+            .filter(|path| std::path::Path::new(path).is_dir())
+            .collect();
+        for dir in &dirs {
+            fs::remove_dir_all(dir)?;
+        }
+
+        Ok(())
+    }
 }
 
 pub struct FilePath<'a> {

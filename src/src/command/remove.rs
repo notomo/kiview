@@ -1,6 +1,3 @@
-use std::fs::{remove_dir_all, remove_file};
-use std::path::Path;
-
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
@@ -18,27 +15,14 @@ impl<'a> Command for RemoveCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
         match self.opts.no_confirm {
             true => {
-                let targets = self.current.targets();
-                let paths: Vec<_> = targets
-                    .iter()
-                    .map(|target| Path::new(&target.path))
+                let targets = self
+                    .current
+                    .targets()
+                    .into_iter()
+                    .map(|target| target.path)
                     .collect();
 
-                let files: Vec<_> = paths
-                    .iter()
-                    .filter(|path| !path.to_path_buf().is_dir())
-                    .collect();
-                for file in &files {
-                    remove_file(file)?;
-                }
-
-                let dirs: Vec<_> = paths
-                    .iter()
-                    .filter(|path| path.to_path_buf().is_dir())
-                    .collect();
-                for dir in &dirs {
-                    remove_dir_all(dir)?;
-                }
+                self.dispatcher.path_repository().remove(targets)?;
 
                 let paths: Paths = self
                     .dispatcher

@@ -18,6 +18,7 @@ pub trait PathRepository {
     fn list(&self, path: &str) -> Result<Vec<FullPath>, crate::repository::Error>;
     fn create(&self, path: &str) -> Result<(), crate::repository::Error>;
     fn rename(&self, from: &str, to: &str) -> Result<(), crate::repository::Error>;
+    fn remove(&self, paths: Vec<String>) -> Result<(), crate::repository::Error>;
 }
 
 pub trait Path {
