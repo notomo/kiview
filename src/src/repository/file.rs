@@ -69,6 +69,11 @@ impl PathRepository for FilePathRepository {
         Ok(fs::rename(from, to)?)
     }
 
+    fn copy(&self, from: &str, to: &str) -> Result<(), crate::repository::Error> {
+        fs::copy(from, to)?;
+        Ok(())
+    }
+
     fn remove(&self, paths: Vec<String>) -> Result<(), crate::repository::Error> {
         let files: Vec<_> = paths
             .iter()
@@ -113,6 +118,13 @@ impl<'a> Path for FilePath<'a> {
 
     fn join(&self, path: &str) -> Result<String, crate::repository::Error> {
         Ok(self.path.join(path).to_str()?.to_string())
+    }
+
+    fn name(&self) -> Option<String> {
+        self.path
+            .file_name()
+            .and_then(|p| p.to_str())
+            .and_then(|p| Some(p.to_string()))
     }
 
     fn to_string(&self) -> Result<String, crate::repository::Error> {

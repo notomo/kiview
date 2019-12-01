@@ -1,6 +1,3 @@
-use std::fs::{copy, rename};
-use std::path::Path;
-
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
@@ -18,24 +15,33 @@ impl<'a> Command for PasteCommand<'a> {
             .current
             .registered_paths
             .iter()
-            .map(|target| Path::new(target))
+            .map(|path| self.dispatcher.path(path))
             .collect();
 
+        let repository = self.dispatcher.path_repository();
+        let target_group_path = match &self.current.target {
+            Some(target) if !target.is_parent_node => self
+                .dispatcher
+                .path(&target.path)
+                .parent()
+                .unwrap_or(target.path.clone()),
+            Some(_) | None => self.current.path.to_string(),
+        };
+
         // FIXME: when already exists
-        for from in &from_paths {
-            let to_name = from.file_name()?;
-            let to = Path::new(self.current.path).join(to_name);
+        for from_path in from_paths {
+            let from = from_path.to_string()?;
+            let to = self
+                .dispatcher
+                .path(&target_group_path)
+                .join(&from_path.name()?)?;
             match self.current.has_cut {
-                true => rename(from, to).and_then(|_| Ok(())),
-                false => copy(from, to).and_then(|_| Ok(())),
+                true => repository.rename(&from, &to),
+                false => repository.copy(&from, &to),
             }?;
         }
 
-        let paths: Paths = self
-            .dispatcher
-            .path_repository()
-            .list(self.current.path)?
-            .into();
+        let paths: Paths = repository.list(self.current.path)?.into();
 
         Ok(vec![
             paths.to_write_all_action(),
