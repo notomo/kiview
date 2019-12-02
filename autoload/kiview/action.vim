@@ -107,6 +107,7 @@ endfunction
 
 function! s:create(action, buffer) abort
     call a:buffer.open()
+    call a:buffer.history.restore('')
 endfunction
 
 function! s:quit(buffer) abort

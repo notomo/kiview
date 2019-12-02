@@ -50,6 +50,7 @@ function! s:suite.create()
     call s:assert.not_contains(lines, '')
     call s:assert.filetype('kiview')
     call s:assert.false(&modifiable)
+    call s:assert.line_number(2)
 
     call s:assert.syntax_name('KiviewNode')
     call search('autoload\/')
@@ -206,10 +207,13 @@ function! s:suite.parent_marker()
     cd ./src
 
     call s:sync_main('')
+
+    normal! gg
     call s:sync_main('child')
 
     let lines = s:lines()
     call s:assert.contains(lines, 'autoload/')
+    call s:assert.line_number(2)
 endfunction
 
 function! s:suite.go()

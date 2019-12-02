@@ -1,4 +1,6 @@
 
+let s:default_line_number = 2
+
 function! kiview#history#new(bufnr) abort
     let history = {
         \ 'line_numbers': {},
@@ -12,6 +14,7 @@ function! kiview#history#new(bufnr) abort
 
     function! history.restore(path) abort
         if !has_key(self.line_numbers, a:path)
+            call setpos('.', [self.bufnr, s:default_line_number, 1, 0])
             return
         endif
 
