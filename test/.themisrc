@@ -68,6 +68,12 @@ function! KiviewTestAssert() abort
         call self.equals(actual, a:expected, message)
     endfunction
 
+    function! assert.buffer_name(expected) abort
+        let actual = expand('%')
+        let message = printf('status should match %s, but actual: %s', a:expected, actual)
+        call self.match(actual, a:expected, message)
+    endfunction
+
     return assert
 endfunction
 

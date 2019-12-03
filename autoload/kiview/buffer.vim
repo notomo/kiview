@@ -1,5 +1,6 @@
 
 let s:buffers = {}
+let s:id = 0
 
 function! kiview#buffer#new(range) abort
     let bufnr = bufnr('%')
@@ -10,6 +11,10 @@ function! kiview#buffer#new(range) abort
     endif
 
     let bufnr = nvim_create_buf(v:false, v:true)
+
+    let s:id += 1
+    call nvim_buf_set_name(bufnr, 'kiview-' . s:id)
+
     let buffer = {
         \ 'bufnr': bufnr,
         \ 'register': kiview#register#new(),

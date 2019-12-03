@@ -54,6 +54,7 @@ function! s:suite.create()
     call s:assert.false(&modifiable)
     call s:assert.line_number(2)
     call s:assert.dir(cwd)
+    call s:assert.buffer_name('kiview-\d\+')
 
     call s:assert.syntax_name('KiviewNode')
     call search('autoload\/')
