@@ -21,6 +21,15 @@ function! kiview#current#new(bufnr) abort
 
     function! current.set(path) abort
         let self.path = a:path
+
+        let current = win_getid()
+        for id in win_findbuf(self.bufnr)
+            call nvim_set_current_win(id)
+            execute 'lcd' a:path
+        endfor
+        call nvim_set_current_win(current)
+
+        call self.logger.log('set cwd: ' . self.path)
     endfunction
 
     function! current.set_cursor(line_number) abort

@@ -13,6 +13,10 @@ function! kiview#history#new(bufnr) abort
     endfunction
 
     function! history.restore(path) abort
+        if empty(win_findbuf(self.bufnr))
+            return
+        endif
+
         if !has_key(self.line_numbers, a:path)
             call setpos('.', [self.bufnr, s:default_line_number, 1, 0])
             return

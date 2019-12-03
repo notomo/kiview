@@ -41,6 +41,8 @@ function! s:sync_main(arg) abort
 endfunction
 
 function! s:suite.create()
+    let cwd = getcwd()
+
     call s:sync_main('')
 
     let lines = s:lines()
@@ -51,6 +53,7 @@ function! s:suite.create()
     call s:assert.filetype('kiview')
     call s:assert.false(&modifiable)
     call s:assert.line_number(2)
+    call s:assert.dir(cwd)
 
     call s:assert.syntax_name('KiviewNode')
     call search('autoload\/')
@@ -58,6 +61,7 @@ function! s:suite.create()
 endfunction
 
 function! s:suite.do_parent_child()
+    let cwd = getcwd()
     cd ./test/plugin
 
     call s:sync_main('')
@@ -67,6 +71,7 @@ function! s:suite.do_parent_child()
     call s:assert.contains(lines, 'kiview.vim')
     call s:assert.not_contains(lines, '')
     call s:assert.filetype('kiview')
+    call s:assert.dir(cwd . '/test/plugin')
 
     call s:sync_main('parent')
 
@@ -77,6 +82,7 @@ function! s:suite.do_parent_child()
     call s:assert.not_contains(test_lines, '')
     call s:assert.filetype('kiview')
     call s:assert.false(&modifiable)
+    call s:assert.dir(cwd . '/test')
 
     call s:sync_main('parent')
 
@@ -85,6 +91,7 @@ function! s:suite.do_parent_child()
     call s:assert.contains(lines, 'autoload/')
     call s:assert.not_contains(lines, '')
     call s:assert.filetype('kiview')
+    call s:assert.dir(cwd)
 
     call search('test/')
     call s:sync_main('child')
