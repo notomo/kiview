@@ -80,12 +80,12 @@ endfunction
 function! KiviewTestBeforeEach() abort
     execute 'cd' s:root
 
-    call s:clear_test_data()
-    call s:make_test_data()
-
     call kiview#logger#set_func({ msg -> themis#log(msg) })
     call kiview#messenger#set_func({ msg -> themis#log('[test messenger] ' . msg) })
     call themis#log('')
+
+    filetype on
+    syntax enable
 endfunction
 
 function! KiviewTestAfterEach() abort
@@ -94,34 +94,6 @@ function! KiviewTestAfterEach() abort
     call kiview#logger#clear()
     call kiview#input_reader#clear()
 
-    call s:clear_test_data()
-endfunction
-
-function! s:make_test_data() abort
-    call system(['touch', './test/plugin/_test_data/removed_file1'])
-    call system(['touch', './test/plugin/_test_data/removed_file2'])
-    call system(['touch', './test/plugin/_test_data/removed_cancel_file'])
-
-    call mkdir('./test/plugin/_test_data/removed_dir', 'p')
-    call system(['touch', './test/plugin/_test_data/removed_dir/file'])
-
-    call system(['touch', './test/plugin/_test_data/copy_file'])
-    call system(['touch', './test/plugin/_test_data/cut_file'])
-    call system(['touch', './test/plugin/_test_data/rename_file'])
-    call mkdir('./test/plugin/_test_data/paste', 'p')
-endfunction
-
-function! s:clear_test_data() abort
-    call delete('./test/plugin/_test_data/removed_dir', 'rf')
-    call delete('./test/plugin/_test_data/removed_file1')
-    call delete('./test/plugin/_test_data/removed_file2')
-
-    call delete('./test/plugin/_test_data/new', 'rf')
-    call delete('./test/plugin/_test_data/removed_cancel_file')
-
-    call delete('./test/plugin/_test_data/copy_file')
-    call delete('./test/plugin/_test_data/cut_file')
-    call delete('./test/plugin/_test_data/rename_file')
-    call delete('./test/plugin/_test_data/renamed_file')
-    call delete('./test/plugin/_test_data/paste', 'rf')
+    filetype off
+    syntax off
 endfunction

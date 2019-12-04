@@ -4,14 +4,10 @@ let s:assert = KiviewTestAssert()
 
 function! s:suite.before_each()
     call KiviewTestBeforeEach()
-    filetype on
-    syntax enable
 endfunction
 
 function! s:suite.after_each()
     call KiviewTestAfterEach()
-    filetype off
-    syntax off
 endfunction
 
 function! s:lines() abort
@@ -232,157 +228,229 @@ function! s:suite.go()
     call s:assert.contains(lines, 'kiview/')
 endfunction
 
-function! s:suite.new()
-    cd ./test/plugin/_test_data
+function! s:suite.__new__() abort
+    let suite = themis#suite('kiview.plugin.new')
 
-    let input_reader = s:input_reader('new/')
+    function! suite.after_each()
+        call delete('./test/plugin/_test_data/new', 'rf')
+        call delete('./test/plugin/_test_data/new_file', 'rf')
+    endfunction
 
-    call s:sync_main('')
-    call s:sync_main('new')
+    function! suite.new()
+        cd ./test/plugin/_test_data
 
-    call search('new\/')
-    call s:sync_main('child')
+        let input_reader = s:input_reader('new/')
 
-    let input_reader = s:input_reader('new_file')
+        call s:sync_main('')
+        call s:sync_main('new')
 
-    call s:sync_main('new')
+        call search('new\/')
+        call s:sync_main('child')
 
-    let lines = s:lines()
-    call s:assert.contains(lines, 'new_file')
+        let input_reader = s:input_reader('new_file')
 
-    call search('new_file')
-    call s:sync_main('child')
+        call s:sync_main('new')
 
-    call s:assert.file_name('new_file')
+        let lines = s:lines()
+        call s:assert.contains(lines, 'new_file')
+
+        call search('new_file')
+        call s:sync_main('child')
+
+        call s:assert.file_name('new_file')
+    endfunction
+
+    function! suite.cancel_new()
+        let input_reader = s:input_reader('')
+
+        call s:sync_main('')
+        call s:sync_main('new')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'autoload/')
+    endfunction
+
 endfunction
 
-function! s:suite.cancel_new()
-    let input_reader = s:input_reader('')
+function! s:suite.__remove__() abort
+    let suite = themis#suite('plugin.kiview.remove')
 
-    call s:sync_main('')
-    call s:sync_main('new')
+    function! suite.before_each()
+        call system(['touch', './test/plugin/_test_data/removed_file1'])
+        call system(['touch', './test/plugin/_test_data/removed_file2'])
+        call system(['touch', './test/plugin/_test_data/removed_cancel_file'])
 
-    let lines = s:lines()
-    call s:assert.contains(lines, 'autoload/')
+        call mkdir('./test/plugin/_test_data/removed_dir', 'p')
+        call system(['touch', './test/plugin/_test_data/removed_dir/file'])
+
+        call KiviewTestBeforeEach()
+    endfunction
+
+    function! suite.after_each()
+        call KiviewTestAfterEach()
+
+        call delete('./test/plugin/_test_data/removed_dir', 'rf')
+        call delete('./test/plugin/_test_data/removed_file1')
+        call delete('./test/plugin/_test_data/removed_file2')
+
+        call delete('./test/plugin/_test_data/new', 'rf')
+        call delete('./test/plugin/_test_data/removed_cancel_file')
+    endfunction
+
+    function! suite.remove()
+        cd ./test/plugin/_test_data
+
+        let input_reader = s:input_reader('y')
+
+        call s:sync_main('')
+
+        let first_line = search('removed_file1')
+        let last_line = search('removed_file2')
+        let command = kiview#main([first_line, last_line], 'remove')
+        call command.wait()
+
+        let lines = s:lines()
+        call s:assert.not_contains(lines, 'removed_file1')
+        call s:assert.not_contains(lines, 'removed_file2')
+
+        call search('removed_dir\/')
+        call s:sync_main('remove')
+
+        let lines = s:lines()
+        call s:assert.not_contains(lines, 'removed_dir/')
+    endfunction
+
+    function! suite.cancel_remove()
+        cd ./test/plugin/_test_data
+
+        let input_reader = s:input_reader('')
+
+        call s:sync_main('')
+
+        call search('removed_cancel_file')
+        call s:sync_main('remove')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'removed_cancel_file')
+    endfunction
+
+    function! suite.no_remove()
+        cd ./test/plugin/_test_data
+
+        let input_reader = s:input_reader('n')
+
+        call s:sync_main('')
+
+        call search('removed_cancel_file')
+        call s:sync_main('remove')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'removed_cancel_file')
+    endfunction
+
 endfunction
 
-function! s:suite.remove()
-    cd ./test/plugin/_test_data
+function! s:suite.__copy_cut_paste__() abort
+    let suite = themis#suite('plugin.kiview.copy_cut_paste')
 
-    let input_reader = s:input_reader('Y')
+    function! suite.before_each()
+        call system(['touch', './test/plugin/_test_data/copy_file'])
+        call system(['touch', './test/plugin/_test_data/cut_file'])
+        call mkdir('./test/plugin/_test_data/paste', 'p')
+        call KiviewTestBeforeEach()
+    endfunction
 
-    call s:sync_main('')
+    function! suite.after_each()
+        call KiviewTestAfterEach()
+        call delete('./test/plugin/_test_data/copy_file')
+        call delete('./test/plugin/_test_data/cut_file')
+        call delete('./test/plugin/_test_data/paste', 'rf')
+    endfunction
 
-    let first_line = search('removed_file1')
-    let last_line = search('removed_file2')
-    let command = kiview#main([first_line, last_line], 'remove')
-    call command.wait()
+    function! suite.copy_and_paste()
+        call s:sync_main('go -path=test/plugin/_test_data')
 
-    let lines = s:lines()
-    call s:assert.not_contains(lines, 'removed_file1')
-    call s:assert.not_contains(lines, 'removed_file2')
+        call search('copy_file')
+        call s:sync_main('cut')
+        call s:sync_main('copy') " copy disables cut
 
-    call search('removed_dir\/')
-    call s:sync_main('remove')
+        call search('paste\/')
+        call s:sync_main('child')
 
-    let lines = s:lines()
-    call s:assert.not_contains(lines, 'removed_dir/')
+        call s:sync_main('paste')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'copy_file')
+
+        call search('copy_file')
+        call s:sync_main('child')
+
+        call s:assert.file_name('copy_file')
+
+        wincmd p
+        call s:sync_main('parent')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'copy_file')
+    endfunction
+
+    function! suite.cut_and_paste()
+        call s:sync_main('go -path=test/plugin/_test_data')
+
+        call search('cut_file')
+        call s:sync_main('cut')
+
+        call search('paste\/')
+        call s:sync_main('child')
+
+        call s:sync_main('paste')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'cut_file')
+
+        call search('cut_file')
+        call s:sync_main('child')
+
+        call s:assert.file_name('cut_file')
+
+        wincmd p
+        call s:sync_main('parent')
+
+        let lines = s:lines()
+        call s:assert.not_contains(lines, 'cut_file')
+    endfunction
+
 endfunction
 
-function! s:suite.cancel_remove()
-    cd ./test/plugin/_test_data
+function! s:suite.__rename__() abort
+    let suite = themis#suite('plugin.kiview.rename')
 
-    let input_reader = s:input_reader('')
+    function! suite.before_each()
+        call system(['touch', './test/plugin/_test_data/rename_file'])
+        call KiviewTestBeforeEach()
+    endfunction
 
-    call s:sync_main('')
+    function! suite.after_each()
+        call KiviewTestAfterEach()
+        call delete('./test/plugin/_test_data/rename_file')
+        call delete('./test/plugin/_test_data/renamed_file')
+    endfunction
 
-    call search('removed_cancel_file')
-    call s:sync_main('remove')
+    function! suite.rename()
+        cd ./test/plugin/_test_data
 
-    let lines = s:lines()
-    call s:assert.contains(lines, 'removed_cancel_file')
-endfunction
+        let input_reader = s:input_reader('renamed_file')
 
-function! s:suite.no_remove()
-    cd ./test/plugin/_test_data
+        call s:sync_main('')
 
-    let input_reader = s:input_reader('n')
+        call search('rename_file')
+        call s:sync_main('rename')
 
-    call s:sync_main('')
+        let lines = s:lines()
+        call s:assert.contains(lines, 'renamed_file')
+        call s:assert.not_contains(lines, 'rename_file')
+    endfunction
 
-    call search('removed_cancel_file')
-    call s:sync_main('remove')
-
-    let lines = s:lines()
-    call s:assert.contains(lines, 'removed_cancel_file')
-endfunction
-
-function! s:suite.copy_and_paste()
-    call s:sync_main('go -path=test/plugin/_test_data')
-
-    call search('copy_file')
-    call s:sync_main('cut')
-    call s:sync_main('copy') " copy disables cut
-
-    call search('paste\/')
-    call s:sync_main('child')
-
-    call s:sync_main('paste')
-
-    let lines = s:lines()
-    call s:assert.contains(lines, 'copy_file')
-
-    call search('copy_file')
-    call s:sync_main('child')
-
-    call s:assert.file_name('copy_file')
-
-    wincmd p
-    call s:sync_main('parent')
-
-    let lines = s:lines()
-    call s:assert.contains(lines, 'copy_file')
-endfunction
-
-function! s:suite.cut_and_paste()
-    call s:sync_main('go -path=test/plugin/_test_data')
-
-    call search('cut_file')
-    call s:sync_main('cut')
-
-    call search('paste\/')
-    call s:sync_main('child')
-
-    call s:sync_main('paste')
-
-    let lines = s:lines()
-    call s:assert.contains(lines, 'cut_file')
-
-    call search('cut_file')
-    call s:sync_main('child')
-
-    call s:assert.file_name('cut_file')
-
-    wincmd p
-    call s:sync_main('parent')
-
-    let lines = s:lines()
-    call s:assert.not_contains(lines, 'cut_file')
-endfunction
-
-function! s:suite.rename()
-    cd ./test/plugin/_test_data
-
-    let input_reader = s:input_reader('renamed_file')
-
-    call s:sync_main('')
-
-    call search('rename_file')
-    call s:sync_main('rename')
-
-    let lines = s:lines()
-    call s:assert.contains(lines, 'renamed_file')
-    call s:assert.not_contains(lines, 'rename_file')
 endfunction
 
 function! s:suite.go_error()
