@@ -22,7 +22,6 @@ function! kiview#buffer#new(range) abort
         \ 'history': kiview#history#new(bufnr),
         \ 'current': kiview#current#new(bufnr),
         \ 'logger': kiview#logger#new('buffer'),
-        \ 'props': {},
     \ }
 
     function! buffer.open() abort
