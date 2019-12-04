@@ -13,7 +13,8 @@ function! kiview#buffer#new(range) abort
     let bufnr = nvim_create_buf(v:false, v:true)
 
     let s:id += 1
-    call nvim_buf_set_name(bufnr, 'kiview-' . s:id)
+    let name = printf('kiview://%s/kiview', s:id)
+    call nvim_buf_set_name(bufnr, name)
 
     let buffer = {
         \ 'bufnr': bufnr,
@@ -57,6 +58,7 @@ function! kiview#buffer#new(range) abort
 
     let s:buffers[bufnr] = buffer
     execute printf('autocmd BufWipeout <buffer=%s> call s:clean("%s")', bufnr, bufnr)
+    execute printf('autocmd BufReadCmd <buffer=%s> ++nested call s:reload()', bufnr)
 
     return buffer
 endfunction
@@ -66,4 +68,9 @@ function! s:clean(bufnr) abort
         return
     endif
     call remove(s:buffers, a:bufnr)
+endfunction
+
+function! s:reload() abort
+    Kiview
+    setlocal filetype=kiview
 endfunction
