@@ -88,12 +88,91 @@ impl From<&str> for Layout {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct Split {
+    pub name: SplitName,
+    pub mod_name: SplitModName,
+}
+
+#[derive(Debug, Clone, Copy, Serialize)]
+pub enum SplitName {
+    #[serde(rename = "tab")]
+    Tab,
+    #[serde(rename = "vertical")]
+    Vertical,
+    #[serde(rename = "horizontal")]
+    Horizontal,
+    #[serde(rename = "no")]
+    No,
+    #[serde(rename = "unknown")]
+    Unknown,
+}
+
+impl From<&str> for SplitName {
+    fn from(s: &str) -> Self {
+        match s {
+            "tab" => SplitName::Tab,
+            "vertical" => SplitName::Vertical,
+            "horizontal" => SplitName::Horizontal,
+            "no" => SplitName::No,
+            _ => SplitName::Unknown,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Serialize)]
+pub enum SplitModName {
+    #[serde(rename = "leftabove")]
+    LeftAbove,
+    #[serde(rename = "rightbelow")]
+    RightBelow,
+    #[serde(rename = "")]
+    No,
+    #[serde(rename = "unknown")]
+    Unknown,
+}
+
+impl From<&str> for SplitModName {
+    fn from(s: &str) -> Self {
+        match s {
+            "leftabove" => SplitModName::LeftAbove,
+            "rightbelow" => SplitModName::RightBelow,
+            _ => SplitModName::Unknown,
+        }
+    }
+}
+
+impl From<&str> for Split {
+    fn from(s: &str) -> Self {
+        let names: Vec<_> = s.split(":").collect();
+        match &names[..] {
+            [name, mod_name] => Split {
+                name: SplitName::from(*name),
+                mod_name: SplitModName::from(*mod_name),
+            },
+            [""] => Split {
+                name: SplitName::Vertical,
+                mod_name: SplitModName::LeftAbove,
+            },
+            [name] => Split {
+                name: SplitName::from(*name),
+                mod_name: SplitModName::No,
+            },
+            _ => Split {
+                name: SplitName::Unknown,
+                mod_name: SplitModName::Unknown,
+            },
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum CommandOption {
     Layout { value: Layout },
     Path { value: String },
     Quit,
     NoConfirm,
+    Split { value: Split },
     Unknown,
 }
 
@@ -109,6 +188,9 @@ impl From<&str> for CommandOption {
             ["path", path] => CommandOption::Path {
                 value: path.to_string(),
             },
+            ["split", split] => CommandOption::Split {
+                value: Split::from(*split),
+            },
             _ => CommandOption::Unknown,
         }
     }
@@ -120,6 +202,7 @@ pub struct CommandOptions {
     pub quit: bool,
     pub path: Option<String>,
     pub no_confirm: bool,
+    pub split: Split,
 }
 
 impl CommandOptions {
@@ -170,11 +253,24 @@ impl CommandOptions {
             _ => false,
         });
 
+        let split: Split = options
+            .iter()
+            .map(|opt| match &opt {
+                CommandOption::Split { value } => Some(value.clone()),
+                _ => None,
+            })
+            .filter(|opt| opt.is_some())
+            .collect::<Vec<Option<Split>>>()
+            .get(0)
+            .and_then(|split| *split)
+            .unwrap_or(Split::from(""));
+
         CommandOptions {
             layout: layout,
             quit: quit,
             path: path,
             no_confirm: no_confirm,
+            split: split,
         }
     }
 }

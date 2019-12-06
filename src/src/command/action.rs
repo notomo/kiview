@@ -1,3 +1,4 @@
+use super::command::{SplitModName, SplitName};
 use crate::repository::FullPath;
 use serde_derive::Serialize;
 
@@ -11,7 +12,10 @@ pub enum Action {
     #[serde(rename = "vertical_open")]
     VerticalOpen { paths: Vec<String> },
     #[serde(rename = "create")]
-    Create,
+    Create {
+        split_name: SplitName,
+        mod_name: SplitModName,
+    },
     #[serde(rename = "confirm_remove")]
     ConfirmRemove,
     #[serde(rename = "confirm_rename")]

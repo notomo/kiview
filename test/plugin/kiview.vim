@@ -579,3 +579,48 @@ function! s:suite.toggle_selection()
     call s:assert.tab_count(3)
     call s:assert.file_name('Cargo.toml')
 endfunction
+
+function! s:suite.vertical_rightbelow()
+    call s:sync_main('-split=vertical:rightbelow')
+
+    call s:assert.filetype('kiview')
+
+    wincmd h
+    call s:assert.filetype('')
+    call s:assert.window_count(2)
+endfunction
+
+function! s:suite.split_horizontal_leftabove()
+    call s:sync_main('-split=horizontal:leftabove')
+
+    call s:assert.filetype('kiview')
+
+    wincmd j
+    call s:assert.filetype('')
+    call s:assert.window_count(2)
+endfunction
+
+function! s:suite.split_horizontal_rightbelow()
+    call s:sync_main('-split=horizontal:rightbelow')
+
+    call s:assert.filetype('kiview')
+
+    wincmd k
+    call s:assert.filetype('')
+    call s:assert.window_count(2)
+endfunction
+
+function! s:suite.split_tab()
+    call s:sync_main('-split=tab')
+
+    call s:assert.filetype('kiview')
+    call s:assert.window_count(1)
+    call s:assert.tab_count(2)
+endfunction
+
+function! s:suite.no_split()
+    call s:sync_main('-split=no')
+
+    call s:assert.filetype('kiview')
+    call s:assert.window_count(1)
+endfunction

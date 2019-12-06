@@ -2,6 +2,13 @@
 let s:buffers = {}
 let s:id = 0
 
+let s:split_names = {
+    \ 'no': '',
+    \ 'tab': 'tabedit',
+    \ 'vertical': 'vsplit',
+    \ 'horizontal': 'split',
+\ }
+
 function! kiview#buffer#new(range) abort
     let bufnr = bufnr('%')
     if has_key(s:buffers, bufnr)
@@ -24,8 +31,8 @@ function! kiview#buffer#new(range) abort
         \ 'logger': kiview#logger#new('buffer'),
     \ }
 
-    function! buffer.open() abort
-        leftabove vsplit
+    function! buffer.open(split_name, mod_name) abort
+        execute a:mod_name s:split_names[a:split_name]
         execute 'buffer' self.bufnr
 
         setlocal filetype=kiview

@@ -106,7 +106,7 @@ function! s:add_history(action, buffer) abort
 endfunction
 
 function! s:create(action, buffer) abort
-    call a:buffer.open()
+    call a:buffer.open(a:action.split_name, a:action.mod_name)
     call a:buffer.history.restore('')
 endfunction
 

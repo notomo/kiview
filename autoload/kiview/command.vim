@@ -5,7 +5,7 @@ let s:id = 0
 function! kiview#command#new(buffer, action_handler, event_service, arg, parent_id) abort
     let s:id += 1
 
-    let cmd = ['kiview', 'do', '--arg', a:arg]
+    let cmd = ['kiview', 'do', '--arg=' . a:arg]
     let command = {
         \ 'id': s:id,
         \ 'parent_id': a:parent_id,

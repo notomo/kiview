@@ -36,7 +36,10 @@ impl<'a> Command for GoCommand<'a> {
             },
         ];
         if !self.current.created {
-            actions.push(Action::Create);
+            actions.push(Action::Create {
+                split_name: self.opts.split.name,
+                mod_name: self.opts.split.mod_name,
+            });
         }
 
         Ok(actions)
