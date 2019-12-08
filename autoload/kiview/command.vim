@@ -31,6 +31,7 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
     function! command.on_job_finished(id, err) abort
         if !empty(a:err)
             call kiview#messenger#new().error(a:err)
+            call self.buffer.current.clear_selection()
             call self.event_service.command_finished(self.id)
             return
         endif

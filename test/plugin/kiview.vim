@@ -624,3 +624,17 @@ function! s:suite.no_split()
     call s:assert.filetype('kiview')
     call s:assert.window_count(1)
 endfunction
+
+function! s:suite.clear_selection_on_error()
+    call s:sync_main('go -path=./src')
+
+    call search('\.gitignore')
+    call s:sync_main('toggle_selection')
+
+    call s:sync_main('go -path=./not_found')
+
+    call search('Makefile')
+    call s:sync_main('child')
+
+    call s:assert.file_name('Makefile')
+endfunction
