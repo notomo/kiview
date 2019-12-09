@@ -27,14 +27,16 @@ impl<'a> Command for GoCommand<'a> {
             .list(&current_path)?
             .into();
 
-        let mut actions = vec![
-            paths.to_write_all_action(),
-            Action::TryToRestoreCursor { path: current_path },
-            Action::AddHistory {
+        let mut actions = vec![paths.to_write_all_action()];
+
+        if self.current.path != current_path {
+            actions.push(Action::TryToRestoreCursor { path: current_path });
+            actions.push(Action::AddHistory {
                 path: self.current.path.to_string(),
                 line_number: self.current.line_number,
-            },
-        ];
+            });
+        }
+
         if !self.current.created {
             actions.push(Action::Create {
                 split_name: self.opts.split.name,

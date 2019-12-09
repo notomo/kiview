@@ -5,7 +5,7 @@ let s:hl_namespace = nvim_create_namespace('kiview_highlight')
 function! kiview#current#new(bufnr) abort
     let current = {
         \ 'path': getcwd(),
-        \ 'line_number': 1,
+        \ 'line_number': 2,
         \ 'target': v:null,
         \ 'targets': [],
         \ 'selected_targets': [],

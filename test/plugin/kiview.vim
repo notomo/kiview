@@ -638,3 +638,18 @@ function! s:suite.clear_selection_on_error()
 
     call s:assert.file_name('Makefile')
 endfunction
+
+function! s:suite.open_same_path()
+    call s:sync_main('')
+
+    let line_number = line('.')
+    call s:sync_main('')
+
+    call s:assert.line_number(line_number)
+
+    normal! 2j
+    let line_number = line('.')
+    call s:sync_main('')
+
+    call s:assert.line_number(line_number)
+endfunction
