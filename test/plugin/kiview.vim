@@ -140,7 +140,7 @@ function! s:suite.tab_open()
     call s:assert.tab_count(2)
 endfunction
 
-function! s:suite.vertical()
+function! s:suite.vertical_open()
     call s:sync_main('')
 
     call search('Makefile')
@@ -148,6 +148,22 @@ function! s:suite.vertical()
 
     call s:assert.file_name('Makefile')
     call s:assert.window_count(3)
+
+    wincmd h
+    call s:assert.filetype('kiview')
+endfunction
+
+function! s:suite.horizontal_open()
+    call s:sync_main('')
+
+    call search('Makefile')
+    call s:sync_main('child -layout=horizontal')
+
+    call s:assert.file_name('Makefile')
+    call s:assert.window_count(3)
+
+    wincmd h
+    call s:assert.filetype('kiview')
 endfunction
 
 function! s:suite.history()
