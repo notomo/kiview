@@ -7,6 +7,7 @@ function! kiview#action#new_handler(buffer) abort
             \ 'open': { action -> s:open_targets(action, buffer) },
             \ 'tab_open': { action -> s:tab_open_targets(action, buffer) },
             \ 'vertical_open': { action -> s:vertical_open_targets(action, buffer) },
+            \ 'horizontal_open': { action -> s:horizontal_open_targets(action, buffer) },
             \ 'create': { action -> s:create(action, buffer) },
             \ 'add_history': { action -> s:add_history(action, buffer) },
             \ 'try_to_restore_cursor': { action -> s:try_to_restore_cursor(action, buffer) },
@@ -58,6 +59,14 @@ function! s:vertical_open_targets(action, buffer) abort
     wincmd w
     for path in a:action.paths
         execute 'vsplit' path
+    endfor
+    call a:buffer.current.clear_selection()
+endfunction
+
+function! s:horizontal_open_targets(action, buffer) abort
+    wincmd w
+    for path in a:action.paths
+        execute 'split' path
     endfor
     call a:buffer.current.clear_selection()
 endfunction

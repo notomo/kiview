@@ -11,6 +11,8 @@ pub enum Action {
     TabOpen { paths: Vec<String> },
     #[serde(rename = "vertical_open")]
     VerticalOpen { paths: Vec<String> },
+    #[serde(rename = "horizontal_open")]
+    HorizontalOpen { paths: Vec<String> },
     #[serde(rename = "create")]
     Create {
         split_name: SplitName,

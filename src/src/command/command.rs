@@ -65,6 +65,7 @@ impl From<&str> for CommandName {
 pub enum Layout {
     Tab,
     Vertical,
+    Horizontal,
     Open,
 }
 
@@ -73,6 +74,7 @@ impl Layout {
         match self {
             Layout::Tab => Action::TabOpen { paths: paths },
             Layout::Vertical => Action::VerticalOpen { paths: paths },
+            Layout::Horizontal => Action::HorizontalOpen { paths: paths },
             Layout::Open => Action::Open { paths: paths },
         }
     }
@@ -83,6 +85,7 @@ impl From<&str> for Layout {
         match s {
             "tab" => Layout::Tab,
             "vertical" => Layout::Vertical,
+            "horizontal" => Layout::Horizontal,
             _ => Layout::Open,
         }
     }
@@ -113,6 +116,7 @@ impl From<Layout> for SplitName {
         match l {
             Layout::Tab => SplitName::Tab,
             Layout::Vertical => SplitName::Vertical,
+            Layout::Horizontal => SplitName::Horizontal,
             Layout::Open => SplitName::No,
         }
     }
