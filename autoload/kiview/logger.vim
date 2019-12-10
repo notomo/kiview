@@ -54,7 +54,8 @@ function! kiview#logger#new(...) abort
         call self.logs(lines)
     endfunction
 
-    function! logger.trace(throwpoint) abort
+    function! logger.trace(throwpoint, exception) abort
+        call self.log(a:exception)
         call self.log(a:throwpoint)
         let last = matchstr(a:throwpoint, '\v.*\.\.\zs\d+\ze, line \d+$')
         if !empty(last)
@@ -86,7 +87,7 @@ function! s:nop_logger(...) abort
     function! logger.buffer_log(bufnr) abort
     endfunction
 
-    function! logger.trace(throwpoint) abort
+    function! logger.trace(throwpoint, exception) abort
     endfunction
 
     return logger
