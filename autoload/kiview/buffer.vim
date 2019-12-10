@@ -9,7 +9,7 @@ let s:split_names = {
     \ 'horizontal': 'split',
 \ }
 
-function! kiview#buffer#new(range) abort
+function! kiview#buffer#find(range) abort
     let bufnr = bufnr('%')
     if has_key(s:buffers, bufnr)
         let buffer = s:buffers[bufnr]
@@ -17,6 +17,10 @@ function! kiview#buffer#new(range) abort
         return buffer
     endif
 
+    return kiview#buffer#new()
+endfunction
+
+function! kiview#buffer#new() abort
     let bufnr = nvim_create_buf(v:false, v:true)
 
     let s:id += 1

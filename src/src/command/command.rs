@@ -69,7 +69,7 @@ pub enum Layout {
 }
 
 impl Layout {
-    pub fn action(&self, paths: Vec<String>) -> Action {
+    pub fn leaf_node_action(&self, paths: Vec<String>) -> Action {
         match self {
             Layout::Tab => Action::TabOpen { paths: paths },
             Layout::Vertical => Action::VerticalOpen { paths: paths },
@@ -106,6 +106,16 @@ pub enum SplitName {
     No,
     #[serde(rename = "unknown")]
     Unknown,
+}
+
+impl From<Layout> for SplitName {
+    fn from(l: Layout) -> Self {
+        match l {
+            Layout::Tab => SplitName::Tab,
+            Layout::Vertical => SplitName::Vertical,
+            Layout::Open => SplitName::No,
+        }
+    }
 }
 
 impl From<&str> for SplitName {

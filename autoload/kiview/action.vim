@@ -1,7 +1,7 @@
 
-function! kiview#action#new_handler(buffer, input_reader) abort
+function! kiview#action#new_handler(buffer) abort
     let buffer = a:buffer
-    let input_reader = a:input_reader
+    let input_reader = kiview#input_reader#new()
     let handler = {
         \ 'funcs': {
             \ 'open': { action -> s:open_targets(action, buffer) },
@@ -23,6 +23,8 @@ function! kiview#action#new_handler(buffer, input_reader) abort
             \ 'cut': { action -> s:cut(action, buffer) },
             \ 'clear_register': { action -> s:clear_register(buffer) },
             \ 'toggle_selection': { action -> s:toggle_selection(action, buffer) },
+            \ 'show_error': { action -> s:show_error(action) },
+            \ 'fork_buffer': { action -> s:fork_buffer(action, buffer) },
         \ },
     \ }
 
@@ -155,4 +157,18 @@ endfunction
 
 function! s:toggle_selection(action, buffer) abort
     call a:buffer.current.toggle_selection(a:action.ids)
+endfunction
+
+function! s:show_error(action) abort
+    let message = printf('on %s: %s', a:action.path, a:action.message)
+    call kiview#messenger#new().error(message)
+endfunction
+
+function! s:fork_buffer(action, buffer) abort
+    for item in a:action.items
+        let new_buffer = kiview#buffer#new()
+        let new_buffer.history = deepcopy(a:buffer.history)
+        call s:write_all(item, new_buffer)
+        call new_buffer.open(a:action.split_name, a:action.mod_name)
+    endfor
 endfunction

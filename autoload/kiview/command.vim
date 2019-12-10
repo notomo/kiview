@@ -2,7 +2,7 @@
 let s:limitter = kiview#limitter#new()
 let s:id = 0
 
-function! kiview#command#new(buffer, action_handler, event_service, arg, parent_id) abort
+function! kiview#command#new(buffer, event_service, arg, parent_id) abort
     let s:id += 1
 
     let cmd = ['kiview', 'do', '--arg=' . a:arg]
@@ -12,7 +12,7 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
         \ 'job': kiview#job#new(cmd, a:event_service),
         \ 'buffer': a:buffer,
         \ 'event_service': a:event_service,
-        \ 'action_handler': a:action_handler,
+        \ 'action_handler': kiview#action#new_handler(a:buffer),
         \ 'children': [],
         \ 'logger': kiview#logger#new('command: ' . s:id).label('parent: ' . a:parent_id),
     \ }
@@ -44,7 +44,7 @@ function! kiview#command#new(buffer, action_handler, event_service, arg, parent_
                     continue
                 endif
 
-                let child = kiview#command#new(self.buffer, self.action_handler, self.event_service, arg, self.id)
+                let child = kiview#command#new(self.buffer, self.event_service, arg, self.id)
                 call add(self.children, child)
                 call child.start()
             endfor

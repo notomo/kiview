@@ -8,6 +8,8 @@ extern crate serde_json;
 
 use std::io::prelude::*;
 
+extern crate itertools;
+
 mod command;
 use command::{Command, CommandName, CommandOptions, Current};
 

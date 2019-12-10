@@ -54,6 +54,21 @@ pub enum Action {
     },
     #[serde(rename = "close_tree")]
     CloseTree { root: usize, count: usize },
+    #[serde(rename = "fork_buffer")]
+    ForkBuffer {
+        items: Vec<ForkBufferItem>,
+        split_name: SplitName,
+        mod_name: SplitModName,
+    },
+    #[serde(rename = "show_error")]
+    ShowError { path: String, message: String },
+}
+
+#[derive(Debug, Serialize)]
+pub struct ForkBufferItem {
+    path: String,
+    lines: Vec<String>,
+    props: Vec<Prop>,
 }
 
 #[derive(Debug, Serialize)]
@@ -71,6 +86,14 @@ impl From<Vec<FullPath>> for Paths {
 
 impl From<Vec<&FullPath>> for Paths {
     fn from(paths: Vec<&FullPath>) -> Paths {
+        Paths {
+            paths: paths.into_iter().map(|p| p.clone()).collect(),
+        }
+    }
+}
+
+impl From<&Vec<FullPath>> for Paths {
+    fn from(paths: &Vec<FullPath>) -> Paths {
         Paths {
             paths: paths.into_iter().map(|p| p.clone()).collect(),
         }
@@ -122,6 +145,22 @@ impl Paths {
 
     pub fn to_write_all_action(&self) -> Action {
         Action::WriteAll {
+            lines: self.paths.iter().map(|p| p.name.clone()).collect(),
+            props: self
+                .paths
+                .iter()
+                .map(|p| Prop {
+                    path: p.path.clone(),
+                    depth: 0 as usize,
+                    is_parent_node: p.is_parent_node,
+                })
+                .collect::<Vec<Prop>>(),
+        }
+    }
+
+    pub fn to_fork_buffer_item(&self, path: &str) -> ForkBufferItem {
+        ForkBufferItem {
+            path: path.to_string(),
             lines: self.paths.iter().map(|p| p.name.clone()).collect(),
             props: self
                 .paths
