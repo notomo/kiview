@@ -14,6 +14,7 @@ function! kiview#action#new_handler(buffer) abort
             \ 'set_cursor': { action -> s:set_cursor(action, buffer) },
             \ 'set_path': { action -> s:set_path(action, buffer) },
             \ 'write_all': { action -> s:write_all(action, buffer) },
+            \ 'write': { action -> s:write(action, buffer) },
             \ 'open_tree': { action -> s:open_tree(action, buffer) },
             \ 'close_tree': { action -> s:close_tree(action, buffer) },
             \ 'quit': { action -> s:quit(buffer) },
@@ -75,6 +76,13 @@ function! s:write_all(action, buffer) abort
     call a:buffer.current.unset_props_all()
     call a:buffer.write_all(a:action.lines)
     call a:buffer.current.set_props(a:action.props, 1)
+    call a:buffer.current.clear_selection()
+endfunction
+
+function! s:write(action, buffer) abort
+    let start = a:action.root + 1
+    call a:buffer.write(a:action.lines, start, a:action.next_sibling)
+    call a:buffer.current.set_props(a:action.props, start)
     call a:buffer.current.clear_selection()
 endfunction
 

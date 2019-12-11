@@ -13,38 +13,38 @@ pub struct NewCommand<'a> {
 
 impl<'a> Command for NewCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        match &self.opts.path {
-            Some(opt_path) => {
-                let target_group_path = match &self.current.target {
-                    Some(target) if !target.is_parent_node => self
-                        .dispatcher
-                        .path(&target.path)
-                        .parent()
-                        .unwrap_or(target.path.clone()),
-                    Some(_) | None => self.current.path.to_string(),
-                };
-                let new_path = self.dispatcher.path(&target_group_path).join(opt_path)?;
-
-                self.dispatcher.path_repository().create(&new_path)?;
-
-                let paths: Paths = self
-                    .dispatcher
-                    .path_repository()
-                    .list(self.current.path)?
-                    .into();
-
-                Ok(vec![
-                    paths.to_write_all_action(),
-                    Action::TryToRestoreCursor {
-                        path: self.current.path.to_string(),
-                    },
-                    Action::AddHistory {
-                        path: self.current.path.to_string(),
-                        line_number: self.current.line_number,
-                    },
-                ])
-            }
-            None => Ok(vec![Action::ConfirmNew]),
+        if self.opts.path.is_none() {
+            return Ok(vec![Action::ConfirmNew]);
         }
+
+        let target_group_path = match &self.current.target {
+            Some(target) if !target.is_parent_node => self
+                .dispatcher
+                .path(&target.path)
+                .parent()
+                .unwrap_or(target.path.clone()),
+            Some(_) | None => self.current.path.to_string(),
+        };
+        let new_path = self
+            .dispatcher
+            .path(&target_group_path)
+            .join(self.opts.path.as_ref().unwrap())?;
+
+        self.dispatcher.path_repository().create(&new_path)?;
+
+        let paths: Paths = self
+            .dispatcher
+            .path_repository()
+            .list(&target_group_path)?
+            .iter()
+            .skip(1)
+            .collect::<Vec<_>>()
+            .into();
+
+        Ok(vec![paths.to_write_action(
+            self.current.depth as usize,
+            self.current.parent_line_number as usize,
+            self.current.last_sibling_line_number as usize,
+        )])
     }
 }

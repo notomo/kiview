@@ -80,6 +80,8 @@ function! s:build_input(buffer) abort
         \ 'line_number': a:buffer.current.line_number,
         \ 'target': !empty(a:buffer.current.target) ? {'id': a:buffer.current.target.id, 'path': a:buffer.current.target.path, 'is_parent_node': a:buffer.current.target.is_parent_node} : v:null,
         \ 'next_sibling_line_number': a:buffer.current.next_sibling_line_number,
+        \ 'parent_line_number': a:buffer.current.parent_line_number,
+        \ 'last_sibling_line_number': a:buffer.current.last_sibling_line_number,
         \ 'depth': a:buffer.current.depth,
         \ 'targets': a:buffer.current.targets,
         \ 'selected_targets': a:buffer.current.selected_targets,

@@ -247,7 +247,17 @@ endfunction
 function! s:suite.__new__() abort
     let suite = themis#suite('kiview.plugin.new')
 
+    function! suite.before_each()
+        call mkdir('./test/plugin/_test_data/tree', 'p')
+        call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
+
+        call KiviewTestBeforeEach()
+    endfunction
+
     function! suite.after_each()
+        call KiviewTestAfterEach()
+
+        call delete('./test/plugin/_test_data/tree', 'rf')
         call delete('./test/plugin/_test_data/new', 'rf')
         call delete('./test/plugin/_test_data/new_file', 'rf')
     endfunction
@@ -284,6 +294,22 @@ function! s:suite.__new__() abort
 
         let lines = s:lines()
         call s:assert.contains(lines, 'autoload/')
+    endfunction
+
+    function! suite.new_in_tree()
+        cd ./test/plugin/_test_data
+
+        call s:sync_main('')
+
+        call search('tree/')
+        call s:sync_main('toggle_tree')
+        call search('file_in_tree')
+
+        let input_reader = s:input_reader('new_in_tree')
+        call s:sync_main('new')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, '  new_in_tree')
     endfunction
 
 endfunction

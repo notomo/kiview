@@ -47,6 +47,14 @@ pub enum Action {
         lines: Vec<String>,
         props: Vec<Prop>,
     },
+    #[serde(rename = "write")]
+    Write {
+        lines: Vec<String>,
+        props: Vec<Prop>,
+        root: usize,
+        count: usize,
+        next_sibling: usize,
+    },
     #[serde(rename = "open_tree")]
     OpenTree {
         lines: Vec<String>,
@@ -154,6 +162,31 @@ impl Paths {
                 .map(|p| Prop {
                     path: p.path.clone(),
                     depth: 0 as usize,
+                    is_parent_node: p.is_parent_node,
+                })
+                .collect::<Vec<Prop>>(),
+        }
+    }
+
+    pub fn to_write_action(&self, depth: usize, root: usize, next_sibling: usize) -> Action {
+        let indent = std::iter::repeat(" ").take(depth).collect::<String>();
+        let lines: Vec<_> = self
+            .paths
+            .iter()
+            .map(|p| format!("{}{}", indent, p.name))
+            .collect();
+
+        Action::Write {
+            count: (&lines).len(),
+            root: root,
+            next_sibling: next_sibling,
+            lines: lines,
+            props: self
+                .paths
+                .iter()
+                .map(|p| Prop {
+                    path: p.path.clone(),
+                    depth: depth,
                     is_parent_node: p.is_parent_node,
                 })
                 .collect::<Vec<Prop>>(),

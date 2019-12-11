@@ -13,6 +13,12 @@ pub struct Current<'a> {
     pub next_sibling_line_number: u64,
 
     #[serde(default)]
+    pub last_sibling_line_number: u64,
+
+    #[serde(default)]
+    pub parent_line_number: u64,
+
+    #[serde(default)]
     pub opened: bool,
 
     #[serde(default)]

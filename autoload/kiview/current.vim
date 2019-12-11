@@ -10,6 +10,8 @@ function! kiview#current#new(bufnr) abort
         \ 'targets': [],
         \ 'selected_targets': [],
         \ 'next_sibling_line_number': 1,
+        \ 'parent_line_number': 1,
+        \ 'last_sibling_line_number': 1,
         \ 'depth': 0,
         \ 'bufnr': a:bufnr,
         \ 'created': v:false,
@@ -40,6 +42,8 @@ function! kiview#current#new(bufnr) abort
         let self.line_number = line('.')
         let self.depth = indent(self.line_number)
         let self.next_sibling_line_number = self._get_next_sibling_line_number(self.line_number, self.depth)
+        let self.parent_line_number = self._get_parent_line_number(self.line_number, self.depth)
+        let self.last_sibling_line_number = self._get_last_sibling_line_number(self.parent_line_number, indent(self.parent_line_number))
         let self.created = v:true
 
         let self.target = self._get_target(self.line_number)
@@ -60,6 +64,38 @@ function! kiview#current#new(bufnr) abort
                 return line_number
             elseif depth < a:depth
                 return line_number
+            endif
+        endfor
+        return last_line_number + 1
+    endfunction
+
+    function! current._get_parent_line_number(line_number, depth) abort
+        let first_line_number = 1
+        for line_number in range(a:line_number, first_line_number, -1)
+            let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [line_number - 1, 0], [line_number - 1, 0], {})
+            if empty(mark_ids)
+                continue
+            endif
+
+            let depth = self.props[mark_ids[0][0]].depth
+            if depth < a:depth
+                return line_number
+            endif
+        endfor
+        return first_line_number
+    endfunction
+
+    function! current._get_last_sibling_line_number(line_number, depth) abort
+        let last_line_number = line('$')
+        for line_number in range(a:line_number + 1, last_line_number)
+            let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [line_number - 1, 0], [line_number - 1, 0], {})
+            if empty(mark_ids)
+                continue
+            endif
+
+            let depth = self.props[mark_ids[0][0]].depth
+            if depth < a:depth
+                return line_number - 1
             endif
         endfor
         return last_line_number + 1
