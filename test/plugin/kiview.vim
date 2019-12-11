@@ -669,3 +669,30 @@ function! s:suite.open_same_path()
 
     call s:assert.line_number(line_number)
 endfunction
+
+function! s:suite.tab_open_group_node()
+    let cwd = getcwd()
+
+    call s:sync_main('')
+    call search('test\/')
+    call s:sync_main('toggle_selection')
+    call search('Makefile')
+    call s:sync_main('toggle_selection')
+    call s:sync_main('child -layout=tab')
+
+    call s:assert.tab_count(3)
+
+    call s:assert.file_name('Makefile')
+
+    tabprevious
+    call s:assert.filetype('kiview')
+    call s:assert.dir(cwd . '/test')
+
+    call search('plugin\/')
+    call s:sync_main('child')
+
+    call s:assert.dir(cwd . '/test/plugin')
+
+    tabprevious
+    call s:assert.dir(cwd)
+endfunction

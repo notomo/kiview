@@ -177,7 +177,10 @@ function! s:fork_buffer(action, buffer) abort
     for item in a:action.items
         let new_buffer = kiview#buffer#new()
         let new_buffer.history = deepcopy(a:buffer.history)
+
         call s:write_all(item, new_buffer)
+
         call new_buffer.open(a:action.split_name, a:action.mod_name)
+        call new_buffer.current.set(item.path)
     endfor
 endfunction
