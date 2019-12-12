@@ -250,6 +250,7 @@ function! s:suite.__new__() abort
     function! suite.before_each()
         call mkdir('./test/plugin/_test_data/tree', 'p')
         call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
+        call mkdir('./test/plugin/_test_data/tree2', 'p')
 
         call KiviewTestBeforeEach()
     endfunction
@@ -258,6 +259,7 @@ function! s:suite.__new__() abort
         call KiviewTestAfterEach()
 
         call delete('./test/plugin/_test_data/tree', 'rf')
+        call delete('./test/plugin/_test_data/tree2', 'rf')
         call delete('./test/plugin/_test_data/new', 'rf')
         call delete('./test/plugin/_test_data/new_file', 'rf')
     endfunction
@@ -310,6 +312,8 @@ function! s:suite.__new__() abort
 
         let lines = s:lines()
         call s:assert.contains(lines, '  new_in_tree')
+        call s:assert.contains(lines, 'tree2/')
+        call s:assert.count_contains(lines, '  file_in_tree', 1)
     endfunction
 
 endfunction

@@ -22,6 +22,12 @@ function! KiviewTestAssert() abort
         call self.true(count(a:haystack, a:needle) != 0, a:needle . ' must be in the haystack')
     endfunction
 
+    function! assert.count_contains(haystack, needle, expected) abort
+        let actual = count(a:haystack, a:needle)
+        let message = printf('%s must be in the haystack exactly %s times', a:needle, a:expected)
+        call self.equals(actual, a:expected, message)
+    endfunction
+
     function! assert.not_contains(haystack, needle) abort
         call self.false(count(a:haystack, a:needle) != 0, a:needle . ' must not be in the haystack')
     endfunction
