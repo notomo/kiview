@@ -403,6 +403,8 @@ function! s:suite.__copy_cut_paste__() abort
         call system(['touch', './test/plugin/_test_data/copy_file'])
         call system(['touch', './test/plugin/_test_data/cut_file'])
         call mkdir('./test/plugin/_test_data/paste', 'p')
+        call mkdir('./test/plugin/_test_data/tree', 'p')
+        call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
         call KiviewTestBeforeEach()
     endfunction
 
@@ -411,6 +413,7 @@ function! s:suite.__copy_cut_paste__() abort
         call delete('./test/plugin/_test_data/copy_file')
         call delete('./test/plugin/_test_data/cut_file')
         call delete('./test/plugin/_test_data/paste', 'rf')
+        call delete('./test/plugin/_test_data/tree', 'rf')
     endfunction
 
     function! suite.copy_and_paste()
@@ -464,6 +467,24 @@ function! s:suite.__copy_cut_paste__() abort
 
         let lines = s:lines()
         call s:assert.not_contains(lines, 'cut_file')
+    endfunction
+
+    function! suite.paste_in_tree()
+        call s:sync_main('go -path=test/plugin/_test_data')
+
+        call search('copy_file')
+        call s:sync_main('cut')
+        call s:sync_main('copy') " copy disables cut
+
+        call search('tree/')
+        call s:sync_main('toggle_tree')
+
+        call search('file_in_tree')
+        call s:sync_main('paste')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, '  copy_file')
+        call s:assert.contains(lines, 'copy_file')
     endfunction
 
 endfunction

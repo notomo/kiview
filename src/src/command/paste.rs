@@ -41,17 +41,21 @@ impl<'a> Command for PasteCommand<'a> {
             }?;
         }
 
-        let paths: Paths = repository.list(self.current.path)?.into();
+        let paths: Paths = self
+            .dispatcher
+            .path_repository()
+            .list(&target_group_path)?
+            .iter()
+            .skip(1)
+            .collect::<Vec<_>>()
+            .into();
 
         Ok(vec![
-            paths.to_write_all_action(),
-            Action::TryToRestoreCursor {
-                path: self.current.path.to_string(),
-            },
-            Action::AddHistory {
-                path: self.current.path.to_string(),
-                line_number: self.current.line_number,
-            },
+            paths.to_write_action(
+                self.current.depth as usize,
+                self.current.parent_line_number as usize,
+                self.current.last_sibling_line_number as usize,
+            ),
             Action::ClearRegister,
         ])
     }
