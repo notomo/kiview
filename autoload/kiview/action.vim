@@ -19,7 +19,7 @@ function! kiview#action#new_handler(buffer) abort
             \ 'close_tree': { action -> s:close_tree(action, buffer) },
             \ 'quit': { action -> s:quit(buffer) },
             \ 'confirm_new': { action -> s:confirm_new(input_reader) },
-            \ 'confirm_remove': { action -> s:confirm_remove(input_reader) },
+            \ 'confirm_remove': { action -> s:confirm_remove(action, input_reader) },
             \ 'confirm_rename': { action -> s:confirm_rename(action, input_reader) },
             \ 'copy': { action -> s:copy(action, buffer) },
             \ 'cut': { action -> s:cut(action, buffer) },
@@ -134,15 +134,15 @@ function! s:quit(buffer) abort
 endfunction
 
 function! s:confirm_new(input_reader) abort
-    let name = a:input_reader.read('new: ')
+    let name = a:input_reader.read('new: ', [])
     if empty(name)
         return
     endif
     return 'new -path=' . name
 endfunction
 
-function! s:confirm_remove(input_reader) abort
-    let answer = a:input_reader.read('remove? Y/n: ')
+function! s:confirm_remove(action, input_reader) abort
+    let answer = a:input_reader.read('remove? Y/n: ', a:action.paths)
     if empty(answer) || answer !=? 'Y'
         return
     endif
@@ -150,8 +150,7 @@ function! s:confirm_remove(input_reader) abort
 endfunction
 
 function! s:confirm_rename(action, input_reader) abort
-    let message = printf('rename from %s to: ', a:action.path)
-    let name = a:input_reader.read(message)
+    let name = a:input_reader.read('rename to: ', [a:action.path])
     if empty(name)
         return
     endif

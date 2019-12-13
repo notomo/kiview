@@ -14,15 +14,15 @@ function! s:lines() abort
     return getbufline('%', 1, '$')
 endfunction
 
-function! s:input_reader(answer) abort
-    let input_reader = {'answer': a:answer}
-    function! input_reader.read(msg) abort
+function! s:set_input(answer) abort
+    let f = {'answer': a:answer}
+
+    function! f.read(msg) abort
         call themis#log('[prompt] ' . a:msg . self.answer)
         return self.answer
     endfunction
-    call kiview#input_reader#set(input_reader)
 
-    return input_reader
+    call kiview#input_reader#set_func({ msg -> f.read(msg) })
 endfunction
 
 function! s:main(arg) abort
@@ -267,7 +267,7 @@ function! s:suite.__new__() abort
     function! suite.new()
         cd ./test/plugin/_test_data
 
-        let input_reader = s:input_reader('new/')
+        call s:set_input('new/')
 
         call s:sync_main('')
         call s:sync_main('new')
@@ -275,7 +275,7 @@ function! s:suite.__new__() abort
         call search('new\/')
         call s:sync_main('child')
 
-        let input_reader = s:input_reader('new_file')
+        call s:set_input('new_file')
 
         call s:sync_main('new')
 
@@ -289,7 +289,7 @@ function! s:suite.__new__() abort
     endfunction
 
     function! suite.cancel_new()
-        let input_reader = s:input_reader('')
+        call s:set_input('')
 
         call s:sync_main('')
         call s:sync_main('new')
@@ -307,7 +307,7 @@ function! s:suite.__new__() abort
         call s:sync_main('toggle_tree')
         call search('file_in_tree')
 
-        let input_reader = s:input_reader('new_in_tree')
+        call s:set_input('new_in_tree')
         call s:sync_main('new')
 
         let lines = s:lines()
@@ -346,7 +346,7 @@ function! s:suite.__remove__() abort
     function! suite.remove()
         cd ./test/plugin/_test_data
 
-        let input_reader = s:input_reader('y')
+        call s:set_input('y')
 
         call s:sync_main('')
 
@@ -369,7 +369,7 @@ function! s:suite.__remove__() abort
     function! suite.cancel_remove()
         cd ./test/plugin/_test_data
 
-        let input_reader = s:input_reader('')
+        call s:set_input('')
 
         call s:sync_main('')
 
@@ -383,7 +383,7 @@ function! s:suite.__remove__() abort
     function! suite.no_remove()
         cd ./test/plugin/_test_data
 
-        let input_reader = s:input_reader('n')
+        call s:set_input('n')
 
         call s:sync_main('')
 
@@ -506,7 +506,7 @@ function! s:suite.__rename__() abort
     function! suite.rename()
         cd ./test/plugin/_test_data
 
-        let input_reader = s:input_reader('renamed_file')
+        call s:set_input('renamed_file')
 
         call s:sync_main('')
 

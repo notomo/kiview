@@ -1,26 +1,30 @@
 
 function! kiview#input_reader#clear() abort
-    let s:input_reader = v:null
+    let s:func = { message -> input(message) }
 endfunction
 call kiview#input_reader#clear()
 
+function! kiview#input_reader#set_func(func) abort
+    let s:func = a:func
+endfunction
+
 function! kiview#input_reader#new() abort
-    if !empty(s:input_reader)
-        return s:input_reader
-    endif
+    let input_reader = {
+        \ 'func': s:func,
+    \ }
 
-    let input_reader = {}
-
-    function! input_reader.read(message) abort
+    function! input_reader.read(propmt, targets) abort
         call inputsave()
-        let input = input(a:message)
+
+        let message = a:propmt
+        if !empty(a:targets)
+            let message = join(a:targets, "\n") . "\n" . message
+        endif
+
+        let input = self.func(message)
         call inputrestore()
         return input
     endfunction
 
     return input_reader
-endfunction
-
-function! kiview#input_reader#set(input_reader) abort
-    let s:input_reader = a:input_reader
 endfunction

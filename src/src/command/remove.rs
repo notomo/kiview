@@ -13,16 +13,16 @@ pub struct RemoveCommand<'a> {
 
 impl<'a> Command for RemoveCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
-        if !self.opts.no_confirm {
-            return Ok(vec![Action::ConfirmRemove]);
-        }
-
         let targets = self
             .current
             .targets()
             .into_iter()
             .map(|target| target.path)
             .collect();
+
+        if !self.opts.no_confirm {
+            return Ok(vec![Action::ConfirmRemove { paths: targets }]);
+        }
 
         self.dispatcher.path_repository().remove(targets)?;
 
@@ -32,15 +32,6 @@ impl<'a> Command for RemoveCommand<'a> {
             .list(self.current.path)?
             .into();
 
-        Ok(vec![
-            paths.to_write_all_action(),
-            Action::TryToRestoreCursor {
-                path: self.current.path.to_string(),
-            },
-            Action::AddHistory {
-                path: self.current.path.to_string(),
-                line_number: self.current.line_number,
-            },
-        ])
+        Ok(vec![paths.to_write_all_action()])
     }
 }

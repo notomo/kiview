@@ -19,7 +19,7 @@ pub enum Action {
         mod_name: SplitModName,
     },
     #[serde(rename = "confirm_remove")]
-    ConfirmRemove,
+    ConfirmRemove { paths: Vec<String> },
     #[serde(rename = "confirm_rename")]
     ConfirmRename { path: String },
     #[serde(rename = "cut")]
