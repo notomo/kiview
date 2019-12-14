@@ -52,9 +52,11 @@ function! s:suite.create()
     call s:assert.dir(cwd)
     call s:assert.buffer_name('kiview')
 
-    call s:assert.syntax_name('KiviewNode')
+    normal! gg
+    call s:assert.syntax_name('KiviewNodeClosed')
+
     call search('autoload\/')
-    call s:assert.syntax_name('KiviewNode')
+    call s:assert.syntax_name('KiviewNodeClosed')
 endfunction
 
 function! s:suite.do_parent_child()

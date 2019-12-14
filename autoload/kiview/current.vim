@@ -121,6 +121,18 @@ function! kiview#current#new(bufnr) abort
         let mark_id = nvim_buf_get_extmarks(self.bufnr, s:namespace, [index, 0], [index, 0], {})[0][0]
         let prop = self.props[mark_id]
         let prop.opened = a:opened
+
+        let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:line_number -1 , 0], [a:line_number - 1, 0], {})
+        if !empty(mark_ids) && has_key(self.selected, mark_ids[0][0])
+            return
+        endif
+
+        if prop.opened
+            call nvim_buf_add_highlight(self.bufnr, s:hl_namespace, 'KiviewNodeOpen', a:line_number - 1, 0, -1)
+            call themis#log('hoge')
+        else
+            call nvim_buf_clear_namespace(self.bufnr, s:hl_namespace, a:line_number - 1, a:line_number)
+        endif
     endfunction
 
     function! current.toggle_selection(ids) abort
