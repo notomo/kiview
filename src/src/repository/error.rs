@@ -8,6 +8,8 @@ pub enum ErrorKind {
     IO { message: String },
     #[fail(display = "Internal error: {}", message)]
     Internal { message: String },
+    #[fail(display = "Already exists: {}", path)]
+    AlreadyExists { path: String },
 }
 
 #[derive(Debug)]
@@ -31,6 +33,14 @@ impl From<NoneError> for Error {
             inner: Context::new(ErrorKind::Internal {
                 message: String::from("NoneError"),
             }),
+        }
+    }
+}
+
+impl From<ErrorKind> for Error {
+    fn from(error: ErrorKind) -> Error {
+        Error {
+            inner: Context::new(error),
         }
     }
 }

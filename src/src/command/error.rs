@@ -1,4 +1,5 @@
 use crate::repository::Error as RepositoryError;
+use crate::repository::ErrorKind as RepositoryErrorKind;
 use failure::{Backtrace, Context, Fail};
 use std::fmt;
 use std::fmt::Display;
@@ -15,6 +16,8 @@ pub enum ErrorKind {
     Unknown { command_name: String },
     #[fail(display = "Invalid command: {}", message)]
     Invalid { message: String },
+    #[fail(display = "Already exists: {}", path)]
+    AlreadyExists { path: String },
 }
 
 #[derive(Debug)]
@@ -74,10 +77,17 @@ impl From<NoneError> for Error {
 
 impl From<RepositoryError> for Error {
     fn from(error: RepositoryError) -> Error {
-        Error {
-            inner: Context::new(ErrorKind::Internal {
+        let kind = match error.inner.get_context() {
+            RepositoryErrorKind::AlreadyExists { path } => ErrorKind::AlreadyExists {
+                path: path.to_string(),
+            },
+            _ => ErrorKind::Internal {
                 message: error.inner.get_context().to_string(),
-            }),
+            },
+        };
+
+        Error {
+            inner: Context::new(kind),
         }
     }
 }

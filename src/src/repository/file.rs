@@ -59,6 +59,13 @@ impl PathRepository for FilePathRepository {
     }
 
     fn create(&self, path: &str) -> Result<(), crate::repository::Error> {
+        if std::path::Path::new(path).exists() {
+            return Err(crate::repository::ErrorKind::AlreadyExists {
+                path: path.to_string(),
+            }
+            .into());
+        }
+
         Ok(match path.ends_with("/") {
             true => fs::create_dir_all(path).and_then(|_| Ok(())),
             false => fs::File::create(path).and_then(|_| Ok(())),

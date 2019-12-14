@@ -1,6 +1,6 @@
 
 function! kiview#input_reader#clear() abort
-    let s:func = { message -> input(message) }
+    let s:func = function('input')
 endfunction
 call kiview#input_reader#clear()
 

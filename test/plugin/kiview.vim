@@ -254,6 +254,9 @@ function! s:suite.__new__() abort
         call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
         call mkdir('./test/plugin/_test_data/tree2', 'p')
 
+        call system(['touch', './test/plugin/_test_data/already'])
+        call writefile(['has contents'], './test/plugin/_test_data/already')
+
         call KiviewTestBeforeEach()
     endfunction
 
@@ -264,6 +267,7 @@ function! s:suite.__new__() abort
         call delete('./test/plugin/_test_data/tree2', 'rf')
         call delete('./test/plugin/_test_data/new', 'rf')
         call delete('./test/plugin/_test_data/new_file', 'rf')
+        call delete('./test/plugin/_test_data/already', 'rf')
     endfunction
 
     function! suite.new()
@@ -298,6 +302,18 @@ function! s:suite.__new__() abort
 
         let lines = s:lines()
         call s:assert.contains(lines, 'autoload/')
+    endfunction
+
+    function! suite.new_already_exists()
+        cd ./test/plugin/_test_data
+
+        call s:set_input('already')
+
+        call s:sync_main('')
+        call s:sync_main('new')
+
+        let contents = readfile('already')
+        call s:assert.not_empty(contents)
     endfunction
 
     function! suite.new_in_tree()

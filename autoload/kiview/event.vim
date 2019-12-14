@@ -22,7 +22,7 @@ function! kiview#event#service() abort
             let s:callbacks[a:event_name] = {}
         endif
         let s:callbacks[a:event_name][a:id] = a:callback
-        execute printf('autocmd User %s:%s:* ++nested ++once call s:callback(expand("<amatch>"), "%s")', a:event_name, a:id, a:event_name)
+        execute printf('autocmd User %s:%s:*,%s:%s:*/* ++nested ++once call s:callback(expand("<amatch>"), "%s")', a:event_name, a:id, a:event_name, a:id, a:event_name)
     endfunction
 
     function! service.job_finished(id, err) abort
