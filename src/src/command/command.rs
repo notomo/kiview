@@ -1,8 +1,9 @@
 use crate::command::Action;
+use crate::command::Error;
 use serde_derive::Serialize;
 
 pub trait Command {
-    fn actions(&self) -> Result<Vec<Action>, crate::command::Error>;
+    fn actions(&self) -> Result<Vec<Action>, Error>;
 }
 
 #[derive(Debug, Serialize)]

@@ -2,6 +2,7 @@ use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
+use crate::command::Error;
 use crate::command::Paths;
 use crate::repository::Dispatcher;
 
@@ -12,7 +13,7 @@ pub struct NewCommand<'a> {
 }
 
 impl<'a> Command for NewCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
+    fn actions(&self) -> Result<Vec<Action>, Error> {
         if self.opts.path.is_none() {
             return Ok(vec![Action::ConfirmNew]);
         }

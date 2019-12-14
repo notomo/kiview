@@ -93,3 +93,11 @@ function! s:build_input(buffer) abort
 
     return json_encode(input)
 endfunction
+
+function! kiview#command#finished() abort
+    return s:limitter.finished()
+endfunction
+
+function! kiview#command#abort() abort
+    let s:limitter = kiview#limitter#new()
+endfunction

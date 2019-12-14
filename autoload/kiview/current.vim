@@ -129,7 +129,6 @@ function! kiview#current#new(bufnr) abort
 
         if prop.opened
             call nvim_buf_add_highlight(self.bufnr, s:hl_namespace, 'KiviewNodeOpen', a:line_number - 1, 0, -1)
-            call themis#log('hoge')
         else
             call nvim_buf_clear_namespace(self.bufnr, s:hl_namespace, a:line_number - 1, a:line_number)
         endif

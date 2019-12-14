@@ -1,6 +1,7 @@
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
+use crate::command::Error;
 use crate::command::Paths;
 use crate::repository::Dispatcher;
 
@@ -10,7 +11,7 @@ pub struct PasteCommand<'a> {
 }
 
 impl<'a> Command for PasteCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
+    fn actions(&self) -> Result<Vec<Action>, Error> {
         let from_paths: Vec<_> = self
             .current
             .registered_paths

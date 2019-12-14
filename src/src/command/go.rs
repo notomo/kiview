@@ -2,6 +2,7 @@ use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
+use crate::command::Error;
 use crate::command::Paths;
 use crate::repository::Dispatcher;
 
@@ -12,7 +13,7 @@ pub struct GoCommand<'a> {
 }
 
 impl<'a> Command for GoCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
+    fn actions(&self) -> Result<Vec<Action>, Error> {
         let current_path = self
             .dispatcher
             .path(match &self.opts.path {

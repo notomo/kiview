@@ -1,6 +1,7 @@
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
+use crate::command::Error;
 use crate::command::Paths;
 use crate::repository::Dispatcher;
 
@@ -10,7 +11,7 @@ pub struct ParentCommand<'a> {
 }
 
 impl<'a> Command for ParentCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, crate::command::Error> {
+    fn actions(&self) -> Result<Vec<Action>, Error> {
         match self.dispatcher.path(self.current.path).parent() {
             Some(current_path) => {
                 let paths: Paths = self

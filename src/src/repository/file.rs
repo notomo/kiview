@@ -1,15 +1,17 @@
+use crate::repository::{Error, ErrorKind};
 use crate::repository::{FullPath, Path, PathRepository};
 use std::fs;
+use std::path::Path as StdPath;
 
 pub struct FilePathRepository {}
 
 impl PathRepository for FilePathRepository {
-    fn list(&self, path: &str) -> Result<Vec<FullPath>, crate::repository::Error> {
+    fn list(&self, path: &str) -> Result<Vec<FullPath>, Error> {
         let parent_directory = vec![FullPath {
             name: String::from(".."),
-            path: std::path::Path::new(&path)
+            path: StdPath::new(&path)
                 .parent()
-                .unwrap_or_else(|| std::path::Path::new(&path))
+                .unwrap_or_else(|| StdPath::new(&path))
                 .canonicalize()?
                 .to_str()?
                 .to_string(),
@@ -58,9 +60,9 @@ impl PathRepository for FilePathRepository {
         Ok([&parent_directory[..], &directories[..], &files[..]].concat())
     }
 
-    fn create(&self, path: &str) -> Result<(), crate::repository::Error> {
-        if std::path::Path::new(path).exists() {
-            return Err(crate::repository::ErrorKind::AlreadyExists {
+    fn create(&self, path: &str) -> Result<(), Error> {
+        if StdPath::new(path).exists() {
+            return Err(ErrorKind::AlreadyExists {
                 path: path.to_string(),
             }
             .into());
@@ -72,19 +74,19 @@ impl PathRepository for FilePathRepository {
         }?)
     }
 
-    fn rename(&self, from: &str, to: &str) -> Result<(), crate::repository::Error> {
+    fn rename(&self, from: &str, to: &str) -> Result<(), Error> {
         Ok(fs::rename(from, to)?)
     }
 
-    fn copy(&self, from: &str, to: &str) -> Result<(), crate::repository::Error> {
+    fn copy(&self, from: &str, to: &str) -> Result<(), Error> {
         fs::copy(from, to)?;
         Ok(())
     }
 
-    fn remove(&self, paths: Vec<String>) -> Result<(), crate::repository::Error> {
+    fn remove(&self, paths: Vec<String>) -> Result<(), Error> {
         let files: Vec<_> = paths
             .iter()
-            .filter(|path| !std::path::Path::new(path).is_dir())
+            .filter(|path| !StdPath::new(path).is_dir())
             .collect();
         for file in &files {
             fs::remove_file(file)?;
@@ -92,7 +94,7 @@ impl PathRepository for FilePathRepository {
 
         let dirs: Vec<_> = paths
             .iter()
-            .filter(|path| std::path::Path::new(path).is_dir())
+            .filter(|path| StdPath::new(path).is_dir())
             .collect();
         for dir in &dirs {
             fs::remove_dir_all(dir)?;
@@ -103,7 +105,7 @@ impl PathRepository for FilePathRepository {
 }
 
 pub struct FilePath<'a> {
-    pub path: &'a std::path::Path,
+    pub path: &'a StdPath,
 }
 
 impl<'a> Path for FilePath<'a> {
@@ -118,12 +120,12 @@ impl<'a> Path for FilePath<'a> {
             .and_then(|p| Some(p.to_string()))
     }
 
-    fn canonicalize(&self) -> Result<String, crate::repository::Error> {
+    fn canonicalize(&self) -> Result<String, Error> {
         let fulll_path = self.path.to_path_buf().canonicalize()?;
         Ok(fulll_path.to_str()?.to_string())
     }
 
-    fn join(&self, path: &str) -> Result<String, crate::repository::Error> {
+    fn join(&self, path: &str) -> Result<String, Error> {
         Ok(self.path.join(path).to_str()?.to_string())
     }
 
@@ -134,7 +136,7 @@ impl<'a> Path for FilePath<'a> {
             .and_then(|p| Some(p.to_string()))
     }
 
-    fn to_string(&self) -> Result<String, crate::repository::Error> {
+    fn to_string(&self) -> Result<String, Error> {
         Ok(self.path.to_str()?.to_string())
     }
 }

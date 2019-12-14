@@ -45,5 +45,9 @@ function! kiview#limitter#new() abort
         return !empty(a:id) && has_key(self._children, a:id) && !empty(self._children[a:id])
     endfunction
 
+    function! limitter.finished() abort
+        return !self._running
+    endfunction
+
     return limitter
 endfunction
