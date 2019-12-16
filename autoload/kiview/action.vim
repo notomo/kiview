@@ -27,6 +27,7 @@ function! kiview#action#new_handler(buffer) abort
             \ 'toggle_selection': { action -> s:toggle_selection(action, buffer) },
             \ 'show_error': { action -> s:show_error(action) },
             \ 'fork_buffer': { action -> s:fork_buffer(action, buffer) },
+            \ 'choose': { action -> s:choose(action, buffer, input_reader) },
         \ },
     \ }
 
@@ -155,6 +156,29 @@ function! s:confirm_rename(action, input_reader) abort
         return
     endif
     return 'rename -no-confirm -path=' . name
+endfunction
+
+function! s:choose(action, buffer, input_reader) abort
+    let paths = []
+    for path in a:action.paths
+        let answer = a:input_reader.read('already exists (f)orce (n)o: ', [path])
+        if answer !=? 'f'
+            continue
+        endif
+        call add(paths, path)
+    endfor
+
+    if empty(paths)
+        return
+    endif
+
+    if a:action.has_cut
+        call a:buffer.register.cut(paths)
+    else
+        call a:buffer.register.copy(paths)
+    endif
+
+    return 'paste -no-confirm'
 endfunction
 
 function! s:copy(action, buffer) abort

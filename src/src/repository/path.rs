@@ -28,6 +28,7 @@ pub trait Path {
     fn parent(&self) -> Option<String>;
     fn canonicalize(&self) -> Result<String, Error>;
     fn join(&self, path: &str) -> Result<String, Error>;
+    fn exists(&self) -> bool;
     fn name(&self) -> Option<String>;
     fn to_string(&self) -> Result<String, Error>;
 }

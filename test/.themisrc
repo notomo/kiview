@@ -80,6 +80,18 @@ function! KiviewTestAssert() abort
         call self.match(actual, a:expected, message)
     endfunction
 
+    function! assert.file_not_empty(file_path) abort
+        let contents = readfile(a:file_path)
+        let message = printf('%s should not be empty file, but actual empty', a:file_path)
+        call self.not_empty(contents, message)
+    endfunction
+
+    function! assert.file_empty(file_path) abort
+        let contents = readfile(a:file_path)
+        let message = printf('%s should be empty file, but actual: %s', a:file_path, contents)
+        call self.empty(contents, message)
+    endfunction
+
     return assert
 endfunction
 

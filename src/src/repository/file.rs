@@ -129,6 +129,10 @@ impl<'a> Path for FilePath<'a> {
         Ok(self.path.join(path).to_str()?.to_string())
     }
 
+    fn exists(&self) -> bool {
+        self.path.exists()
+    }
+
     fn name(&self) -> Option<String> {
         self.path
             .file_name()

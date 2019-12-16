@@ -312,8 +312,7 @@ function! s:suite.__new__() abort
         call s:sync_main('')
         call s:sync_main('new')
 
-        let contents = readfile('already')
-        call s:assert.not_empty(contents)
+        call s:assert.file_not_empty('already')
     endfunction
 
     function! suite.new_in_tree()
@@ -423,15 +422,25 @@ function! s:suite.__copy_cut_paste__() abort
         call mkdir('./test/plugin/_test_data/paste', 'p')
         call mkdir('./test/plugin/_test_data/tree', 'p')
         call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
+
+        call system(['touch', './test/plugin/_test_data/already'])
+        call writefile(['has contents'], './test/plugin/_test_data/already')
+
+        call mkdir('./test/plugin/_test_data/has_already', 'p')
+        call system(['touch', './test/plugin/_test_data/has_already/already'])
+
         call KiviewTestBeforeEach()
     endfunction
 
     function! suite.after_each()
         call KiviewTestAfterEach()
+
         call delete('./test/plugin/_test_data/copy_file')
         call delete('./test/plugin/_test_data/cut_file')
         call delete('./test/plugin/_test_data/paste', 'rf')
         call delete('./test/plugin/_test_data/tree', 'rf')
+        call delete('./test/plugin/_test_data/already', 'rf')
+        call delete('./test/plugin/_test_data/has_already', 'rf')
     endfunction
 
     function! suite.copy_and_paste()
@@ -503,6 +512,36 @@ function! s:suite.__copy_cut_paste__() abort
         let lines = s:lines()
         call s:assert.contains(lines, '  copy_file')
         call s:assert.contains(lines, 'copy_file')
+    endfunction
+
+    function! suite.cancel_paste_on_already_exists()
+        call s:sync_main('go -path=test/plugin/_test_data/has_already')
+
+        call search('already')
+        call s:sync_main('copy')
+        call s:sync_main('parent')
+
+        call s:set_input('n')
+        call s:sync_main('paste')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'already')
+        call s:assert.file_not_empty('already')
+    endfunction
+
+    function! suite.force_paste_on_already_exists()
+        call s:sync_main('go -path=test/plugin/_test_data/has_already')
+
+        call search('already')
+        call s:sync_main('copy')
+        call s:sync_main('parent')
+
+        call s:set_input('f')
+        call s:sync_main('paste')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'already')
+        call s:assert.file_empty('already')
     endfunction
 
 endfunction

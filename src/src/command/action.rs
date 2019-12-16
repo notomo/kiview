@@ -72,6 +72,8 @@ pub enum Action {
     },
     #[serde(rename = "show_error")]
     ShowError { path: String, message: String },
+    #[serde(rename = "choose")]
+    Choose { paths: Vec<String>, has_cut: bool },
 }
 
 #[derive(Debug, Serialize)]

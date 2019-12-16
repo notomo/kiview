@@ -84,6 +84,7 @@ fn main() {
                 CommandName::Paste => box command::PasteCommand {
                     current: current,
                     dispatcher: dispatcher,
+                    opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::Rename => box command::RenameCommand {
                     current: current,
