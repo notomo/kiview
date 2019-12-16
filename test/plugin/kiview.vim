@@ -552,6 +552,9 @@ function! s:suite.__rename__() abort
     function! suite.before_each()
         call system(['touch', './test/plugin/_test_data/rename_file'])
 
+        call system(['touch', './test/plugin/_test_data/already'])
+        call writefile(['has contents'], './test/plugin/_test_data/already')
+
         call mkdir('./test/plugin/_test_data/tree', 'p')
         call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
 
@@ -563,6 +566,7 @@ function! s:suite.__rename__() abort
 
         call delete('./test/plugin/_test_data/rename_file')
         call delete('./test/plugin/_test_data/renamed_file')
+        call delete('./test/plugin/_test_data/already')
         call delete('./test/plugin/_test_data/tree', 'rf')
     endfunction
 
@@ -597,6 +601,18 @@ function! s:suite.__rename__() abort
         let lines = s:lines()
         call s:assert.contains(lines, '  renamed_file')
         call s:assert.not_contains(lines, '  rename_file')
+    endfunction
+
+    function! suite.rename_already_exists()
+        cd ./test/plugin/_test_data
+
+        call s:sync_main('')
+
+        call search('rename_file')
+        call s:set_input('already')
+        call s:sync_main('rename')
+
+        call s:assert.file_not_empty('already')
     endfunction
 
 endfunction
