@@ -1,6 +1,7 @@
 
 let s:namespace = nvim_create_namespace('kiview')
 let s:hl_namespace = nvim_create_namespace('kiview_highlight')
+let s:group_hl_namespace = nvim_create_namespace('kiview_group_highlight')
 
 function! kiview#current#new(bufnr) abort
     let current = {
@@ -128,9 +129,9 @@ function! kiview#current#new(bufnr) abort
         endif
 
         if prop.opened
-            call nvim_buf_add_highlight(self.bufnr, s:hl_namespace, 'KiviewNodeOpen', a:line_number - 1, 0, -1)
+            call nvim_buf_add_highlight(self.bufnr, s:group_hl_namespace, 'KiviewNodeOpen', a:line_number - 1, 0, -1)
         else
-            call nvim_buf_clear_namespace(self.bufnr, s:hl_namespace, a:line_number - 1, a:line_number)
+            call nvim_buf_clear_namespace(self.bufnr, s:group_hl_namespace, a:line_number - 1, a:line_number)
         endif
     endfunction
 
