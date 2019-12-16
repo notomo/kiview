@@ -551,13 +551,19 @@ function! s:suite.__rename__() abort
 
     function! suite.before_each()
         call system(['touch', './test/plugin/_test_data/rename_file'])
+
+        call mkdir('./test/plugin/_test_data/tree', 'p')
+        call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
+
         call KiviewTestBeforeEach()
     endfunction
 
     function! suite.after_each()
         call KiviewTestAfterEach()
+
         call delete('./test/plugin/_test_data/rename_file')
         call delete('./test/plugin/_test_data/renamed_file')
+        call delete('./test/plugin/_test_data/tree', 'rf')
     endfunction
 
     function! suite.rename()
@@ -573,6 +579,24 @@ function! s:suite.__rename__() abort
         let lines = s:lines()
         call s:assert.contains(lines, 'renamed_file')
         call s:assert.not_contains(lines, 'rename_file')
+    endfunction
+
+    function! suite.rename_in_tree()
+        cd ./test/plugin/_test_data
+
+        call s:set_input('renamed_file')
+
+        call s:sync_main('')
+
+        call search('tree/')
+        call s:sync_main('toggle_tree')
+
+        call search('file_in_tree')
+        call s:sync_main('rename')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, '  renamed_file')
+        call s:assert.not_contains(lines, '  rename_file')
     endfunction
 
 endfunction

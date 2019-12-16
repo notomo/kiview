@@ -44,9 +44,16 @@ impl<'a> Command for RenameCommand<'a> {
         let paths: Paths = self
             .dispatcher
             .path_repository()
-            .list(self.current.path)?
+            .list(&target_group_path)?
+            .iter()
+            .skip(1)
+            .collect::<Vec<_>>()
             .into();
 
-        Ok(vec![paths.to_write_all_action()])
+        Ok(vec![paths.to_write_action(
+            self.current.depth as usize,
+            self.current.parent_line_number as usize,
+            self.current.last_sibling_line_number as usize,
+        )])
     }
 }
