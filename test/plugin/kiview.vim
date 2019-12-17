@@ -59,6 +59,14 @@ function! s:suite.create()
     call s:assert.syntax_name('KiviewNodeClosed')
 endfunction
 
+function! s:suite.multiple_create()
+    call s:sync_main('')
+    call s:sync_main('') " nop
+    call s:sync_main('-create')
+
+    call s:assert.window_count(3)
+endfunction
+
 function! s:suite.do_parent_child()
     let cwd = getcwd()
     cd ./test/plugin

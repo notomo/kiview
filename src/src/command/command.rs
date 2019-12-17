@@ -187,6 +187,7 @@ pub enum CommandOption {
     Path { value: String },
     Quit,
     NoConfirm,
+    Create,
     Split { value: Split },
     Unknown,
 }
@@ -200,6 +201,7 @@ impl From<&str> for CommandOption {
             },
             ["quit"] => CommandOption::Quit,
             ["no-confirm"] => CommandOption::NoConfirm,
+            ["create"] => CommandOption::Create,
             ["path", path] => CommandOption::Path {
                 value: path.to_string(),
             },
@@ -217,6 +219,7 @@ pub struct CommandOptions {
     pub quit: bool,
     pub path: Option<String>,
     pub no_confirm: bool,
+    pub create: bool,
     pub split: Split,
 }
 
@@ -268,6 +271,11 @@ impl CommandOptions {
             _ => false,
         });
 
+        let create = options.iter().any(|opt| match &opt {
+            CommandOption::Create => true,
+            _ => false,
+        });
+
         let split: Split = options
             .iter()
             .map(|opt| match &opt {
@@ -285,6 +293,7 @@ impl CommandOptions {
             quit: quit,
             path: path,
             no_confirm: no_confirm,
+            create: create,
             split: split,
         }
     }
