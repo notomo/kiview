@@ -128,6 +128,7 @@ endfunction
 function! s:create(action, buffer) abort
     call a:buffer.open(a:action.split_name, a:action.mod_name)
     call a:buffer.history.restore('')
+    call a:buffer.current.set(a:action.path)
 endfunction
 
 function! s:quit(buffer) abort

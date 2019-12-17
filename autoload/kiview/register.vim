@@ -1,5 +1,11 @@
 
+let s:register = v:null
+
 function! kiview#register#new() abort
+    if !empty(s:register)
+        return s:register
+    endif
+
     let register = {
         \ 'paths': [],
         \ 'has_cut': v:false,
@@ -25,6 +31,8 @@ function! kiview#register#new() abort
 
         call self.logger.log('clear')
     endfunction
+
+    let s:register = register
 
     return register
 endfunction

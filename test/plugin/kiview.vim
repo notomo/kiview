@@ -552,6 +552,30 @@ function! s:suite.__copy_cut_paste__() abort
         call s:assert.file_empty('already')
     endfunction
 
+    function! suite.share_clipboard()
+        let cwd = getcwd()
+
+        call s:sync_main('go -path=test/plugin/_test_data')
+
+        call search('copy_file')
+        call s:sync_main('copy')
+
+        call s:sync_main('-create')
+        call search('paste\/')
+        call s:sync_main('child')
+
+        call s:sync_main('paste')
+
+        let lines = s:lines()
+        call s:assert.dir(cwd . '/test/plugin/_test_data/paste')
+        call s:assert.contains(lines, 'copy_file')
+
+        wincmd p
+        let lines = s:lines()
+        call s:assert.dir(cwd . '/test/plugin/_test_data')
+        call s:assert.contains(lines, 'copy_file')
+    endfunction
+
 endfunction
 
 function! s:suite.__rename__() abort

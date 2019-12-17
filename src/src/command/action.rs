@@ -15,6 +15,7 @@ pub enum Action {
     HorizontalOpen { paths: Vec<String> },
     #[serde(rename = "create")]
     Create {
+        path: String,
         split_name: SplitName,
         mod_name: SplitModName,
     },
