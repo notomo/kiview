@@ -25,6 +25,19 @@ function! s:set_input(answer) abort
     call kiview#input_reader#set_func({ msg -> f.read(msg) })
 endfunction
 
+function! s:messenger() abort
+    let f = {'msg': ''}
+
+    function! f.echo(msg) abort
+        let self.msg = a:msg
+        call themis#log('[messenger] ' . a:msg)
+    endfunction
+
+    call kiview#messenger#set_func({ msg -> f.echo(msg) })
+
+    return f
+endfunction
+
 function! s:main(arg) abort
     let line = line('.')
     return kiview#main([line, line], a:arg)
@@ -454,9 +467,14 @@ function! s:suite.__copy_cut_paste__() abort
     function! suite.copy_and_paste()
         call s:sync_main('go -path=test/plugin/_test_data')
 
+        let messenger = s:messenger()
+
         call search('copy_file')
         call s:sync_main('cut')
         call s:sync_main('copy') " copy disables cut
+
+        call s:assert.contains(messenger.msg, 'Copied')
+        call s:assert.contains(messenger.msg, 'test/plugin/_test_data/copy_file')
 
         call search('paste\/')
         call s:sync_main('child')
@@ -481,8 +499,13 @@ function! s:suite.__copy_cut_paste__() abort
     function! suite.cut_and_paste()
         call s:sync_main('go -path=test/plugin/_test_data')
 
+        let messenger = s:messenger()
+
         call search('cut_file')
         call s:sync_main('cut')
+
+        call s:assert.contains(messenger.msg, 'Cut')
+        call s:assert.contains(messenger.msg, 'test/plugin/_test_data/cut_file')
 
         call search('paste\/')
         call s:sync_main('child')

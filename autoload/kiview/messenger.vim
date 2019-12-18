@@ -32,5 +32,18 @@ function! kiview#messenger#new() abort
         echohl None
     endfunction
 
+    function! messenger.info(message, targets) abort
+        if len(a:targets) == 1
+            call self.func('[kiview] ' . a:message . a:targets[0])
+            return
+        endif
+        if empty(a:targets)
+            call self.func('[kiview] ' . a:message)
+            return
+        endif
+        let message = printf('[kiview] %s%s targets', a:message, len(a:targets))
+        call self.func(message)
+    endfunction
+
     return messenger
 endfunction

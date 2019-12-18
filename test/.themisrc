@@ -110,7 +110,7 @@ function! KiviewTestAfterEach() abort
     let finished = kiview#command#finished()
     call kiview#command#abort()
     if !finished
-        throw 'command is still running'
+        call themis#helper('assert').fail('command is still running')
     endif
 
     silent! %bwipeout!

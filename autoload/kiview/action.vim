@@ -185,11 +185,13 @@ endfunction
 function! s:copy(action, buffer) abort
     call a:buffer.register.copy(a:action.paths)
     call a:buffer.current.clear_selection()
+    call kiview#messenger#new().info('Copied: ', a:action.paths)
 endfunction
 
 function! s:cut(action, buffer) abort
     call a:buffer.register.cut(a:action.paths)
     call a:buffer.current.clear_selection()
+    call kiview#messenger#new().info('Cut: ', a:action.paths)
 endfunction
 
 function! s:clear_register(buffer) abort
