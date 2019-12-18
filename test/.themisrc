@@ -96,6 +96,8 @@ function! KiviewTestAssert() abort
 endfunction
 
 function! KiviewTestBeforeEach() abort
+    call mkdir('./test/plugin/_test_data', 'p')
+
     execute 'cd' s:root
 
     call kiview#logger#set_func({ msg -> themis#log(msg) })
@@ -107,12 +109,6 @@ function! KiviewTestBeforeEach() abort
 endfunction
 
 function! KiviewTestAfterEach() abort
-    let finished = kiview#command#finished()
-    call kiview#command#abort()
-    if !finished
-        call themis#helper('assert').fail('command is still running')
-    endif
-
     silent! %bwipeout!
     execute 'cd' s:root
     call kiview#logger#clear()
@@ -120,4 +116,12 @@ function! KiviewTestAfterEach() abort
 
     filetype off
     syntax off
+
+    call delete('./test/plugin/_test_data', 'rf')
+
+    let finished = kiview#command#finished()
+    call kiview#command#abort()
+    if !finished
+        call themis#helper('assert').fail('command is still running')
+    endif
 endfunction

@@ -271,24 +271,18 @@ function! s:suite.__new__() abort
     let suite = themis#suite('kiview.plugin.new')
 
     function! suite.before_each()
+        call KiviewTestBeforeEach()
+
         call mkdir('./test/plugin/_test_data/tree', 'p')
         call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
         call mkdir('./test/plugin/_test_data/tree2', 'p')
 
         call system(['touch', './test/plugin/_test_data/already'])
         call writefile(['has contents'], './test/plugin/_test_data/already')
-
-        call KiviewTestBeforeEach()
     endfunction
 
     function! suite.after_each()
         call KiviewTestAfterEach()
-
-        call delete('./test/plugin/_test_data/tree', 'rf')
-        call delete('./test/plugin/_test_data/tree2', 'rf')
-        call delete('./test/plugin/_test_data/new', 'rf')
-        call delete('./test/plugin/_test_data/new_file', 'rf')
-        call delete('./test/plugin/_test_data/already', 'rf')
     endfunction
 
     function! suite.new()
@@ -360,25 +354,18 @@ function! s:suite.__remove__() abort
     let suite = themis#suite('plugin.kiview.remove')
 
     function! suite.before_each()
+        call KiviewTestBeforeEach()
+
         call system(['touch', './test/plugin/_test_data/removed_file1'])
         call system(['touch', './test/plugin/_test_data/removed_file2'])
         call system(['touch', './test/plugin/_test_data/removed_cancel_file'])
 
         call mkdir('./test/plugin/_test_data/removed_dir', 'p')
         call system(['touch', './test/plugin/_test_data/removed_dir/file'])
-
-        call KiviewTestBeforeEach()
     endfunction
 
     function! suite.after_each()
         call KiviewTestAfterEach()
-
-        call delete('./test/plugin/_test_data/removed_dir', 'rf')
-        call delete('./test/plugin/_test_data/removed_file1')
-        call delete('./test/plugin/_test_data/removed_file2')
-
-        call delete('./test/plugin/_test_data/new', 'rf')
-        call delete('./test/plugin/_test_data/removed_cancel_file')
     endfunction
 
     function! suite.remove()
@@ -438,6 +425,8 @@ function! s:suite.__copy_cut_paste__() abort
     let suite = themis#suite('plugin.kiview.copy_cut_paste')
 
     function! suite.before_each()
+        call KiviewTestBeforeEach()
+
         call system(['touch', './test/plugin/_test_data/copy_file'])
         call system(['touch', './test/plugin/_test_data/cut_file'])
         call mkdir('./test/plugin/_test_data/paste', 'p')
@@ -449,19 +438,10 @@ function! s:suite.__copy_cut_paste__() abort
 
         call mkdir('./test/plugin/_test_data/has_already', 'p')
         call system(['touch', './test/plugin/_test_data/has_already/already'])
-
-        call KiviewTestBeforeEach()
     endfunction
 
     function! suite.after_each()
         call KiviewTestAfterEach()
-
-        call delete('./test/plugin/_test_data/copy_file')
-        call delete('./test/plugin/_test_data/cut_file')
-        call delete('./test/plugin/_test_data/paste', 'rf')
-        call delete('./test/plugin/_test_data/tree', 'rf')
-        call delete('./test/plugin/_test_data/already', 'rf')
-        call delete('./test/plugin/_test_data/has_already', 'rf')
     endfunction
 
     function! suite.copy_and_paste()
@@ -605,6 +585,8 @@ function! s:suite.__rename__() abort
     let suite = themis#suite('plugin.kiview.rename')
 
     function! suite.before_each()
+        call KiviewTestBeforeEach()
+
         call system(['touch', './test/plugin/_test_data/rename_file'])
 
         call system(['touch', './test/plugin/_test_data/already'])
@@ -612,17 +594,10 @@ function! s:suite.__rename__() abort
 
         call mkdir('./test/plugin/_test_data/tree', 'p')
         call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
-
-        call KiviewTestBeforeEach()
     endfunction
 
     function! suite.after_each()
         call KiviewTestAfterEach()
-
-        call delete('./test/plugin/_test_data/rename_file')
-        call delete('./test/plugin/_test_data/renamed_file')
-        call delete('./test/plugin/_test_data/already')
-        call delete('./test/plugin/_test_data/tree', 'rf')
     endfunction
 
     function! suite.rename()
@@ -742,30 +717,46 @@ function! s:suite.toggle_multi_trees()
     call s:assert.path('plugin/kiview.vim')
 endfunction
 
-function! s:suite.toggle_last_dir()
-    call s:sync_main('go -path=./test/plugin/_test_data/depth0')
+function! s:suite.__toggle_deep__() abort
+    let suite = themis#suite('plugin.kiview.toggle_deep')
 
-    let lines = s:lines()
+    function! suite.before_each()
+        call KiviewTestBeforeEach()
 
-    call search('depth1\/')
-    call s:sync_main('toggle_tree')
-    call s:sync_main('toggle_tree')
+        call mkdir('./test/plugin/_test_data/depth0', 'p')
+        call mkdir('./test/plugin/_test_data/depth0/depth1', 'p')
+    endfunction
 
-    call s:assert.lines(lines)
-endfunction
+    function! suite.after_each()
+        call KiviewTestAfterEach()
+    endfunction
 
-function! s:suite.toggle_single_dir()
-    call s:sync_main('go -path=./test/plugin/_test_data')
+    function! suite.toggle_last_dir()
+        call s:sync_main('go -path=./test/plugin/_test_data/depth0')
 
-    call search('depth0\/')
-    call s:sync_main('toggle_tree')
+        let lines = s:lines()
 
-    let lines = s:lines()
-    call search('depth1\/')
-    call s:sync_main('toggle_tree')
-    call s:sync_main('toggle_tree')
+        call search('depth1\/')
+        call s:sync_main('toggle_tree')
+        call s:sync_main('toggle_tree')
 
-    call s:assert.lines(lines)
+        call s:assert.lines(lines)
+    endfunction
+
+    function! suite.toggle_single_dir()
+        call s:sync_main('go -path=./test/plugin/_test_data')
+
+        call search('depth0\/')
+        call s:sync_main('toggle_tree')
+
+        let lines = s:lines()
+        call search('depth1\/')
+        call s:sync_main('toggle_tree')
+        call s:sync_main('toggle_tree')
+
+        call s:assert.lines(lines)
+    endfunction
+
 endfunction
 
 function! s:suite.open_root()
