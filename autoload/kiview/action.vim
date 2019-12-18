@@ -82,6 +82,7 @@ endfunction
 
 function! s:write(action, buffer) abort
     let start = a:action.root + 1
+    call a:buffer.current.unset_props(start, a:action.next_sibling)
     call a:buffer.write(a:action.lines, start, a:action.next_sibling)
     call a:buffer.current.set_props(a:action.props, start)
     call a:buffer.current.clear_selection()

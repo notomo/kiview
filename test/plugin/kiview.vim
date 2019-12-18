@@ -285,7 +285,8 @@ function! s:suite.__new__() abort
         call KiviewTestAfterEach()
     endfunction
 
-    function! suite.new()
+    function! suite.new_one()
+        let cwd = getcwd()
         cd ./test/plugin/_test_data
 
         call s:set_input('new/')
@@ -295,6 +296,7 @@ function! s:suite.__new__() abort
 
         call search('new\/')
         call s:sync_main('child')
+        call s:assert.dir(cwd . '/test/plugin/_test_data/new')
 
         call s:set_input('new_file')
 

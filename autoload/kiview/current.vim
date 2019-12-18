@@ -50,6 +50,8 @@ function! kiview#current#new(bufnr) abort
         let self.target = self._get_target(self.line_number)
         let self.targets = self._get_targets(a:range[0], a:range[1])
         let self.selected_targets = self._get_selected_targets()
+
+        call self.logger.label('range').log(a:range)
     endfunction
 
     function! current._get_next_sibling_line_number(line_number, depth) abort
@@ -176,7 +178,7 @@ function! kiview#current#new(bufnr) abort
     endfunction
 
     function! current._get_targets(start, end) abort
-        let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:start -1 , 0], [a:end - 1, 0], {})
+        let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:start - 1, 0], [a:end - 1, 0], {})
         let targets = []
         for [id, _, _] in mark_ids
             let prop = self.props[id]
