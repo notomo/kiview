@@ -32,6 +32,12 @@ function! KiviewTestAssert() abort
         call self.false(count(a:haystack, a:needle) != 0, a:needle . ' must not be in the haystack')
     endfunction
 
+    function! assert.current_line(expected) abort
+        let actual = getline(line('.'))
+        let message = printf('current line should be %s, but actual: %s', a:expected, actual)
+        call self.equals(actual, a:expected, message)
+    endfunction
+
     function! assert.file_name(expected) abort
         let actual = fnamemodify(bufname('%'), ':t')
         let message = printf('file name should be %s, but actual: %s', a:expected, actual)

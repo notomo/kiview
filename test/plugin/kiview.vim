@@ -370,7 +370,7 @@ function! s:suite.__remove__() abort
         call KiviewTestAfterEach()
     endfunction
 
-    function! suite.remove()
+    function! suite.remove_one()
         cd ./test/plugin/_test_data
 
         call s:set_input('y')
@@ -381,6 +381,8 @@ function! s:suite.__remove__() abort
         let last_line = search('removed_file2')
         let command = kiview#main([first_line, last_line], 'remove')
         call command.wait()
+
+        call s:assert.current_line('removed_cancel_file')
 
         let lines = s:lines()
         call s:assert.not_contains(lines, 'removed_file1')

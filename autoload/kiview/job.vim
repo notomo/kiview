@@ -49,7 +49,7 @@ function! kiview#job#new(cmd, event_service) abort
 
         call self.logger.log('wait: ' . self.internal_job_id)
         let result = jobwait([self.internal_job_id], a:timeout_msec)
-        call self.logger.log('result: ' . result[0])
+        call self.logger.log('wait result: ' . result[0])
         if result[0] == -3
             " FIXME
             call self.logger.log('invalid job id?')

@@ -33,6 +33,11 @@ impl<'a> Command for RemoveCommand<'a> {
             .list(self.current.path)?
             .into();
 
-        Ok(vec![paths.to_write_all_action()])
+        Ok(vec![
+            paths.to_write_all_action(),
+            Action::SetCursor {
+                line_number: self.current.line_number,
+            },
+        ])
     }
 }
