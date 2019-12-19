@@ -74,9 +74,9 @@ function! KiviewTestAssert() abort
         call self.equals(actual, a:expected, message)
     endfunction
 
-    function! assert.dir(expected) abort
+    function! assert.working_dir(expected) abort
         let actual = getcwd()
-        let message = printf('current dir should be %s, but actual: %s', a:expected, actual)
+        let message = printf('current working dir should be %s, but actual: %s', a:expected, actual)
         call self.equals(actual, a:expected, message)
     endfunction
 

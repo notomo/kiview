@@ -62,7 +62,7 @@ function! s:suite.create()
     call s:assert.filetype('kiview')
     call s:assert.false(&modifiable)
     call s:assert.line_number(2)
-    call s:assert.dir(cwd)
+    call s:assert.working_dir(cwd)
     call s:assert.buffer_name('kiview')
 
     normal! gg
@@ -91,7 +91,7 @@ function! s:suite.do_parent_child()
     call s:assert.contains(lines, 'kiview.vim')
     call s:assert.not_contains(lines, '')
     call s:assert.filetype('kiview')
-    call s:assert.dir(cwd . '/test/plugin')
+    call s:assert.working_dir(cwd . '/test/plugin')
 
     call s:sync_main('parent')
 
@@ -102,7 +102,7 @@ function! s:suite.do_parent_child()
     call s:assert.not_contains(test_lines, '')
     call s:assert.filetype('kiview')
     call s:assert.false(&modifiable)
-    call s:assert.dir(cwd . '/test')
+    call s:assert.working_dir(cwd . '/test')
 
     call s:sync_main('parent')
 
@@ -111,7 +111,7 @@ function! s:suite.do_parent_child()
     call s:assert.contains(lines, 'autoload/')
     call s:assert.not_contains(lines, '')
     call s:assert.filetype('kiview')
-    call s:assert.dir(cwd)
+    call s:assert.working_dir(cwd)
 
     call search('test/')
     call s:sync_main('child')
@@ -296,7 +296,7 @@ function! s:suite.__new__() abort
 
         call search('new\/')
         call s:sync_main('child')
-        call s:assert.dir(cwd . '/test/plugin/_test_data/new')
+        call s:assert.working_dir(cwd . '/test/plugin/_test_data/new')
 
         call s:set_input('new_file')
 
@@ -574,12 +574,12 @@ function! s:suite.__copy_cut_paste__() abort
         call s:sync_main('paste')
 
         let lines = s:lines()
-        call s:assert.dir(cwd . '/test/plugin/_test_data/paste')
+        call s:assert.working_dir(cwd . '/test/plugin/_test_data/paste')
         call s:assert.contains(lines, 'copy_file')
 
         wincmd p
         let lines = s:lines()
-        call s:assert.dir(cwd . '/test/plugin/_test_data')
+        call s:assert.working_dir(cwd . '/test/plugin/_test_data')
         call s:assert.contains(lines, 'copy_file')
     endfunction
 
@@ -884,13 +884,13 @@ function! s:suite.tab_open_group_node()
 
     tabprevious
     call s:assert.filetype('kiview')
-    call s:assert.dir(cwd . '/test')
+    call s:assert.working_dir(cwd . '/test')
 
     call search('plugin\/')
     call s:sync_main('child')
 
-    call s:assert.dir(cwd . '/test/plugin')
+    call s:assert.working_dir(cwd . '/test/plugin')
 
     tabprevious
-    call s:assert.dir(cwd)
+    call s:assert.working_dir(cwd)
 endfunction
