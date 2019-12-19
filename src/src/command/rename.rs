@@ -14,20 +14,20 @@ pub struct RenameCommand<'a> {
 
 impl<'a> Command for RenameCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        if !self.opts.no_confirm && self.current.target.is_some() {
-            let from = self.current.target.as_ref().unwrap().to_string();
-            return Ok(vec![Action::ConfirmRename { path: from }]);
-        }
-
-        if !self.opts.no_confirm && (self.opts.path.is_none() && self.current.target.is_none()) {
-            return Err(ErrorKind::Invalid {
-                message: String::from("no confirm rename required -path and -current-target"),
+        let (target, path) = match (self.opts.no_confirm, &self.current.target, &self.opts.path) {
+            (false, Some(target), _) => {
+                return Ok(vec![Action::ConfirmRename {
+                    path: target.to_string(),
+                }])
             }
-            .into());
-        }
-
-        let target = self.current.target.as_ref().unwrap();
-        let opt_path = self.opts.path.as_ref().unwrap();
+            (true, Some(target), Some(path)) => (target, path),
+            _ => {
+                return Err(ErrorKind::Invalid {
+                    message: String::from("no confirm rename required -path and -current-target"),
+                }
+                .into())
+            }
+        };
 
         let from = self.dispatcher.path(&target.path).to_string()?;
         let target_group_path = match target.is_parent_node {
@@ -38,7 +38,7 @@ impl<'a> Command for RenameCommand<'a> {
                 .unwrap_or(target.path.clone()),
             true => self.current.path.to_string(),
         };
-        let to = self.dispatcher.path(&target_group_path).join(&opt_path)?;
+        let to = self.dispatcher.path(&target_group_path).join(path)?;
         self.dispatcher.path_repository().rename(&from, &to)?;
 
         let paths: Paths = self

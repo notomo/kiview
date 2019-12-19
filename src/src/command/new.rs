@@ -14,9 +14,10 @@ pub struct NewCommand<'a> {
 
 impl<'a> Command for NewCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        if self.opts.path.is_none() {
-            return Ok(vec![Action::ConfirmNew]);
-        }
+        let path = match &self.opts.path {
+            Some(path) => path,
+            None => return Ok(vec![Action::ConfirmNew]),
+        };
 
         let target_group_path = match &self.current.target {
             Some(target) if !target.is_parent_node => self
@@ -26,10 +27,7 @@ impl<'a> Command for NewCommand<'a> {
                 .unwrap_or(target.path.clone()),
             Some(_) | None => self.current.path.to_string(),
         };
-        let new_path = self
-            .dispatcher
-            .path(&target_group_path)
-            .join(self.opts.path.as_ref().unwrap())?;
+        let new_path = self.dispatcher.path(&target_group_path).join(&path)?;
 
         self.dispatcher.path_repository().create(&new_path)?;
 
