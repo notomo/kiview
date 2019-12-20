@@ -41,7 +41,7 @@ function! kiview#current#new(bufnr) abort
 
     function! current.update(range) abort
         let self.line_number = line('.')
-        let self.depth = indent(self.line_number)
+        let self.depth = self._get_depth(self.line_number)
         let self.next_sibling_line_number = self._get_next_sibling_line_number(self.line_number, self.depth)
         let self.parent_line_number = self._get_parent_line_number(self.line_number, self.depth)
         let self.last_sibling_line_number = self._get_last_sibling_line_number(self.line_number, self.depth)
@@ -52,6 +52,11 @@ function! kiview#current#new(bufnr) abort
         let self.selected_targets = self._get_selected_targets()
 
         call self.logger.label('range').log(a:range)
+    endfunction
+
+    function! current._get_depth(line_number) abort
+        let marks = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:line_number - 1, 0], [a:line_number - 1, 0], {})
+        return self.props[marks[0][0]].depth
     endfunction
 
     function! current._get_next_sibling_line_number(line_number, depth) abort
