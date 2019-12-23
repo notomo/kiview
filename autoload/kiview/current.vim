@@ -174,7 +174,7 @@ function! kiview#current#new(bufnr) abort
     endfunction
 
     function! current._get_target(line_number) abort
-        let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:line_number -1 , 0], [a:line_number - 1, 0], {})
+        let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:line_number - 1, 0], [a:line_number - 1, 0], {})
         for [id, _, _] in mark_ids
             let target = copy(self.props[id])
             let target.id = id

@@ -9,6 +9,15 @@ let s:split_names = {
     \ 'horizontal': 'split',
 \ }
 
+function! kiview#buffer#get_or_create(range) abort
+    let buffer = kiview#buffer#find(a:range)
+    if !empty(buffer)
+        return buffer
+    endif
+
+    return kiview#buffer#new()
+endfunction
+
 function! kiview#buffer#find(range) abort
     let bufnr = bufnr('%')
     if has_key(s:buffers, bufnr)
@@ -16,8 +25,7 @@ function! kiview#buffer#find(range) abort
         call buffer.current.update(a:range)
         return buffer
     endif
-
-    return kiview#buffer#new()
+    return v:null
 endfunction
 
 function! kiview#buffer#new() abort

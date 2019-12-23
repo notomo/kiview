@@ -49,7 +49,7 @@ function! s:sync_main(arg) abort
     return command
 endfunction
 
-function! s:suite.create()
+function! s:suite.create_one()
     let cwd = getcwd()
 
     call s:sync_main('')
@@ -70,6 +70,7 @@ function! s:suite.create()
 
     call search('autoload\/')
     call s:assert.syntax_name('KiviewNodeClosed')
+    call s:assert.ends_with(kiview#get().path, 'autoload')
 endfunction
 
 function! s:suite.multiple_create()

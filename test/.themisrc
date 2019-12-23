@@ -98,6 +98,12 @@ function! KiviewTestAssert() abort
         call self.empty(contents, message)
     endfunction
 
+    function! assert.ends_with(haystack, expected) abort
+        let ends_with = a:haystack =~# a:expected . '$'
+        let message = printf('%s should be ends with %s', a:haystack, a:expected)
+        call self.true(ends_with, message)
+    endfunction
+
     return assert
 endfunction
 
