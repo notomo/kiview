@@ -40,8 +40,13 @@ impl<'a> Command for NewCommand<'a> {
             .collect::<Vec<_>>()
             .into();
 
+        let depth = match &self.current.target {
+            Some(target) => target.depth,
+            None => 0,
+        };
+
         Ok(vec![paths.to_write_action(
-            self.current.depth as usize,
+            depth as usize,
             self.current.parent_line_number as usize,
             self.current.last_sibling_line_number as usize,
         )])

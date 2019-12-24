@@ -13,7 +13,6 @@ function! kiview#current#new(bufnr) abort
         \ 'next_sibling_line_number': 1,
         \ 'parent_line_number': 1,
         \ 'last_sibling_line_number': 1,
-        \ 'depth': 0,
         \ 'bufnr': a:bufnr,
         \ 'created': v:false,
         \ 'opened': v:false,
@@ -41,10 +40,10 @@ function! kiview#current#new(bufnr) abort
 
     function! current.update(range) abort
         let self.line_number = line('.')
-        let self.depth = self._get_depth(self.line_number)
-        let self.next_sibling_line_number = self._get_next_sibling_line_number(self.line_number, self.depth)
-        let self.parent_line_number = self._get_parent_line_number(self.line_number, self.depth)
-        let self.last_sibling_line_number = self._get_last_sibling_line_number(self.line_number, self.depth)
+        let depth = self._get_depth(self.line_number)
+        let self.next_sibling_line_number = self._get_next_sibling_line_number(self.line_number, depth)
+        let self.parent_line_number = self._get_parent_line_number(self.line_number, depth)
+        let self.last_sibling_line_number = self._get_last_sibling_line_number(self.line_number, depth)
         let self.created = v:true
 
         let self.target = self._get_target(self.line_number)
@@ -187,7 +186,7 @@ function! kiview#current#new(bufnr) abort
         let targets = []
         for [id, _, _] in mark_ids
             let prop = self.props[id]
-            call add(targets, {'id': id, 'path': prop.path, 'is_parent_node': prop.is_parent_node})
+            call add(targets, self._to_target(id, prop))
         endfor
         return targets
     endfunction
@@ -197,9 +196,13 @@ function! kiview#current#new(bufnr) abort
         let targets = []
         for id in mark_ids
             let prop = self.props[id]
-            call add(targets, {'id': str2nr(id), 'path': prop.path, 'is_parent_node': prop.is_parent_node})
+            call add(targets, self._to_target(id, prop))
         endfor
         return targets
+    endfunction
+
+    function! current._to_target(id, prop) abort
+        return {'id': str2nr(a:id), 'path': a:prop.path, 'is_parent_node': a:prop.is_parent_node, 'depth': a:prop.depth}
     endfunction
 
     return current

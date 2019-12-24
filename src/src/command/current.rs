@@ -7,9 +7,6 @@ pub struct Current<'a> {
     pub line_number: u64,
 
     #[serde(default)]
-    pub depth: u64,
-
-    #[serde(default)]
     pub next_sibling_line_number: u64,
 
     #[serde(default)]
@@ -53,6 +50,7 @@ pub struct Target {
     pub id: u64,
     pub path: String,
     pub is_parent_node: bool,
+    pub depth: u64,
 }
 
 impl Target {

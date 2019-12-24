@@ -37,7 +37,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
 
                 Ok(vec![child_paths.to_open_tree_action(
                     self.current.line_number as usize,
-                    self.current.depth as usize,
+                    target.depth as usize,
                 )])
             }
             _ => Ok(vec![]),
