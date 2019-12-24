@@ -157,6 +157,11 @@ function! kiview#current#new(bufnr) abort
         endfor
     endfunction
 
+    function! current.toggle_all_selection() abort
+        let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [1, 0], [-1, 0], {})
+        call self.toggle_selection(map(mark_ids, { _, v -> v[0] }))
+    endfunction
+
     function! current.set_props(props, start) abort
         let line_number = a:start - 1
         for prop in a:props

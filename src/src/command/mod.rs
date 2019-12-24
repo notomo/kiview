@@ -29,7 +29,7 @@ mod cut;
 pub use cut::CutCommand;
 
 mod select;
-pub use select::ToggleSelectionCommand;
+pub use select::{ToggleAllSelectionCommand, ToggleSelectionCommand};
 
 mod paste;
 pub use paste::PasteCommand;

@@ -32,6 +32,8 @@ pub enum CommandName {
     ToggleTree,
     #[serde(rename = "toggle_selection")]
     ToggleSelection,
+    #[serde(rename = "toggle_all_selection")]
+    ToggleAllSelection,
     #[serde(rename = "unknown")]
     Unknown,
 }
@@ -56,6 +58,7 @@ impl From<&str> for CommandName {
             ["rename"] => CommandName::Rename,
             ["toggle_tree"] => CommandName::ToggleTree,
             ["toggle_selection"] => CommandName::ToggleSelection,
+            ["toggle_all_selection"] => CommandName::ToggleAllSelection,
             [] => CommandName::Go,
             _ => CommandName::Unknown,
         }

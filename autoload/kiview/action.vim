@@ -25,6 +25,7 @@ function! kiview#action#new_handler(buffer) abort
             \ 'cut': { action -> s:cut(action, buffer) },
             \ 'clear_register': { action -> s:clear_register(buffer) },
             \ 'toggle_selection': { action -> s:toggle_selection(action, buffer) },
+            \ 'toggle_all_selection': { action -> s:toggle_all_selection(action, buffer) },
             \ 'show_error': { action -> s:show_error(action) },
             \ 'fork_buffer': { action -> s:fork_buffer(action, buffer) },
             \ 'choose': { action -> s:choose(action, buffer, input_reader) },
@@ -201,6 +202,10 @@ endfunction
 
 function! s:toggle_selection(action, buffer) abort
     call a:buffer.current.toggle_selection(a:action.ids)
+endfunction
+
+function! s:toggle_all_selection(action, buffer) abort
+    call a:buffer.current.toggle_all_selection()
 endfunction
 
 function! s:show_error(action) abort

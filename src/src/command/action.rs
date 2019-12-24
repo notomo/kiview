@@ -31,6 +31,8 @@ pub enum Action {
     Copy { paths: Vec<String> },
     #[serde(rename = "toggle_selection")]
     ToggleSelection { ids: Vec<u64> },
+    #[serde(rename = "toggle_all_selection")]
+    ToggleAllSelection,
     #[serde(rename = "confirm_new")]
     ConfirmNew,
     #[serde(rename = "quit")]

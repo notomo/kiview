@@ -778,10 +778,7 @@ function! s:suite.open_root()
 endfunction
 
 function! s:suite.toggle_selection()
-    call s:sync_main('')
-
-    call search('src\/')
-    call s:sync_main('child')
+    call s:sync_main('go -path=src')
 
     call search('\.gitignore')
     call s:sync_main('toggle_selection')
@@ -793,6 +790,25 @@ function! s:suite.toggle_selection()
 
     call s:assert.tab_count(3)
     call s:assert.file_name('Cargo.toml')
+endfunction
+
+function! s:suite.toggle_all_selection()
+    call s:sync_main('go -path=src')
+
+    call search('src\/')
+    call s:sync_main('toggle_selection')
+    call search('target\/')
+    call s:sync_main('toggle_selection')
+
+    call s:sync_main('toggle_all_selection')
+
+    call s:sync_main('child -layout=tab')
+
+    call s:assert.tab_count(5)
+    call s:assert.file_name('Makefile')
+
+    call s:sync_main('parent')
+    call s:sync_main('toggle_all_selection')
 endfunction
 
 function! s:suite.vertical_rightbelow()
