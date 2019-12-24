@@ -15,7 +15,6 @@ function! kiview#current#new(bufnr) abort
         \ 'last_sibling_line_number': 1,
         \ 'bufnr': a:bufnr,
         \ 'created': v:false,
-        \ 'opened': v:false,
         \ 'props': {},
         \ 'selected': {},
         \ 'logger': kiview#logger#new('current'),
@@ -175,9 +174,8 @@ function! kiview#current#new(bufnr) abort
     function! current._get_target(line_number) abort
         let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:line_number - 1, 0], [a:line_number - 1, 0], {})
         for [id, _, _] in mark_ids
-            let target = copy(self.props[id])
-            let target.id = id
-            return target
+            let prop = copy(self.props[id])
+            return self._to_target(id, prop)
         endfor
     endfunction
 
@@ -202,7 +200,13 @@ function! kiview#current#new(bufnr) abort
     endfunction
 
     function! current._to_target(id, prop) abort
-        return {'id': str2nr(a:id), 'path': a:prop.path, 'is_parent_node': a:prop.is_parent_node, 'depth': a:prop.depth}
+        return {
+            \ 'id': str2nr(a:id),
+            \ 'path': a:prop.path,
+            \ 'is_parent_node': a:prop.is_parent_node,
+            \ 'depth': a:prop.depth,
+            \ 'opened': has_key(a:prop, 'opened') ? a:prop.opened : v:false,
+        \ }
     endfunction
 
     return current

@@ -14,7 +14,16 @@ pub struct ToggleTreeCommand<'a> {
 
 impl<'a> Command for ToggleTreeCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        if self.current.opened && self.current.next_sibling_line_number > self.current.line_number {
+        let target = match &self.current.target {
+            Some(target)
+                if !target.is_parent_node && self.dispatcher.path(&target.path).is_group_node() =>
+            {
+                target
+            }
+            _ => return Ok(vec![]),
+        };
+
+        if target.opened && self.current.next_sibling_line_number > self.current.line_number {
             return Ok(vec![Action::CloseTree {
                 root: self.current.line_number as usize,
                 count: (self.current.next_sibling_line_number - self.current.line_number - 1)
@@ -22,25 +31,18 @@ impl<'a> Command for ToggleTreeCommand<'a> {
             }]);
         }
 
-        match &self.current.target {
-            Some(target)
-                if !target.is_parent_node && self.dispatcher.path(&target.path).is_group_node() =>
-            {
-                let child_paths: Paths = self
-                    .dispatcher
-                    .path_repository()
-                    .list(&target.path)?
-                    .iter()
-                    .skip(1)
-                    .collect::<Vec<_>>()
-                    .into();
+        let child_paths: Paths = self
+            .dispatcher
+            .path_repository()
+            .list(&target.path)?
+            .iter()
+            .skip(1)
+            .collect::<Vec<_>>()
+            .into();
 
-                Ok(vec![child_paths.to_open_tree_action(
-                    self.current.line_number as usize,
-                    target.depth as usize,
-                )])
-            }
-            _ => Ok(vec![]),
-        }
+        Ok(vec![child_paths.to_open_tree_action(
+            self.current.line_number as usize,
+            target.depth as usize,
+        )])
     }
 }

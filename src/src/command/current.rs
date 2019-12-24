@@ -16,9 +16,6 @@ pub struct Current<'a> {
     pub parent_line_number: u64,
 
     #[serde(default)]
-    pub opened: bool,
-
-    #[serde(default)]
     pub created: bool,
 
     #[serde(default)]
@@ -51,6 +48,7 @@ pub struct Target {
     pub path: String,
     pub is_parent_node: bool,
     pub depth: u64,
+    pub opened: bool,
 }
 
 impl Target {

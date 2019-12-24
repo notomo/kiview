@@ -86,7 +86,6 @@ function! s:build_input(buffer) abort
         \ 'selected_targets': a:buffer.current.selected_targets,
         \ 'registered_paths': a:buffer.register.paths,
         \ 'has_cut': a:buffer.register.has_cut,
-        \ 'opened': !empty(a:buffer.current.target) && has_key(a:buffer.current.target, 'opened') && a:buffer.current.target.opened ? v:true : v:false,
         \ 'created': a:buffer.current.created,
     \ }
 
