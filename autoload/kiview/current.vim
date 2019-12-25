@@ -11,7 +11,6 @@ function! kiview#current#new(bufnr) abort
         \ 'targets': [],
         \ 'selected_targets': [],
         \ 'next_sibling_line_number': 1,
-        \ 'last_sibling_line_number': 1,
         \ 'bufnr': a:bufnr,
         \ 'created': v:false,
         \ 'props': {},
@@ -40,7 +39,6 @@ function! kiview#current#new(bufnr) abort
         let self.line_number = line('.')
         let depth = self._get_depth(self.line_number)
         let self.next_sibling_line_number = self._get_next_sibling_line_number(self.line_number, depth)
-        let self.last_sibling_line_number = self._get_last_sibling_line_number(self.line_number, depth)
         let self.created = v:true
 
         let self.target = self._get_target(self.line_number)
@@ -67,22 +65,6 @@ function! kiview#current#new(bufnr) abort
             if depth == a:depth
                 return line_number
             elseif depth < a:depth
-                return line_number
-            endif
-        endfor
-        return last_line_number + 1
-    endfunction
-
-    function! current._get_last_sibling_line_number(line_number, depth) abort
-        let last_line_number = line('$')
-        for line_number in range(a:line_number, last_line_number)
-            let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [line_number - 1, 0], [line_number - 1, 0], {})
-            if empty(mark_ids)
-                continue
-            endif
-
-            let depth = self.props[mark_ids[0][0]].depth
-            if depth < a:depth
                 return line_number
             endif
         endfor
@@ -144,9 +126,9 @@ function! kiview#current#new(bufnr) abort
         call self.toggle_selection(map(mark_ids, { _, v -> v[0] }))
     endfunction
 
-    function! current.to_line_number(id) abort
+    function! current.to_line_number(id, default) abort
         if empty(a:id)
-            return 1
+            return a:default
         endif
         let [index, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:id)
         return index + 1
@@ -154,11 +136,24 @@ function! kiview#current#new(bufnr) abort
 
     function! current.set_props(props, start) abort
         let line_number = a:start - 1
+        let pairs = []
         for prop in a:props
             let id = nvim_buf_set_extmark(self.bufnr, s:namespace, 0, line_number, 0, {})
+            call add(pairs, [id, prop])
             let self.props[id] = prop
             let line_number += 1
         endfor
+
+        let last_sibling_id = id
+        for [id, prop] in pairs
+            if prop.is_parent_node
+                call self.logger.label('line').buffer_log(self.bufnr, s:namespace, self.props)
+                return
+            endif
+            let prop.last_sibling_id = last_sibling_id
+        endfor
+
+        call self.logger.label('line').buffer_log(self.bufnr, s:namespace, self.props)
     endfunction
 
     function! current.clear_selection() abort
@@ -202,6 +197,7 @@ function! kiview#current#new(bufnr) abort
             \ 'depth': a:prop.depth,
             \ 'opened': has_key(a:prop, 'opened') ? a:prop.opened : v:false,
             \ 'parent_id': has_key(a:prop, 'parent_id') ? a:prop.parent_id : v:null,
+            \ 'last_sibling_id': has_key(a:prop, 'last_sibling_id') ? a:prop.last_sibling_id : v:null,
         \ }
     endfunction
 

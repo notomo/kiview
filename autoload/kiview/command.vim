@@ -80,7 +80,6 @@ function! s:build_input(buffer) abort
         \ 'line_number': a:buffer.current.line_number,
         \ 'target': a:buffer.current.target,
         \ 'next_sibling_line_number': a:buffer.current.next_sibling_line_number,
-        \ 'last_sibling_line_number': a:buffer.current.last_sibling_line_number,
         \ 'targets': a:buffer.current.targets,
         \ 'selected_targets': a:buffer.current.selected_targets,
         \ 'registered_paths': a:buffer.register.paths,

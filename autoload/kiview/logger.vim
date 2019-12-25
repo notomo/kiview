@@ -49,8 +49,14 @@ function! kiview#logger#new(...) abort
         call self.log(message)
     endfunction
 
-    function! logger.buffer_log(bufnr) abort
+    function! logger.buffer_log(bufnr, namespace, props) abort
+        let marks = nvim_buf_get_extmarks(a:bufnr, a:namespace, 0, -1, {})
         let lines = getbufline(a:bufnr, 1, '$')
+        let props = deepcopy(a:props)
+        for [id, line, _] in marks
+            let props[id].id = id
+            let lines[str2nr(line)] = printf('%s  %s', lines[line], string(props[id]))
+        endfor
         call self.logs(lines)
     endfunction
 
@@ -84,7 +90,7 @@ function! s:nop_logger(...) abort
     function! logger.logf(message, ...) abort
     endfunction
 
-    function! logger.buffer_log(bufnr) abort
+    function! logger.buffer_log(bufnr, namespace, props) abort
     endfunction
 
     function! logger.trace(throwpoint, exception) abort

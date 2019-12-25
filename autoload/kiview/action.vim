@@ -82,9 +82,10 @@ function! s:write_all(action, buffer) abort
 endfunction
 
 function! s:write(action, buffer) abort
-    let start = a:buffer.current.to_line_number(a:action.parent_id) + 1
-    call a:buffer.current.unset_props(start, a:action.next_sibling)
-    call a:buffer.write(a:action.lines, start, a:action.next_sibling)
+    let start = a:buffer.current.to_line_number(a:action.parent_id, 1) + 1
+    let end = a:buffer.current.to_line_number(a:action.last_sibling_id, -1) + 1
+    call a:buffer.current.unset_props(start, end)
+    call a:buffer.write(a:action.lines, start, end)
     call a:buffer.current.set_props(a:action.props, start)
     call a:buffer.current.clear_selection()
 endfunction

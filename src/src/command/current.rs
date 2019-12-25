@@ -10,9 +10,6 @@ pub struct Current<'a> {
     pub next_sibling_line_number: u64,
 
     #[serde(default)]
-    pub last_sibling_line_number: u64,
-
-    #[serde(default)]
     pub created: bool,
 
     #[serde(default)]
@@ -45,6 +42,7 @@ pub struct Target {
     pub path: String,
     pub is_parent_node: bool,
     pub parent_id: Option<u64>,
+    pub last_sibling_id: Option<u64>,
     pub depth: u64,
     pub opened: bool,
 }

@@ -55,8 +55,8 @@ pub enum Action {
         lines: Vec<String>,
         props: Vec<Prop>,
         parent_id: Option<u64>,
+        last_sibling_id: Option<u64>,
         count: usize,
-        next_sibling: usize,
     },
     #[serde(rename = "open_tree")]
     OpenTree {
@@ -180,7 +180,7 @@ impl Paths {
         &self,
         depth: usize,
         parent_id: Option<u64>,
-        next_sibling: usize,
+        last_sibling_id: Option<u64>,
     ) -> Action {
         let indent = std::iter::repeat(" ").take(depth).collect::<String>();
         let lines: Vec<_> = self
@@ -192,7 +192,7 @@ impl Paths {
         Action::Write {
             count: (&lines).len(),
             parent_id: parent_id,
-            next_sibling: next_sibling,
+            last_sibling_id: last_sibling_id,
             lines: lines,
             props: self
                 .paths
