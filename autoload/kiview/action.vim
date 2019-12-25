@@ -82,7 +82,7 @@ function! s:write_all(action, buffer) abort
 endfunction
 
 function! s:write(action, buffer) abort
-    let start = a:action.root + 1
+    let start = a:buffer.current.to_line_number(a:action.parent_id) + 1
     call a:buffer.current.unset_props(start, a:action.next_sibling)
     call a:buffer.write(a:action.lines, start, a:action.next_sibling)
     call a:buffer.current.set_props(a:action.props, start)
@@ -90,22 +90,21 @@ function! s:write(action, buffer) abort
 endfunction
 
 function! s:open_tree(action, buffer) abort
-    call a:buffer.current.toggle_tree(a:action.root, v:true)
+    let start = a:buffer.current.toggle_tree(a:action.id, v:true) + 1
     if a:action.count == 0
         return
     endif
-    let start = a:action.root + 1
     call a:buffer.write(a:action.lines, start, start)
     call a:buffer.current.set_props(a:action.props, start)
 endfunction
 
 function! s:close_tree(action, buffer) abort
-    call a:buffer.current.toggle_tree(a:action.root, v:false)
+    let line_number = a:buffer.current.toggle_tree(a:action.id, v:false)
     if a:action.count == 0
         return
     endif
-    let start = a:action.root + 1
-    let end = a:action.root + a:action.count
+    let start = line_number + 1
+    let end = line_number + a:action.count
     call a:buffer.current.unset_props(start, end)
     call a:buffer.write([], start, end + 1)
 endfunction

@@ -107,7 +107,7 @@ impl<'a> Command for PasteCommand<'a> {
         Ok(vec![
             paths.to_write_action(
                 depth as usize,
-                self.current.parent_line_number as usize,
+                self.current.target.as_ref().and_then(|t| t.parent_id),
                 self.current.last_sibling_line_number as usize,
             ),
             Action::ClearRegister,

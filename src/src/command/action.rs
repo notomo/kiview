@@ -54,7 +54,7 @@ pub enum Action {
     Write {
         lines: Vec<String>,
         props: Vec<Prop>,
-        root: usize,
+        parent_id: Option<u64>,
         count: usize,
         next_sibling: usize,
     },
@@ -62,11 +62,11 @@ pub enum Action {
     OpenTree {
         lines: Vec<String>,
         props: Vec<Prop>,
-        root: usize,
+        id: u64,
         count: usize,
     },
     #[serde(rename = "close_tree")]
-    CloseTree { root: usize, count: usize },
+    CloseTree { id: u64, count: usize },
     #[serde(rename = "fork_buffer")]
     ForkBuffer {
         items: Vec<ForkBufferItem>,
@@ -91,6 +91,7 @@ pub struct Prop {
     path: String,
     depth: usize,
     is_parent_node: bool,
+    parent_id: Option<u64>,
 }
 
 impl From<Vec<FullPath>> for Paths {
@@ -130,7 +131,7 @@ impl IntoIterator for Paths {
 }
 
 impl Paths {
-    pub fn to_open_tree_action(&self, root: usize, current_depth: usize) -> Action {
+    pub fn to_open_tree_action(&self, id: u64, current_depth: usize) -> Action {
         let indent = std::iter::repeat(" ")
             .take(current_depth)
             .collect::<String>();
@@ -143,6 +144,7 @@ impl Paths {
         let depth = current_depth + 2;
 
         Action::OpenTree {
+            id: id,
             count: (&lines).len(),
             lines: lines,
             props: self
@@ -152,9 +154,9 @@ impl Paths {
                     path: p.path.clone(),
                     depth: depth,
                     is_parent_node: p.is_parent_node,
+                    parent_id: Some(id),
                 })
                 .collect::<Vec<Prop>>(),
-            root: root,
         }
     }
 
@@ -168,12 +170,18 @@ impl Paths {
                     path: p.path.clone(),
                     depth: 0 as usize,
                     is_parent_node: p.is_parent_node,
+                    parent_id: None,
                 })
                 .collect::<Vec<Prop>>(),
         }
     }
 
-    pub fn to_write_action(&self, depth: usize, root: usize, next_sibling: usize) -> Action {
+    pub fn to_write_action(
+        &self,
+        depth: usize,
+        parent_id: Option<u64>,
+        next_sibling: usize,
+    ) -> Action {
         let indent = std::iter::repeat(" ").take(depth).collect::<String>();
         let lines: Vec<_> = self
             .paths
@@ -183,7 +191,7 @@ impl Paths {
 
         Action::Write {
             count: (&lines).len(),
-            root: root,
+            parent_id: parent_id,
             next_sibling: next_sibling,
             lines: lines,
             props: self
@@ -193,6 +201,7 @@ impl Paths {
                     path: p.path.clone(),
                     depth: depth,
                     is_parent_node: p.is_parent_node,
+                    parent_id: parent_id,
                 })
                 .collect::<Vec<Prop>>(),
         }
@@ -209,6 +218,7 @@ impl Paths {
                     path: p.path.clone(),
                     depth: 0 as usize,
                     is_parent_node: p.is_parent_node,
+                    parent_id: None,
                 })
                 .collect::<Vec<Prop>>(),
         }

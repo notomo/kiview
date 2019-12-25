@@ -52,7 +52,7 @@ impl<'a> Command for RenameCommand<'a> {
 
         Ok(vec![paths.to_write_action(
             target.depth as usize,
-            self.current.parent_line_number as usize,
+            target.parent_id,
             self.current.last_sibling_line_number as usize,
         )])
     }

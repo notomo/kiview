@@ -11,7 +11,6 @@ function! kiview#current#new(bufnr) abort
         \ 'targets': [],
         \ 'selected_targets': [],
         \ 'next_sibling_line_number': 1,
-        \ 'parent_line_number': 1,
         \ 'last_sibling_line_number': 1,
         \ 'bufnr': a:bufnr,
         \ 'created': v:false,
@@ -41,7 +40,6 @@ function! kiview#current#new(bufnr) abort
         let self.line_number = line('.')
         let depth = self._get_depth(self.line_number)
         let self.next_sibling_line_number = self._get_next_sibling_line_number(self.line_number, depth)
-        let self.parent_line_number = self._get_parent_line_number(self.line_number, depth)
         let self.last_sibling_line_number = self._get_last_sibling_line_number(self.line_number, depth)
         let self.created = v:true
 
@@ -75,22 +73,6 @@ function! kiview#current#new(bufnr) abort
         return last_line_number + 1
     endfunction
 
-    function! current._get_parent_line_number(line_number, depth) abort
-        let first_line_number = 1
-        for line_number in range(a:line_number, first_line_number, -1)
-            let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [line_number - 1, 0], [line_number - 1, 0], {})
-            if empty(mark_ids)
-                continue
-            endif
-
-            let depth = self.props[mark_ids[0][0]].depth
-            if depth < a:depth
-                return line_number
-            endif
-        endfor
-        return first_line_number
-    endfunction
-
     function! current._get_last_sibling_line_number(line_number, depth) abort
         let last_line_number = line('$')
         for line_number in range(a:line_number, last_line_number)
@@ -122,22 +104,22 @@ function! kiview#current#new(bufnr) abort
         call self.unset_props(0, 1)
     endfunction
 
-    function! current.toggle_tree(line_number, opened) abort
-        let index = a:line_number - 1
-        let mark_id = nvim_buf_get_extmarks(self.bufnr, s:namespace, [index, 0], [index, 0], {})[0][0]
-        let prop = self.props[mark_id]
+    function! current.toggle_tree(id, opened) abort
+        let [index, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:id)
+        let line_number = index + 1
+        let prop = self.props[a:id]
         let prop.opened = a:opened
 
-        let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:line_number -1 , 0], [a:line_number - 1, 0], {})
-        if !empty(mark_ids) && has_key(self.selected, mark_ids[0][0])
-            return
+        if has_key(self.selected, a:id)
+            return line_number
         endif
 
         if prop.opened
-            call nvim_buf_add_highlight(self.bufnr, s:group_hl_namespace, 'KiviewNodeOpen', a:line_number - 1, 0, -1)
+            call nvim_buf_add_highlight(self.bufnr, s:group_hl_namespace, 'KiviewNodeOpen', index, 0, -1)
         else
-            call nvim_buf_clear_namespace(self.bufnr, s:group_hl_namespace, a:line_number - 1, a:line_number)
+            call nvim_buf_clear_namespace(self.bufnr, s:group_hl_namespace, index, index + 1)
         endif
+        return line_number
     endfunction
 
     function! current.toggle_selection(ids) abort
@@ -160,6 +142,14 @@ function! kiview#current#new(bufnr) abort
     function! current.toggle_all_selection() abort
         let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [1, 0], [-1, 0], {})
         call self.toggle_selection(map(mark_ids, { _, v -> v[0] }))
+    endfunction
+
+    function! current.to_line_number(id) abort
+        if empty(a:id)
+            return 1
+        endif
+        let [index, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:id)
+        return index + 1
     endfunction
 
     function! current.set_props(props, start) abort
@@ -211,6 +201,7 @@ function! kiview#current#new(bufnr) abort
             \ 'is_parent_node': a:prop.is_parent_node,
             \ 'depth': a:prop.depth,
             \ 'opened': has_key(a:prop, 'opened') ? a:prop.opened : v:false,
+            \ 'parent_id': has_key(a:prop, 'parent_id') ? a:prop.parent_id : v:null,
         \ }
     endfunction
 

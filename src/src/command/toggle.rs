@@ -25,7 +25,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
 
         if target.opened {
             return Ok(vec![Action::CloseTree {
-                root: self.current.line_number as usize,
+                id: target.id,
                 count: (self.current.next_sibling_line_number - self.current.line_number - 1)
                     as usize,
             }]);
@@ -40,9 +40,8 @@ impl<'a> Command for ToggleTreeCommand<'a> {
             .collect::<Vec<_>>()
             .into();
 
-        Ok(vec![child_paths.to_open_tree_action(
-            self.current.line_number as usize,
-            target.depth as usize,
-        )])
+        Ok(vec![
+            child_paths.to_open_tree_action(target.id, target.depth as usize)
+        ])
     }
 }
