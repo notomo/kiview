@@ -23,7 +23,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
             _ => return Ok(vec![]),
         };
 
-        if target.opened && self.current.next_sibling_line_number > self.current.line_number {
+        if target.opened {
             return Ok(vec![Action::CloseTree {
                 root: self.current.line_number as usize,
                 count: (self.current.next_sibling_line_number - self.current.line_number - 1)
