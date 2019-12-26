@@ -28,7 +28,7 @@ impl<'a> Command for GoCommand<'a> {
             .list(&current_path)?
             .into();
 
-        if self.current.created && self.opts.create {
+        if self.current.used && self.opts.create {
             return Ok(vec![Action::ForkBuffer {
                 items: vec![paths.to_fork_buffer_item(&current_path)],
                 split_name: self.opts.split.name,
@@ -48,7 +48,7 @@ impl<'a> Command for GoCommand<'a> {
             });
         }
 
-        if !self.current.created {
+        if !self.current.used {
             actions.push(Action::Create {
                 path: current_path,
                 split_name: self.opts.split.name,

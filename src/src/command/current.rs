@@ -10,7 +10,7 @@ pub struct Current<'a> {
     pub next_sibling_line_number: u64,
 
     #[serde(default)]
-    pub created: bool,
+    pub used: bool,
 
     #[serde(default)]
     pub has_cut: bool,

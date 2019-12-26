@@ -9,21 +9,20 @@ let s:split_names = {
     \ 'horizontal': 'split',
 \ }
 
-function! kiview#buffer#get_or_create(range) abort
-    let buffer = kiview#buffer#find(a:range)
+function! kiview#buffer#get_or_create() abort
+    let buffer = kiview#buffer#find()
     if !empty(buffer)
+        let buffer.used = v:true
         return buffer
     endif
 
     return kiview#buffer#new()
 endfunction
 
-function! kiview#buffer#find(range) abort
+function! kiview#buffer#find() abort
     let bufnr = bufnr('%')
     if has_key(s:buffers, bufnr)
-        let buffer = s:buffers[bufnr]
-        call buffer.current.update(a:range)
-        return buffer
+        return s:buffers[bufnr]
     endif
     return v:null
 endfunction
@@ -37,6 +36,7 @@ function! kiview#buffer#new() abort
 
     let buffer = {
         \ 'bufnr': bufnr,
+        \ 'used': v:false,
         \ 'register': kiview#register#new(),
         \ 'history': kiview#history#new(bufnr),
         \ 'current': kiview#current#new(bufnr),

@@ -2,7 +2,7 @@
 let s:limitter = kiview#limitter#new()
 let s:id = 0
 
-function! kiview#command#new(buffer, event_service, arg, parent_id) abort
+function! kiview#command#new(buffer, range, event_service, arg, parent_id) abort
     let s:id += 1
 
     let cmd = ['kiview', 'do', '--arg=' . a:arg]
@@ -11,6 +11,7 @@ function! kiview#command#new(buffer, event_service, arg, parent_id) abort
         \ 'parent_id': a:parent_id,
         \ 'job': kiview#job#new(cmd, a:event_service),
         \ 'buffer': a:buffer,
+        \ 'range': a:range,
         \ 'event_service': a:event_service,
         \ 'action_handler': kiview#action#new_handler(a:buffer),
         \ 'children': [],
@@ -24,7 +25,7 @@ function! kiview#command#new(buffer, event_service, arg, parent_id) abort
     function! command._start() abort
         call self.logger.log('start')
         call self.event_service.on_job_finished(self.job.id, { id, err -> self.on_job_finished(id, err) })
-        let input = s:build_input(self.buffer)
+        let input = s:build_input(self.buffer, self.range)
         call self.job.start(input)
     endfunction
 
@@ -44,7 +45,7 @@ function! kiview#command#new(buffer, event_service, arg, parent_id) abort
                     continue
                 endif
 
-                let child = kiview#command#new(self.buffer, self.event_service, arg, self.id)
+                let child = kiview#command#new(self.buffer, self.range, self.event_service, arg, self.id)
                 call add(self.children, child)
                 call child.start()
             endfor
@@ -74,17 +75,31 @@ function! kiview#command#new(buffer, event_service, arg, parent_id) abort
     return command
 endfunction
 
-function! s:build_input(buffer) abort
+function! s:build_input(buffer, range) abort
+    if a:buffer.used
+        let line_number = line('.')
+        let target = a:buffer.current.get_target(line_number)
+        let targets = a:buffer.current.get_targets(a:range[0], a:range[1])
+        let selected_targets = a:buffer.current.get_selected_targets()
+        let next_sibling_line_number = a:buffer.current.get_next_sibling_line_number(line_number)
+    else
+        let line_number = 2
+        let target = v:null
+        let targets = []
+        let selected_targets = []
+        let next_sibling_line_number = 1
+    endif
+
     let input = {
-        \ 'path': a:buffer.current.path,
-        \ 'line_number': a:buffer.current.line_number,
-        \ 'target': a:buffer.current.target,
-        \ 'next_sibling_line_number': a:buffer.current.next_sibling_line_number,
-        \ 'targets': a:buffer.current.targets,
-        \ 'selected_targets': a:buffer.current.selected_targets,
+        \ 'path': getcwd(),
+        \ 'line_number': line_number,
+        \ 'target': target,
+        \ 'targets': targets,
+        \ 'selected_targets': selected_targets,
+        \ 'next_sibling_line_number': next_sibling_line_number,
         \ 'registered_paths': a:buffer.register.paths,
         \ 'has_cut': a:buffer.register.has_cut,
-        \ 'created': a:buffer.current.created,
+        \ 'used': a:buffer.used
     \ }
 
     return json_encode(input)
