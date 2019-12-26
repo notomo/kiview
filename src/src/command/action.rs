@@ -66,7 +66,10 @@ pub enum Action {
         count: usize,
     },
     #[serde(rename = "close_tree")]
-    CloseTree { id: u64, count: usize },
+    CloseTree {
+        id: u64,
+        next_sibling_id: Option<u64>,
+    },
     #[serde(rename = "fork_buffer")]
     ForkBuffer {
         items: Vec<ForkBufferItem>,

@@ -101,11 +101,13 @@ endfunction
 
 function! s:close_tree(action, buffer) abort
     let line_number = a:buffer.current.toggle_tree(a:action.id, v:false)
-    if a:action.count == 0
+    let next_sibling_line_number = a:buffer.current.to_line_number(a:action.next_sibling_id, 0)
+    let line_count = next_sibling_line_number - line_number - 1
+    if line_count == 0
         return
     endif
     let start = line_number + 1
-    let end = line_number + a:action.count
+    let end = line_number + line_count
     call a:buffer.current.unset_props(start, end)
     call a:buffer.write([], start, end + 1)
 endfunction

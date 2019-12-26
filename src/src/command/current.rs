@@ -7,14 +7,11 @@ pub struct Current<'a> {
     pub line_number: u64,
 
     #[serde(default)]
-    pub next_sibling_line_number: u64,
-
-    #[serde(default)]
     pub used: bool,
 
-    #[serde(default)]
     pub has_cut: bool,
 
+    #[serde(default)]
     pub target: Option<Target>,
 
     #[serde(default)]
@@ -43,6 +40,7 @@ pub struct Target {
     pub is_parent_node: bool,
     pub parent_id: Option<u64>,
     pub last_sibling_id: Option<u64>,
+    pub next_sibling_id: Option<u64>,
     pub depth: u64,
     pub opened: bool,
 }

@@ -76,31 +76,20 @@ function! kiview#command#new(buffer, range, event_service, arg, parent_id) abort
 endfunction
 
 function! s:build_input(buffer, range) abort
-    if a:buffer.used
-        let line_number = line('.')
-        let target = a:buffer.current.get_target(line_number)
-        let targets = a:buffer.current.get_targets(a:range[0], a:range[1])
-        let selected_targets = a:buffer.current.get_selected_targets()
-        let next_sibling_line_number = a:buffer.current.get_next_sibling_line_number(line_number)
-    else
-        let line_number = 2
-        let target = v:null
-        let targets = []
-        let selected_targets = []
-        let next_sibling_line_number = 1
-    endif
-
     let input = {
         \ 'path': getcwd(),
-        \ 'line_number': line_number,
-        \ 'target': target,
-        \ 'targets': targets,
-        \ 'selected_targets': selected_targets,
-        \ 'next_sibling_line_number': next_sibling_line_number,
+        \ 'line_number': 2,
         \ 'registered_paths': a:buffer.register.paths,
         \ 'has_cut': a:buffer.register.has_cut,
-        \ 'used': a:buffer.used
     \ }
+
+    if a:buffer.used
+        let input.line_number = line('.')
+        let input.target = a:buffer.current.get_target(input.line_number)
+        let input.targets = a:buffer.current.get_targets(a:range[0], a:range[1])
+        let input.selected_targets = a:buffer.current.get_selected_targets()
+        let input.used = v:true
+    endif
 
     return json_encode(input)
 endfunction

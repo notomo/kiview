@@ -26,27 +26,6 @@ function! kiview#current#new(bufnr) abort
         call setpos('.', [self.bufnr, a:line_number, 1, 0])
     endfunction
 
-    function! current.get_next_sibling_line_number(line_number) abort
-        let marks = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:line_number - 1, 0], [a:line_number - 1, 0], {})
-        let current_depth = self.props[marks[0][0]].depth
-
-        let last_line_number = line('$')
-        for line_number in range(a:line_number + 1, last_line_number)
-            let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [line_number - 1, 0], [line_number - 1, 0], {})
-            if empty(mark_ids)
-                continue
-            endif
-
-            let depth = self.props[mark_ids[0][0]].depth
-            if depth == current_depth
-                return line_number
-            elseif depth < current_depth
-                return line_number
-            endif
-        endfor
-        return last_line_number + 1
-    endfunction
-
     function! current.unset_props(start, end) abort
         let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [a:start - 1, 0], [a:end - 1, 0], {})
         for [id, _, _] in mark_ids
@@ -119,8 +98,14 @@ function! kiview#current#new(bufnr) abort
             let self.props[id] = prop
             let line_number += 1
         endfor
-
         let last_sibling_id = id
+
+        let [_, prev_prop] = pairs[0]
+        for [id, prop] in pairs[1:]
+            let prev_prop.next_sibling_id = id
+            let prev_prop = prop
+        endfor
+
         for [id, prop] in pairs
             if prop.is_parent_node
                 call self.logger.label('line').buffer_log(self.bufnr, s:namespace, self.props)
@@ -174,6 +159,7 @@ function! kiview#current#new(bufnr) abort
             \ 'opened': has_key(a:prop, 'opened') ? a:prop.opened : v:false,
             \ 'parent_id': has_key(a:prop, 'parent_id') ? a:prop.parent_id : v:null,
             \ 'last_sibling_id': has_key(a:prop, 'last_sibling_id') ? a:prop.last_sibling_id : v:null,
+            \ 'next_sibling_id': has_key(a:prop, 'next_sibling_id') ? a:prop.next_sibling_id : v:null,
         \ }
     endfunction
 
