@@ -722,6 +722,19 @@ function! s:suite.toggle_multi_trees()
     call s:assert.path('plugin/kiview.vim')
 endfunction
 
+function! s:suite.toggle_parent_and_child()
+    call s:sync_main('')
+
+    call search('autoload\/')
+    call s:sync_main('toggle_selection')
+    call s:sync_main('toggle_tree')
+
+    call search('kiview\/')
+    call s:sync_main('toggle_selection')
+
+    call s:sync_main('toggle_tree')
+endfunction
+
 function! s:suite.__toggle_deep__() abort
     let suite = themis#suite('plugin.kiview.toggle_deep')
 

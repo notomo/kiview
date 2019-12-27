@@ -150,4 +150,8 @@ impl<'a> Path for FilePath<'a> {
     fn to_string(&self) -> Result<String, Error> {
         Ok(self.path.to_str()?.to_string())
     }
+
+    fn contained(&self, haystack: &str) -> bool {
+        self.path.starts_with(haystack)
+    }
 }

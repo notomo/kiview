@@ -31,6 +31,7 @@ pub trait Path {
     fn exists(&self) -> bool;
     fn name(&self) -> Option<String>;
     fn to_string(&self) -> Result<String, Error>;
+    fn contained(&self, haystack: &str) -> bool;
 }
 
 #[derive(Debug, Clone)]
