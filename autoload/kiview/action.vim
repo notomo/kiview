@@ -144,7 +144,8 @@ function! s:confirm_new(input_reader) abort
     if empty(name)
         return
     endif
-    return 'new -path=' . name
+    let paths = map(split(name, '\v\s+'), {_, v -> '-paths=' . v})
+    return 'new ' . join(paths, ' ')
 endfunction
 
 function! s:confirm_remove(action, input_reader) abort

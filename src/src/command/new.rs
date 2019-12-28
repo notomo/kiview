@@ -14,9 +14,8 @@ pub struct NewCommand<'a> {
 
 impl<'a> Command for NewCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        let path = match &self.opts.path {
-            Some(path) => path,
-            None => return Ok(vec![Action::ConfirmNew]),
+        if self.opts.paths.len() == 0 {
+            return Ok(vec![Action::ConfirmNew]);
         };
 
         let target_group_path = match &self.current.target {
@@ -27,9 +26,27 @@ impl<'a> Command for NewCommand<'a> {
                 .unwrap_or(target.path.clone()),
             Some(_) | None => self.current.path.to_string(),
         };
-        let new_path = self.dispatcher.path(&target_group_path).join(&path)?;
+        let depth = match &self.current.target {
+            Some(target) => target.depth,
+            None => 0,
+        };
 
-        self.dispatcher.path_repository().create(&new_path)?;
+        let errors: Vec<_> = self
+            .opts
+            .paths
+            .iter()
+            .map(
+                |p| match self.dispatcher.path(&target_group_path).join(&p) {
+                    Ok(new_path) => self.dispatcher.path_repository().create(&new_path),
+                    Err(err) => Err(err),
+                },
+            )
+            .filter(|res| res.is_err())
+            .map(|res| Action::ShowError {
+                path: String::from(""),
+                message: res.as_ref().err().unwrap().inner.to_string(),
+            })
+            .collect();
 
         let paths: Paths = self
             .dispatcher
@@ -40,15 +57,13 @@ impl<'a> Command for NewCommand<'a> {
             .collect::<Vec<_>>()
             .into();
 
-        let depth = match &self.current.target {
-            Some(target) => target.depth,
-            None => 0,
-        };
-
-        Ok(vec![paths.to_write_action(
+        let mut actions = vec![paths.to_write_action(
             depth as usize,
             self.current.target.as_ref().and_then(|t| t.parent_id),
             self.current.target.as_ref().and_then(|t| t.last_sibling_id),
-        )])
+        )];
+        actions.extend(errors);
+
+        Ok(actions)
     }
 }

@@ -188,6 +188,7 @@ impl From<&str> for Split {
 pub enum CommandOption {
     Layout { value: Layout },
     Path { value: String },
+    Paths { value: String },
     Quit,
     NoConfirm,
     Create,
@@ -208,6 +209,9 @@ impl From<&str> for CommandOption {
             ["path", path] => CommandOption::Path {
                 value: path.to_string(),
             },
+            ["paths", path] => CommandOption::Paths {
+                value: path.to_string(),
+            },
             ["split", split] => CommandOption::Split {
                 value: Split::from(*split),
             },
@@ -221,6 +225,7 @@ pub struct CommandOptions {
     pub layout: Layout,
     pub quit: bool,
     pub path: Option<String>,
+    pub paths: Vec<String>,
     pub no_confirm: bool,
     pub create: bool,
     pub split: Split,
@@ -264,6 +269,15 @@ impl CommandOptions {
             .get(0)
             .and_then(|path| path.clone());
 
+        let paths: Vec<String> = options
+            .iter()
+            .map(|opt| match &opt {
+                CommandOption::Paths { value } => Some(value.clone()),
+                _ => None,
+            })
+            .filter_map(|opt| opt)
+            .collect();
+
         let quit = options.iter().any(|opt| match &opt {
             CommandOption::Quit => true,
             _ => false,
@@ -295,6 +309,7 @@ impl CommandOptions {
             layout: layout,
             quit: quit,
             path: path,
+            paths: paths,
             no_confirm: no_confirm,
             create: create,
             split: split,

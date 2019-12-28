@@ -351,6 +351,19 @@ function! s:suite.__new__() abort
         call s:assert.count_contains(lines, '  file_in_tree', 1)
     endfunction
 
+    function! suite.new_multiple()
+        let cwd = getcwd()
+        cd ./test/plugin/_test_data
+        call s:set_input('new_file1 new_file2')
+
+        call s:sync_main('')
+        call s:sync_main('new')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'new_file1')
+        call s:assert.contains(lines, 'new_file2')
+    endfunction
+
 endfunction
 
 function! s:suite.__remove__() abort
