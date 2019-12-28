@@ -1,4 +1,5 @@
 use super::command::{SplitModName, SplitName};
+use super::current::RegisteredTarget;
 use crate::repository::FullPath;
 use serde_derive::Serialize;
 
@@ -19,24 +20,33 @@ pub enum Action {
         split_name: SplitName,
         mod_name: SplitModName,
     },
+    #[serde(rename = "quit")]
+    Quit,
+
     #[serde(rename = "confirm_remove")]
     ConfirmRemove { paths: Vec<String> },
     #[serde(rename = "confirm_rename")]
     ConfirmRename { path: String },
+    #[serde(rename = "confirm_new")]
+    ConfirmNew,
+
+    #[serde(rename = "copy")]
+    Copy { targets: Vec<RegisteredTarget> },
     #[serde(rename = "cut")]
-    Cut { paths: Vec<String> },
+    Cut { targets: Vec<RegisteredTarget> },
     #[serde(rename = "clear_register")]
     ClearRegister,
-    #[serde(rename = "copy")]
-    Copy { paths: Vec<String> },
+    #[serde(rename = "choose")]
+    Choose {
+        targets: Vec<RegisteredTarget>,
+        has_cut: bool,
+    },
+
     #[serde(rename = "toggle_selection")]
     ToggleSelection { ids: Vec<u64> },
     #[serde(rename = "toggle_all_selection")]
     ToggleAllSelection,
-    #[serde(rename = "confirm_new")]
-    ConfirmNew,
-    #[serde(rename = "quit")]
-    Quit,
+
     #[serde(rename = "add_history")]
     AddHistory { path: String, line_number: u64 },
     #[serde(rename = "try_to_restore_cursor")]
@@ -45,6 +55,7 @@ pub enum Action {
     SetCursor { line_number: u64 },
     #[serde(rename = "set_path")]
     SetPath { path: String },
+
     #[serde(rename = "write_all")]
     WriteAll {
         lines: Vec<String>,
@@ -58,6 +69,7 @@ pub enum Action {
         last_sibling_id: Option<u64>,
         count: usize,
     },
+
     #[serde(rename = "open_tree")]
     OpenTree {
         lines: Vec<String>,
@@ -70,6 +82,7 @@ pub enum Action {
         id: u64,
         next_sibling_id: Option<u64>,
     },
+
     #[serde(rename = "fork_buffer")]
     ForkBuffer {
         items: Vec<ForkBufferItem>,
@@ -78,8 +91,6 @@ pub enum Action {
     },
     #[serde(rename = "show_error")]
     ShowError { path: String, message: String },
-    #[serde(rename = "choose")]
-    Choose { paths: Vec<String>, has_cut: bool },
 }
 
 #[derive(Debug, Serialize)]

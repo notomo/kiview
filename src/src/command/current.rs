@@ -1,4 +1,4 @@
-use serde_derive::Deserialize;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
 pub struct Current<'a> {
@@ -21,7 +21,7 @@ pub struct Current<'a> {
     pub selected_targets: Vec<Target>,
 
     #[serde(default)]
-    pub registered_paths: Vec<&'a str>,
+    pub registered_targets: Vec<RegisteredTarget>,
 }
 
 impl<'a> Current<'a> {
@@ -49,4 +49,12 @@ impl Target {
     pub fn to_string(&self) -> String {
         self.path.clone()
     }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct RegisteredTarget {
+    pub path: String,
+
+    #[serde(default)]
+    pub name: Option<String>,
 }

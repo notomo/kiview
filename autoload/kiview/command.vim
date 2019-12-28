@@ -79,7 +79,7 @@ function! s:build_input(buffer, range) abort
     let input = {
         \ 'path': getcwd(),
         \ 'line_number': 2,
-        \ 'registered_paths': a:buffer.register.paths,
+        \ 'registered_targets': a:buffer.register.targets,
         \ 'has_cut': a:buffer.register.has_cut,
     \ }
 

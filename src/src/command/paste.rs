@@ -1,3 +1,4 @@
+use super::current::RegisteredTarget;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
@@ -25,22 +26,25 @@ impl<'a> Command for PasteCommand<'a> {
             Some(_) | None => self.current.path.to_string(),
         };
 
-        let from_paths: Vec<_> = self
+        let froms: Vec<_> = self
             .current
-            .registered_paths
+            .registered_targets
             .iter()
-            .unique()
-            .map(|path| self.dispatcher.path(path))
+            .unique_by(|target| &target.path)
+            .map(|target| (target, self.dispatcher.path(&target.path)))
             .collect();
 
-        let pair_results: Vec<_> = from_paths
+        let pair_results: Vec<_> = froms
             .iter()
-            .map(|from| match from.name() {
-                Some(name) => Ok((from, name)),
-                None => Err(Error::from(ErrorKind::IO {
-                    message: String::from("name not found"),
-                })),
-            })
+            .map(
+                |(target, from_path)| match (target.name.clone(), from_path.name()) {
+                    (Some(name), _) => Ok((from_path, name)),
+                    (None, Some(name)) => Ok((from_path, name)),
+                    (None, None) => Err(Error::from(ErrorKind::IO {
+                        message: String::from("name not found"),
+                    })),
+                },
+            )
             .map(|res| {
                 if res.is_err() {
                     return res;
@@ -112,9 +116,12 @@ impl<'a> Command for PasteCommand<'a> {
             ),
             Action::ClearRegister,
             Action::Choose {
-                paths: already_exists
+                targets: already_exists
                     .iter()
-                    .map(|(_, to)| to.to_string())
+                    .map(|(_, to)| RegisteredTarget {
+                        path: to.to_string(),
+                        name: None,
+                    })
                     .collect(),
                 has_cut: self.current.has_cut,
             },

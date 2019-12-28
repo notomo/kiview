@@ -14,12 +14,14 @@ function! s:lines() abort
     return getbufline('%', 1, '$')
 endfunction
 
-function! s:set_input(answer) abort
-    let f = {'answer': a:answer}
+function! s:set_input(...) abort
+    let f = {'answers': a:000}
 
     function! f.read(msg) abort
-        call themis#log('[prompt] ' . a:msg . self.answer)
-        return self.answer
+        let answer = self.answers[0]
+        call themis#log('[prompt] ' . a:msg . answer)
+        let self.answers = self.answers[1:]
+        return answer
     endfunction
 
     call kiview#input_reader#set_func({ msg -> f.read(msg) })
@@ -393,7 +395,7 @@ function! s:suite.__remove__() abort
 
     function! suite.remove_one()
         cd ./test/plugin/_test_data
-        call s:set_input('y')
+        call s:set_input('y', 'y')
 
         call s:sync_main('')
 
@@ -588,6 +590,33 @@ function! s:suite.__copy_cut_paste__() abort
         let lines = s:lines()
         call s:assert.contains(lines, '  copy_file')
         call s:assert.contains(lines, 'copy_file')
+    endfunction
+
+    function! suite.copy_and_renamed_paste()
+        call s:sync_main('go -path=test/plugin/_test_data')
+
+        call search('copy_file')
+        call s:sync_main('copy')
+
+        call s:set_input('r', 'renamed_copy_file')
+        call s:sync_main('paste')
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'copy_file')
+        call s:assert.contains(lines, 'renamed_copy_file')
+    endfunction
+
+    function! suite.cancel_renamed_paste()
+        call s:sync_main('go -path=test/plugin/_test_data')
+        let test_lines = s:lines()
+
+        call search('copy_file')
+        call s:sync_main('copy')
+
+        call s:set_input('r', '')
+        call s:sync_main('paste')
+
+        call s:assert.lines(test_lines)
     endfunction
 
     function! suite.cancel_paste_on_already_exists()

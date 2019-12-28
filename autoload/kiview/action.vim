@@ -165,38 +165,44 @@ function! s:confirm_rename(action, input_reader) abort
 endfunction
 
 function! s:choose(action, buffer, input_reader) abort
-    let paths = []
-    for path in a:action.paths
-        let answer = a:input_reader.read('already exists (f)orce (n)o: ', [path])
-        if answer !=? 'f'
+    let targets = []
+    for target in a:action.targets
+        let answer = a:input_reader.read('already exists (f)orce (n)o (r)ename: ', [target.path])
+        if answer ==? 'n'
             continue
+        elseif answer ==? 'r'
+            let new_name = a:input_reader.read('rename to: ', [])
+            if empty(new_name)
+                continue
+            endif
+            let target.name = new_name
         endif
-        call add(paths, path)
+        call add(targets, target)
     endfor
 
-    if empty(paths)
+    if empty(targets)
         return
     endif
 
     if a:action.has_cut
-        call a:buffer.register.cut(paths)
+        call a:buffer.register.cut(targets)
     else
-        call a:buffer.register.copy(paths)
+        call a:buffer.register.copy(targets)
     endif
 
     return 'paste -no-confirm'
 endfunction
 
 function! s:copy(action, buffer) abort
-    call a:buffer.register.copy(a:action.paths)
+    call a:buffer.register.copy(a:action.targets)
     call a:buffer.current.clear_selection()
-    call kiview#messenger#new().info('Copied: ', a:action.paths)
+    call kiview#messenger#new().info('Copied: ', a:action.targets)
 endfunction
 
 function! s:cut(action, buffer) abort
-    call a:buffer.register.cut(a:action.paths)
+    call a:buffer.register.cut(a:action.targets)
     call a:buffer.current.clear_selection()
-    call kiview#messenger#new().info('Cut: ', a:action.paths)
+    call kiview#messenger#new().info('Cut: ', a:action.targets)
 endfunction
 
 function! s:clear_register(buffer) abort

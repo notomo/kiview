@@ -34,7 +34,7 @@ function! kiview#messenger#new() abort
 
     function! messenger.info(message, targets) abort
         if len(a:targets) == 1
-            call self.func('[kiview] ' . a:message . a:targets[0])
+            call self.func('[kiview] ' . a:message . a:targets[0].path)
             return
         endif
         if empty(a:targets)

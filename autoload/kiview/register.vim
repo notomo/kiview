@@ -7,23 +7,23 @@ function! kiview#register#new() abort
     endif
 
     let register = {
-        \ 'paths': [],
+        \ 'targets': [],
         \ 'has_cut': v:false,
         \ 'logger': kiview#logger#new('register'),
     \ }
 
-    function! register.cut(paths) abort
-        let self.paths = a:paths
+    function! register.cut(targets) abort
+        let self.targets = a:targets
         let self.has_cut = v:true
 
-        call self.logger.log('cut: ' . string(self.paths))
+        call self.logger.logf('cut: %s', self.targets)
     endfunction
 
-    function! register.copy(paths) abort
-        let self.paths = a:paths
+    function! register.copy(targets) abort
+        let self.targets = a:targets
         let self.has_cut = v:false
 
-        call self.logger.log('copy: ' . string(self.paths))
+        call self.logger.logf('copy: %s', self.targets)
     endfunction
 
     function! register.clear() abort
