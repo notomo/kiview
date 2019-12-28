@@ -91,6 +91,11 @@ function! kiview#current#new(bufnr) abort
     endfunction
 
     function! current.set_props(props, start) abort
+        if empty(a:props)
+            call self.logger.label('line').buffer_log(self.bufnr, s:namespace, self.props)
+            return
+        endif
+
         let line_number = a:start - 1
         let pairs = []
         for prop in a:props

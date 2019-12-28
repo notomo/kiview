@@ -109,6 +109,10 @@ impl PathRepository for FilePathRepository {
 
         Ok(())
     }
+
+    fn root(&self) -> String {
+        String::from("/")
+    }
 }
 
 pub struct FilePath<'a> {

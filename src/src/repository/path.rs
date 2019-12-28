@@ -21,6 +21,7 @@ pub trait PathRepository {
     fn rename(&self, from: &str, to: &str) -> Result<(), Error>;
     fn copy(&self, from: &str, to: &str) -> Result<(), Error>;
     fn remove(&self, paths: Vec<String>) -> Result<(), Error>;
+    fn root(&self) -> String;
 }
 
 pub trait Path {

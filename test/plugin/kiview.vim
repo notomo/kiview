@@ -363,6 +363,13 @@ function! s:suite.__remove__() abort
         call system(['touch', './test/plugin/_test_data/removed_file2'])
         call system(['touch', './test/plugin/_test_data/removed_cancel_file'])
 
+        call mkdir('./test/plugin/_test_data/tree', 'p')
+        call system(['touch', './test/plugin/_test_data/tree/file_in_tree1'])
+        call system(['touch', './test/plugin/_test_data/tree/file_in_tree2'])
+
+        call mkdir('./test/plugin/_test_data/tree2', 'p')
+        call system(['touch', './test/plugin/_test_data/tree2/file_in_tree'])
+
         call mkdir('./test/plugin/_test_data/removed_dir', 'p')
         call system(['touch', './test/plugin/_test_data/removed_dir/file'])
     endfunction
@@ -373,7 +380,6 @@ function! s:suite.__remove__() abort
 
     function! suite.remove_one()
         cd ./test/plugin/_test_data
-
         call s:set_input('y')
 
         call s:sync_main('')
@@ -382,8 +388,6 @@ function! s:suite.__remove__() abort
         let last_line = search('removed_file2')
         let command = kiview#main([first_line, last_line], 'remove')
         call command.wait()
-
-        call s:assert.current_line('removed_cancel_file')
 
         let lines = s:lines()
         call s:assert.not_contains(lines, 'removed_file1')
@@ -396,9 +400,53 @@ function! s:suite.__remove__() abort
         call s:assert.not_contains(lines, 'removed_dir/')
     endfunction
 
+    function! suite.remove_in_tree()
+        cd ./test/plugin/_test_data
+        call s:set_input('y')
+
+        call s:sync_main('')
+
+        call search('tree\/')
+        call s:sync_main('toggle_tree')
+        call search('file_in_tree1')
+        call s:sync_main('toggle_selection')
+
+        call s:sync_main('remove')
+
+        let lines = s:lines()
+        call s:assert.not_contains(lines, '  file_in_tree1')
+        call s:assert.contains(lines, '  file_in_tree2')
+    endfunction
+
+    function! suite.remove_parent_and_child()
+        cd ./test/plugin/_test_data
+        call s:set_input('y')
+
+        call s:sync_main('')
+
+        call search('tree\/')
+        call s:sync_main('toggle_tree')
+        call search('tree2\/')
+        call s:sync_main('toggle_tree')
+
+        call search('tree\/')
+        call s:sync_main('toggle_selection')
+        call search('file_in_tree1')
+        call s:sync_main('toggle_selection')
+        call search('file_in_tree$')
+        call s:sync_main('toggle_selection')
+
+        call s:sync_main('remove')
+
+        let lines = s:lines()
+        call s:assert.not_contains(lines, '  file_in_tree1')
+        call s:assert.not_contains(lines, '  file_in_tree2')
+        call s:assert.not_contains(lines, 'tree/')
+        call s:assert.not_contains(lines, '  file_in_tree')
+    endfunction
+
     function! suite.cancel_remove()
         cd ./test/plugin/_test_data
-
         call s:set_input('')
 
         call s:sync_main('')
@@ -412,7 +460,6 @@ function! s:suite.__remove__() abort
 
     function! suite.no_remove()
         cd ./test/plugin/_test_data
-
         call s:set_input('n')
 
         call s:sync_main('')
