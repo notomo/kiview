@@ -67,6 +67,7 @@ function! kiview#command#new(buffer, range, event_service, arg, parent_id) abort
         endif
 
         call self.job.wait(timeout_msec)
+        sleep 15m " FIXME: workaround for returning -3 by jobwait()
         for child in self.children
             call child.wait(timeout_msec)
         endfor
