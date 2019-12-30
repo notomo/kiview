@@ -35,7 +35,7 @@ mod paste;
 pub use paste::PasteCommand;
 
 mod rename;
-pub use rename::RenameCommand;
+pub use rename::{MultipleRenameCommand, RenameCommand};
 
 mod toggle;
 pub use toggle::ToggleTreeCommand;

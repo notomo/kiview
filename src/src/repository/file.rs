@@ -158,4 +158,8 @@ impl<'a> Path for FilePath<'a> {
     fn contained(&self, haystack: &str) -> bool {
         self.path.starts_with(haystack)
     }
+
+    fn to_relative(&self, base: &str) -> Result<String, Error> {
+        Ok(self.path.strip_prefix(base)?.to_str()?.to_string())
+    }
 }

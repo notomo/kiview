@@ -42,7 +42,7 @@ endfunction
 
 function! s:main(arg) abort
     let line = line('.')
-    return kiview#main([line, line], a:arg)
+    return kiview#main([line, line], a:arg, bufnr('%'))
 endfunction
 
 function! s:sync_main(arg) abort
@@ -243,7 +243,7 @@ function! s:suite.range()
     call s:sync_main('')
 
     let line = search('Cargo\.toml')
-    let command = kiview#main([line, line + 1], 'child -layout=tab')
+    let command = kiview#main([line, line + 1], 'child -layout=tab', bufnr('%'))
     call command.wait()
 
     call s:assert.tab_count(3)
@@ -401,7 +401,7 @@ function! s:suite.__remove__() abort
 
         let first_line = search('removed_file1')
         let last_line = search('removed_file2')
-        let command = kiview#main([first_line, last_line], 'remove')
+        let command = kiview#main([first_line, last_line], 'remove', bufnr('%'))
         call command.wait()
 
         let lines = s:lines()
@@ -694,7 +694,7 @@ function! s:suite.__rename__() abort
         call KiviewTestAfterEach()
     endfunction
 
-    function! suite.rename()
+    function! suite.rename_one()
         cd ./test/plugin/_test_data
 
         call s:set_input('renamed_file')
@@ -737,6 +737,56 @@ function! s:suite.__rename__() abort
         call s:sync_main('rename')
 
         call s:assert.file_not_empty('already')
+    endfunction
+
+    function! suite.multiple_rename_one()
+        cd ./test/plugin/_test_data
+
+        call s:sync_main('')
+
+        call search('rename_file')
+        call s:sync_main('multiple_rename')
+        call s:assert.modified(v:false)
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'rename_file')
+
+        call setbufline('%', 2, 'renamed_file')
+
+        write
+        let command = kiview#last_command()
+        call command.wait(1000)
+
+        call s:assert.modified(v:false)
+        call s:assert.window_count(3)
+
+        quit
+        call s:sync_main('')
+        let lines = s:lines()
+        call s:assert.contains(lines, 'renamed_file')
+        call s:assert.not_contains(lines, 'rename_file')
+    endfunction
+
+    function! suite.multiple_rename_already_exists()
+        cd ./test/plugin/_test_data
+
+        call s:sync_main('')
+
+        call search('rename_file')
+        call s:sync_main('toggle_selection')
+        call search('already')
+        call s:sync_main('toggle_selection')
+        call s:sync_main('multiple_rename')
+
+        call setbufline('%', 2, 'renamed_file')
+        call setbufline('%', 3, 'renamed_file')
+
+        write
+        let command = kiview#last_command()
+        call command.wait(1000)
+
+        call s:assert.window_count(3)
+        call s:assert.modified(v:true)
     endfunction
 
 endfunction

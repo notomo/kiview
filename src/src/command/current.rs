@@ -10,6 +10,7 @@ pub struct Current<'a> {
     pub used: bool,
 
     pub has_cut: bool,
+    pub renamer_opened: bool,
 
     #[serde(default)]
     pub target: Option<Target>,
@@ -22,6 +23,9 @@ pub struct Current<'a> {
 
     #[serde(default)]
     pub registered_targets: Vec<RegisteredTarget>,
+
+    #[serde(default)]
+    pub rename_targets: Vec<RenameTarget>,
 }
 
 impl<'a> Current<'a> {
@@ -57,4 +61,10 @@ pub struct RegisteredTarget {
 
     #[serde(default)]
     pub name: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RenameTarget {
+    pub from: String,
+    pub to: String,
 }

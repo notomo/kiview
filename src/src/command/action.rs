@@ -91,6 +91,14 @@ pub enum Action {
     },
     #[serde(rename = "show_error")]
     ShowError { path: String, message: String },
+
+    #[serde(rename = "open_renamer")]
+    OpenRenamer {
+        path: String,
+        items: Vec<RenameItem>,
+    },
+    #[serde(rename = "complete_renamer")]
+    CompleteRenamer,
 }
 
 #[derive(Debug, Serialize)]
@@ -98,6 +106,13 @@ pub struct ForkBufferItem {
     path: String,
     lines: Vec<String>,
     props: Vec<Prop>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct RenameItem {
+    pub id: u64,
+    pub path: String,
+    pub relative_path: String,
 }
 
 #[derive(Debug, Serialize)]

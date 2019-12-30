@@ -21,6 +21,8 @@ function! kiview#action#new_handler(buffer) abort
             \ 'confirm_new': { action -> s:confirm_new(input_reader) },
             \ 'confirm_remove': { action -> s:confirm_remove(action, input_reader) },
             \ 'confirm_rename': { action -> s:confirm_rename(action, input_reader) },
+            \ 'open_renamer': { action -> s:open_renamer(action, buffer) },
+            \ 'complete_renamer': { action -> s:complete_renamer(action, buffer) },
             \ 'copy': { action -> s:copy(action, buffer) },
             \ 'cut': { action -> s:cut(action, buffer) },
             \ 'clear_register': { action -> s:clear_register(buffer) },
@@ -232,4 +234,12 @@ function! s:fork_buffer(action, buffer) abort
         call new_buffer.open(a:action.split_name, a:action.mod_name)
         call new_buffer.current.set(item.path)
     endfor
+endfunction
+
+function! s:open_renamer(action, buffer) abort
+    call a:buffer.renamer.open(a:action.path, a:action.items)
+endfunction
+
+function! s:complete_renamer(action, buffer) abort
+    call a:buffer.renamer.complete()
 endfunction

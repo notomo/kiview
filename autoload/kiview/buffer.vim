@@ -1,6 +1,6 @@
 
 let s:buffers = {}
-let s:id = 0
+let s:id = get(s:, 'id', 0)
 
 let s:split_names = {
     \ 'no': '',
@@ -9,8 +9,8 @@ let s:split_names = {
     \ 'horizontal': 'split',
 \ }
 
-function! kiview#buffer#get_or_create() abort
-    let buffer = kiview#buffer#find()
+function! kiview#buffer#get_or_create(bufnr) abort
+    let buffer = kiview#buffer#find(a:bufnr)
     if !empty(buffer)
         let buffer.used = v:true
         return buffer
@@ -19,10 +19,9 @@ function! kiview#buffer#get_or_create() abort
     return kiview#buffer#new()
 endfunction
 
-function! kiview#buffer#find() abort
-    let bufnr = bufnr('%')
-    if has_key(s:buffers, bufnr)
-        return s:buffers[bufnr]
+function! kiview#buffer#find(bufnr) abort
+    if has_key(s:buffers, a:bufnr)
+        return s:buffers[a:bufnr]
     endif
     return v:null
 endfunction
@@ -38,6 +37,7 @@ function! kiview#buffer#new() abort
         \ 'bufnr': bufnr,
         \ 'used': v:false,
         \ 'register': kiview#register#new(),
+        \ 'renamer': kiview#renamer#new(s:id, bufnr),
         \ 'history': kiview#history#new(bufnr),
         \ 'current': kiview#current#new(bufnr),
         \ 'logger': kiview#logger#new('buffer'),

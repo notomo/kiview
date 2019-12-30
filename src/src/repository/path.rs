@@ -33,6 +33,7 @@ pub trait Path {
     fn name(&self) -> Option<String>;
     fn to_string(&self) -> Result<String, Error>;
     fn contained(&self, haystack: &str) -> bool;
+    fn to_relative(&self, base: &str) -> Result<String, Error>;
 }
 
 #[derive(Debug, Clone)]

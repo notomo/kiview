@@ -22,7 +22,7 @@ pub enum ErrorKind {
 
 #[derive(Debug)]
 pub struct Error {
-    inner: Context<ErrorKind>,
+    pub inner: Context<ErrorKind>,
 }
 
 impl Fail for Error {

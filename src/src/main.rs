@@ -91,6 +91,11 @@ fn main() {
                     dispatcher: dispatcher,
                     opts: &command_opts,
                 } as Box<dyn Command>,
+                CommandName::MultipleRename => box command::MultipleRenameCommand {
+                    current: current,
+                    dispatcher: dispatcher,
+                    opts: &command_opts,
+                } as Box<dyn Command>,
                 CommandName::ToggleTree => box command::ToggleTreeCommand {
                     current: current,
                     dispatcher: dispatcher,

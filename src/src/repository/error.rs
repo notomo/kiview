@@ -1,6 +1,7 @@
 use failure::{Context, Fail};
 use std::io::Error as IOError;
 use std::option::NoneError;
+use std::path::StripPrefixError;
 
 #[derive(Fail, Debug)]
 pub enum ErrorKind {
@@ -41,6 +42,16 @@ impl From<ErrorKind> for Error {
     fn from(error: ErrorKind) -> Error {
         Error {
             inner: Context::new(error),
+        }
+    }
+}
+
+impl From<StripPrefixError> for Error {
+    fn from(error: StripPrefixError) -> Error {
+        Error {
+            inner: Context::new(ErrorKind::IO {
+                message: error.to_string(),
+            }),
         }
     }
 }

@@ -81,6 +81,8 @@ function! s:build_input(buffer, range) abort
         \ 'path': getcwd(),
         \ 'line_number': 2,
         \ 'registered_targets': a:buffer.register.targets,
+        \ 'rename_targets': a:buffer.renamer.targets,
+        \ 'renamer_opened': a:buffer.renamer.opened(),
         \ 'has_cut': a:buffer.register.has_cut,
     \ }
 

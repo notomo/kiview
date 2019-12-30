@@ -1,3 +1,5 @@
+use super::action::RenameItem;
+use super::current::Target;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
@@ -5,6 +7,7 @@ use crate::command::Current;
 use crate::command::Paths;
 use crate::command::{Error, ErrorKind};
 use crate::repository::Dispatcher;
+use itertools::Itertools;
 
 pub struct RenameCommand<'a> {
     pub current: Current<'a>,
@@ -55,5 +58,87 @@ impl<'a> Command for RenameCommand<'a> {
             target.parent_id,
             self.current.target.as_ref().and_then(|t| t.last_sibling_id),
         )])
+    }
+}
+
+pub struct MultipleRenameCommand<'a> {
+    pub current: Current<'a>,
+    pub dispatcher: Dispatcher,
+    pub opts: &'a CommandOptions,
+}
+
+impl<'a> Command for MultipleRenameCommand<'a> {
+    fn actions(&self) -> Result<Vec<Action>, Error> {
+        let targets = self
+            .current
+            .targets()
+            .into_iter()
+            .group_by(|target| target.depth)
+            .into_iter()
+            .fold(vec![], |mut acc: Vec<Target>, (_, targets)| {
+                let mut child_acc: Vec<_> = vec![];
+                for target in targets {
+                    let count = acc
+                        .iter()
+                        .filter(|x| self.dispatcher.path(&target.path).contained(&x.path))
+                        .count();
+                    if count == 0 {
+                        child_acc.push(target)
+                    }
+                }
+                acc.extend(child_acc);
+                acc
+            });
+
+        if self.current.rename_targets.len() == 0 && !self.current.renamer_opened {
+            return Ok(vec![Action::OpenRenamer {
+                path: self.current.path.to_string(),
+                items: targets
+                    .into_iter()
+                    .map(|target| RenameItem {
+                        id: target.id,
+                        path: target.path.clone(),
+                        relative_path: match self
+                            .dispatcher
+                            .path(&target.path)
+                            .to_relative(self.current.path)
+                        {
+                            Ok(relative_path) => relative_path,
+                            Err(_) => target.path.clone(),
+                        },
+                    })
+                    .collect(),
+            }]);
+        };
+        if self.current.rename_targets.len() == 0 && self.current.renamer_opened {
+            return Ok(vec![]);
+        };
+
+        let mut actions: Vec<_> = self
+            .current
+            .rename_targets
+            .iter()
+            .map(|target| {
+                let to = match self.dispatcher.path(self.current.path).join(&target.to) {
+                    Ok(to) => to,
+                    Err(err) => return Err(Error::from(err)),
+                };
+                match self.dispatcher.path_repository().rename(&target.from, &to) {
+                    Ok(()) => Ok(()),
+                    Err(err) => Err(Error::from(err)),
+                }
+            })
+            .filter(|res| res.is_err())
+            .map(|res| Action::ShowError {
+                path: String::from(""),
+                message: res.as_ref().err().unwrap().inner.to_string(),
+            })
+            .collect();
+
+        if actions.len() == 0 {
+            actions.push(Action::CompleteRenamer)
+        }
+
+        Ok(actions)
     }
 }
