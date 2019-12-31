@@ -98,7 +98,7 @@ pub enum Action {
         items: Vec<RenameItem>,
     },
     #[serde(rename = "complete_renamer")]
-    CompleteRenamer,
+    CompleteRenamer { items: Vec<RenameItem> },
 }
 
 #[derive(Debug, Serialize)]
@@ -108,7 +108,7 @@ pub struct ForkBufferItem {
     props: Vec<Prop>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct RenameItem {
     pub id: u64,
     pub path: String,

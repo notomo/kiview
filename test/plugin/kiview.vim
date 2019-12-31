@@ -787,6 +787,35 @@ function! s:suite.__rename__() abort
 
         call s:assert.window_count(3)
         call s:assert.modified(v:true)
+        q!
+    endfunction
+
+    function! suite.multiple_rename_twice()
+        cd ./test/plugin/_test_data
+
+        call s:sync_main('')
+
+        call search('rename_file')
+        call s:sync_main('multiple_rename')
+
+        call setbufline('%', 2, 'renamed_file')
+
+        write
+        let command = kiview#last_command()
+        call command.wait(1000)
+
+        call s:assert.modified(v:false)
+        call s:assert.window_count(3)
+
+        let lines = s:lines()
+        call s:assert.contains(lines, 'renamed_file')
+
+        call search('renamed_file')
+        call setbufline('%', 2, 'twice_renamed_file')
+
+        write
+        let command = kiview#last_command()
+        call command.wait(1000)
     endfunction
 
 endfunction

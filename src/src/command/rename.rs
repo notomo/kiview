@@ -114,7 +114,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
             return Ok(vec![]);
         };
 
-        let mut actions: Vec<_> = self
+        let results: Vec<_> = self
             .current
             .rename_targets
             .iter()
@@ -124,10 +124,18 @@ impl<'a> Command for MultipleRenameCommand<'a> {
                     Err(err) => return Err(Error::from(err)),
                 };
                 match self.dispatcher.path_repository().rename(&target.from, &to) {
-                    Ok(()) => Ok(()),
+                    Ok(()) => Ok(RenameItem {
+                        id: target.id,
+                        path: to,
+                        relative_path: target.to.clone(),
+                    }),
                     Err(err) => Err(Error::from(err)),
                 }
             })
+            .collect();
+
+        let mut actions: Vec<_> = results
+            .iter()
             .filter(|res| res.is_err())
             .map(|res| Action::ShowError {
                 path: String::from(""),
@@ -136,7 +144,13 @@ impl<'a> Command for MultipleRenameCommand<'a> {
             .collect();
 
         if actions.len() == 0 {
-            actions.push(Action::CompleteRenamer)
+            actions.push(Action::CompleteRenamer {
+                items: results
+                    .into_iter()
+                    .filter(|res| res.is_ok())
+                    .map(|res| res.as_ref().unwrap().clone())
+                    .collect(),
+            })
         }
 
         Ok(actions)

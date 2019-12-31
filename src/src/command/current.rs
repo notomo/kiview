@@ -65,6 +65,7 @@ pub struct RegisteredTarget {
 
 #[derive(Debug, Deserialize)]
 pub struct RenameTarget {
+    pub id: u64,
     pub from: String,
     pub to: String,
 }

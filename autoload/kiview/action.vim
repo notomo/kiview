@@ -241,5 +241,5 @@ function! s:open_renamer(action, buffer) abort
 endfunction
 
 function! s:complete_renamer(action, buffer) abort
-    call a:buffer.renamer.complete()
+    call a:buffer.renamer.complete(a:action.items)
 endfunction
