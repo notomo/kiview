@@ -227,7 +227,7 @@ endfunction
 function! s:fork_buffer(action, buffer) abort
     for item in a:action.items
         let new_buffer = kiview#buffer#new()
-        let new_buffer.history = deepcopy(a:buffer.history)
+        call new_buffer.history.copy(a:buffer.history)
 
         call s:write_all(item, new_buffer)
 

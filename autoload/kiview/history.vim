@@ -8,6 +8,10 @@ function! kiview#history#new(bufnr) abort
         \ 'logger': kiview#logger#new('history'),
     \ }
 
+    function! history.copy(history) abort
+        let self.line_numbers = copy(a:history.line_numbers)
+    endfunction
+
     function! history.add(path, line_number) abort
         let self.line_numbers[a:path] = a:line_number
     endfunction

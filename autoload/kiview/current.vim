@@ -124,6 +124,9 @@ function! kiview#current#new(bufnr) abort
     endfunction
 
     function! current.clear_selection() abort
+        if !nvim_buf_is_valid(self.bufnr)
+            return
+        endif
         call nvim_buf_clear_namespace(self.bufnr, s:hl_namespace, 0, -1)
         let self.selected = {}
     endfunction
