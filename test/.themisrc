@@ -2,8 +2,80 @@
 call themis#option('recursive', 1)
 
 let s:root = getcwd()
+let s:test_data_dir = './test/plugin/_test_data/'
 
-function! KiviewTestAssert() abort
+function! KiviewTestHelper(name) abort
+    let helper = {
+        \ 'name': a:name,
+    \ }
+
+    function! helper.new_file(path) abort
+        call system(['touch', s:test_data_dir . a:path])
+    endfunction
+
+    function! helper.new_file_with_content(path, content) abort
+        call self.new_file(a:path)
+        call writefile(a:content, s:test_data_dir . a:path)
+    endfunction
+
+    function! helper.new_directory(path) abort
+        call mkdir(s:test_data_dir . a:path, 'p')
+    endfunction
+
+    function! helper.suite() abort
+        let suite = themis#suite(self.name)
+        let suite.before_each = function('s:before_each')
+        let suite.after_each = function('s:after_each')
+        return suite
+    endfunction
+
+    function! helper.before_each() abort
+        return function('s:before_each')
+    endfunction
+
+    function! helper.after_each() abort
+        return function('s:after_each')
+    endfunction
+
+    function! helper.assert() abort
+        return s:assert()
+    endfunction
+
+    function! helper.sub_suite(name) abort
+        return themis#suite(a:name)
+    endfunction
+
+    function! helper.lines() abort
+        return getbufline('%', 1, '$')
+    endfunction
+
+    function! helper.set_input(...) abort
+        let f = {'answers': a:000}
+        function! f.read(msg) abort
+            let answer = self.answers[0]
+            call themis#log('[prompt] ' . a:msg . answer)
+            let self.answers = self.answers[1:]
+            return answer
+        endfunction
+
+        call kiview#input_reader#set_func({ msg -> f.read(msg) })
+    endfunction
+
+    function! helper.messenger() abort
+        let f = {'msg': ''}
+        function! f.echo(msg) abort
+            let self.msg = a:msg
+            call themis#log('[messenger] ' . a:msg)
+        endfunction
+
+        call kiview#messenger#set_func({ msg -> f.echo(msg) })
+        return f
+    endfunction
+
+    return helper
+endfunction
+
+function! s:assert() abort
     let assert = themis#helper('assert')
 
     function! assert.window_count(expected) abort
@@ -113,8 +185,8 @@ function! KiviewTestAssert() abort
     return assert
 endfunction
 
-function! KiviewTestBeforeEach() abort
-    call mkdir('./test/plugin/_test_data', 'p')
+function! s:before_each() abort
+    call mkdir(s:test_data_dir, 'p')
 
     execute 'cd' s:root
 
@@ -126,7 +198,7 @@ function! KiviewTestBeforeEach() abort
     syntax enable
 endfunction
 
-function! KiviewTestAfterEach() abort
+function! s:after_each() abort
     silent! %bwipeout!
     execute 'cd' s:root
     call kiview#logger#clear()
@@ -135,7 +207,7 @@ function! KiviewTestAfterEach() abort
     filetype off
     syntax off
 
-    call delete('./test/plugin/_test_data', 'rf')
+    call delete(s:test_data_dir, 'rf')
 
     let finished = kiview#command#finished()
     call kiview#command#abort()

@@ -1,44 +1,7 @@
 
-let s:suite = themis#suite('plugin.kiview')
-let s:assert = KiviewTestAssert()
-
-function! s:suite.before_each()
-    call KiviewTestBeforeEach()
-endfunction
-
-function! s:suite.after_each()
-    call KiviewTestAfterEach()
-endfunction
-
-function! s:lines() abort
-    return getbufline('%', 1, '$')
-endfunction
-
-function! s:set_input(...) abort
-    let f = {'answers': a:000}
-
-    function! f.read(msg) abort
-        let answer = self.answers[0]
-        call themis#log('[prompt] ' . a:msg . answer)
-        let self.answers = self.answers[1:]
-        return answer
-    endfunction
-
-    call kiview#input_reader#set_func({ msg -> f.read(msg) })
-endfunction
-
-function! s:messenger() abort
-    let f = {'msg': ''}
-
-    function! f.echo(msg) abort
-        let self.msg = a:msg
-        call themis#log('[messenger] ' . a:msg)
-    endfunction
-
-    call kiview#messenger#set_func({ msg -> f.echo(msg) })
-
-    return f
-endfunction
+let s:helper = KiviewTestHelper('plugin.kiview')
+let s:suite = s:helper.suite()
+let s:assert = s:helper.assert()
 
 function! s:main(arg) abort
     let line = line('.')
@@ -56,7 +19,7 @@ function! s:suite.create_one()
 
     call s:sync_main('')
 
-    let lines = s:lines()
+    let lines = s:helper.lines()
     call s:assert.not_empty(lines)
     call s:assert.equals(lines[0], '..')
     call s:assert.contains(lines, 'autoload/')
@@ -89,7 +52,7 @@ function! s:suite.do_parent_child()
 
     call s:sync_main('')
 
-    let lines = s:lines()
+    let lines = s:helper.lines()
     call s:assert.not_empty(lines)
     call s:assert.contains(lines, 'kiview.vim')
     call s:assert.not_contains(lines, '')
@@ -98,7 +61,7 @@ function! s:suite.do_parent_child()
 
     call s:sync_main('parent')
 
-    let test_lines = s:lines()
+    let test_lines = s:helper.lines()
     call s:assert.not_empty(test_lines)
     call s:assert.equals(lines[0], '..')
     call s:assert.contains(test_lines, 'plugin/')
@@ -109,7 +72,7 @@ function! s:suite.do_parent_child()
 
     call s:sync_main('parent')
 
-    let lines = s:lines()
+    let lines = s:helper.lines()
     call s:assert.not_empty(lines)
     call s:assert.contains(lines, 'autoload/')
     call s:assert.not_contains(lines, '')
@@ -119,7 +82,7 @@ function! s:suite.do_parent_child()
     call search('test/')
     call s:sync_main('child')
 
-    let lines = s:lines()
+    let lines = s:helper.lines()
     call s:assert.not_empty(lines)
     call s:assert.equals(lines[0], '..')
     call s:assert.contains(test_lines, 'plugin/')
@@ -200,7 +163,7 @@ function! s:suite.history()
     call search('src')
     call s:sync_main('child')
 
-    let lines = s:lines()
+    let lines = s:helper.lines()
     call s:assert.contains(lines, 'repository/')
 
     call search('repository')
@@ -213,7 +176,7 @@ function! s:suite.history()
     call s:sync_main('child')
     call s:sync_main('child')
 
-    let lines = s:lines()
+    let lines = s:helper.lines()
     call s:assert.contains(lines, 'repository/')
 endfunction
 
@@ -257,7 +220,7 @@ function! s:suite.parent_marker()
     normal! gg
     call s:sync_main('child')
 
-    let lines = s:lines()
+    let lines = s:helper.lines()
     call s:assert.contains(lines, 'autoload/')
     call s:assert.line_number(2)
 endfunction
@@ -266,33 +229,32 @@ function! s:suite.go()
     call s:sync_main('')
     call s:sync_main('go -path=./autoload')
 
-    let lines = s:lines()
+    let lines = s:helper.lines()
     call s:assert.contains(lines, 'kiview/')
 endfunction
 
 function! s:suite.__new__() abort
-    let suite = themis#suite('kiview.plugin.new')
+    let suite = s:helper.sub_suite('new')
 
     function! suite.before_each()
-        call KiviewTestBeforeEach()
+        call s:helper.before_each()
 
-        call mkdir('./test/plugin/_test_data/tree', 'p')
-        call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
-        call mkdir('./test/plugin/_test_data/tree2', 'p')
+        call s:helper.new_directory('tree')
+        call s:helper.new_file('tree/file_in_tree')
+        call s:helper.new_directory('tree2')
 
-        call system(['touch', './test/plugin/_test_data/already'])
-        call writefile(['has contents'], './test/plugin/_test_data/already')
+        call s:helper.new_file_with_content('already', ['has contents'])
     endfunction
 
     function! suite.after_each()
-        call KiviewTestAfterEach()
+        call s:helper.after_each()
     endfunction
 
     function! suite.new_one()
         let cwd = getcwd()
         cd ./test/plugin/_test_data
 
-        call s:set_input('new/')
+        call s:helper.set_input('new/')
 
         call s:sync_main('')
         call s:sync_main('new')
@@ -301,11 +263,11 @@ function! s:suite.__new__() abort
         call s:sync_main('child')
         call s:assert.working_dir(cwd . '/test/plugin/_test_data/new')
 
-        call s:set_input('new_file')
+        call s:helper.set_input('new_file')
 
         call s:sync_main('new')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'new_file')
 
         call search('new_file')
@@ -315,19 +277,19 @@ function! s:suite.__new__() abort
     endfunction
 
     function! suite.cancel_new()
-        call s:set_input('')
+        call s:helper.set_input('')
 
         call s:sync_main('')
         call s:sync_main('new')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'autoload/')
     endfunction
 
     function! suite.new_already_exists()
         cd ./test/plugin/_test_data
 
-        call s:set_input('already')
+        call s:helper.set_input('already')
 
         call s:sync_main('')
         call s:sync_main('new')
@@ -344,10 +306,10 @@ function! s:suite.__new__() abort
         call s:sync_main('toggle_tree')
         call search('file_in_tree')
 
-        call s:set_input('new_in_tree')
+        call s:helper.set_input('new_in_tree')
         call s:sync_main('new')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, '  new_in_tree')
         call s:assert.contains(lines, 'tree2/')
         call s:assert.count_contains(lines, '  file_in_tree', 1)
@@ -356,12 +318,12 @@ function! s:suite.__new__() abort
     function! suite.new_multiple()
         let cwd = getcwd()
         cd ./test/plugin/_test_data
-        call s:set_input('new_file1 new_file2')
+        call s:helper.set_input('new_file1 new_file2')
 
         call s:sync_main('')
         call s:sync_main('new')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'new_file1')
         call s:assert.contains(lines, 'new_file2')
     endfunction
@@ -369,33 +331,33 @@ function! s:suite.__new__() abort
 endfunction
 
 function! s:suite.__remove__() abort
-    let suite = themis#suite('plugin.kiview.remove')
+    let suite = s:helper.sub_suite('remove')
 
     function! suite.before_each()
-        call KiviewTestBeforeEach()
+        call s:helper.before_each()
 
-        call system(['touch', './test/plugin/_test_data/removed_file1'])
-        call system(['touch', './test/plugin/_test_data/removed_file2'])
-        call system(['touch', './test/plugin/_test_data/removed_cancel_file'])
+        call s:helper.new_file('removed_file1')
+        call s:helper.new_file('removed_file2')
+        call s:helper.new_file('removed_cancel_file')
 
-        call mkdir('./test/plugin/_test_data/tree', 'p')
-        call system(['touch', './test/plugin/_test_data/tree/file_in_tree1'])
-        call system(['touch', './test/plugin/_test_data/tree/file_in_tree2'])
+        call s:helper.new_directory('tree')
+        call s:helper.new_file('tree/file_in_tree1')
+        call s:helper.new_file('tree/file_in_tree2')
 
-        call mkdir('./test/plugin/_test_data/tree2', 'p')
-        call system(['touch', './test/plugin/_test_data/tree2/file_in_tree'])
+        call s:helper.new_directory('tree2')
+        call s:helper.new_file('tree2/file_in_tree')
 
-        call mkdir('./test/plugin/_test_data/removed_dir', 'p')
-        call system(['touch', './test/plugin/_test_data/removed_dir/file'])
+        call s:helper.new_directory('removed_dir')
+        call s:helper.new_file('removed_dir/file')
     endfunction
 
     function! suite.after_each()
-        call KiviewTestAfterEach()
+        call s:helper.after_each()
     endfunction
 
     function! suite.remove_one()
         cd ./test/plugin/_test_data
-        call s:set_input('y', 'y')
+        call s:helper.set_input('y', 'y')
 
         call s:sync_main('')
 
@@ -404,20 +366,20 @@ function! s:suite.__remove__() abort
         let command = kiview#main([first_line, last_line], 'remove', bufnr('%'))
         call command.wait()
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.not_contains(lines, 'removed_file1')
         call s:assert.not_contains(lines, 'removed_file2')
 
         call search('removed_dir\/')
         call s:sync_main('remove')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.not_contains(lines, 'removed_dir/')
     endfunction
 
     function! suite.remove_in_tree()
         cd ./test/plugin/_test_data
-        call s:set_input('y')
+        call s:helper.set_input('y')
 
         call s:sync_main('')
 
@@ -428,14 +390,14 @@ function! s:suite.__remove__() abort
 
         call s:sync_main('remove')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.not_contains(lines, '  file_in_tree1')
         call s:assert.contains(lines, '  file_in_tree2')
     endfunction
 
     function! suite.remove_parent_and_child()
         cd ./test/plugin/_test_data
-        call s:set_input('y')
+        call s:helper.set_input('y')
 
         call s:sync_main('')
 
@@ -453,7 +415,7 @@ function! s:suite.__remove__() abort
 
         call s:sync_main('remove')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.not_contains(lines, '  file_in_tree1')
         call s:assert.not_contains(lines, '  file_in_tree2')
         call s:assert.not_contains(lines, 'tree/')
@@ -462,59 +424,58 @@ function! s:suite.__remove__() abort
 
     function! suite.cancel_remove()
         cd ./test/plugin/_test_data
-        call s:set_input('')
+        call s:helper.set_input('')
 
         call s:sync_main('')
 
         call search('removed_cancel_file')
         call s:sync_main('remove')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'removed_cancel_file')
     endfunction
 
     function! suite.no_remove()
         cd ./test/plugin/_test_data
-        call s:set_input('n')
+        call s:helper.set_input('n')
 
         call s:sync_main('')
 
         call search('removed_cancel_file')
         call s:sync_main('remove')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'removed_cancel_file')
     endfunction
 
 endfunction
 
 function! s:suite.__copy_cut_paste__() abort
-    let suite = themis#suite('plugin.kiview.copy_cut_paste')
+    let suite = s:helper.sub_suite('copy_cut_paste')
 
     function! suite.before_each()
-        call KiviewTestBeforeEach()
+        call s:helper.before_each()
 
-        call system(['touch', './test/plugin/_test_data/copy_file'])
-        call system(['touch', './test/plugin/_test_data/cut_file'])
-        call mkdir('./test/plugin/_test_data/paste', 'p')
-        call mkdir('./test/plugin/_test_data/tree', 'p')
-        call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
+        call s:helper.new_file('copy_file')
+        call s:helper.new_file('cut_file')
+        call s:helper.new_directory('paste')
+        call s:helper.new_directory('tree')
+        call s:helper.new_file('tree/file_in_tree')
 
-        call system(['touch', './test/plugin/_test_data/already'])
-        call writefile(['has contents'], './test/plugin/_test_data/already')
+        call s:helper.new_file_with_content('already', ['has contents'])
 
-        call mkdir('./test/plugin/_test_data/has_already', 'p')
-        call system(['touch', './test/plugin/_test_data/has_already/already'])
+        call s:helper.new_directory('has_already')
+        call s:helper.new_file('has_already/already')
     endfunction
 
     function! suite.after_each()
-        call KiviewTestAfterEach()
+        call s:helper.after_each()
     endfunction
 
     function! suite.copy_and_paste()
         call s:sync_main('go -path=test/plugin/_test_data')
 
-        let messenger = s:messenger()
+        let messenger = s:helper.messenger()
 
         call search('copy_file')
         call s:sync_main('cut')
@@ -528,7 +489,7 @@ function! s:suite.__copy_cut_paste__() abort
 
         call s:sync_main('paste')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'copy_file')
 
         call search('copy_file')
@@ -539,14 +500,14 @@ function! s:suite.__copy_cut_paste__() abort
         wincmd p
         call s:sync_main('parent')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'copy_file')
     endfunction
 
     function! suite.cut_and_paste()
         call s:sync_main('go -path=test/plugin/_test_data')
 
-        let messenger = s:messenger()
+        let messenger = s:helper.messenger()
 
         call search('cut_file')
         call s:sync_main('cut')
@@ -559,7 +520,7 @@ function! s:suite.__copy_cut_paste__() abort
 
         call s:sync_main('paste')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'cut_file')
 
         call search('cut_file')
@@ -570,7 +531,7 @@ function! s:suite.__copy_cut_paste__() abort
         wincmd p
         call s:sync_main('parent')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.not_contains(lines, 'cut_file')
     endfunction
 
@@ -587,7 +548,7 @@ function! s:suite.__copy_cut_paste__() abort
         call search('file_in_tree')
         call s:sync_main('paste')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, '  copy_file')
         call s:assert.contains(lines, 'copy_file')
     endfunction
@@ -598,22 +559,22 @@ function! s:suite.__copy_cut_paste__() abort
         call search('copy_file')
         call s:sync_main('copy')
 
-        call s:set_input('r', 'renamed_copy_file')
+        call s:helper.set_input('r', 'renamed_copy_file')
         call s:sync_main('paste')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'copy_file')
         call s:assert.contains(lines, 'renamed_copy_file')
     endfunction
 
     function! suite.cancel_renamed_paste()
         call s:sync_main('go -path=test/plugin/_test_data')
-        let test_lines = s:lines()
+        let test_lines = s:helper.lines()
 
         call search('copy_file')
         call s:sync_main('copy')
 
-        call s:set_input('r', '')
+        call s:helper.set_input('r', '')
         call s:sync_main('paste')
 
         call s:assert.lines(test_lines)
@@ -626,10 +587,10 @@ function! s:suite.__copy_cut_paste__() abort
         call s:sync_main('copy')
         call s:sync_main('parent')
 
-        call s:set_input('n')
+        call s:helper.set_input('n')
         call s:sync_main('paste')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'already')
         call s:assert.file_not_empty('already')
     endfunction
@@ -641,10 +602,10 @@ function! s:suite.__copy_cut_paste__() abort
         call s:sync_main('copy')
         call s:sync_main('parent')
 
-        call s:set_input('f')
+        call s:helper.set_input('f')
         call s:sync_main('paste')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'already')
         call s:assert.file_empty('already')
     endfunction
@@ -663,12 +624,12 @@ function! s:suite.__copy_cut_paste__() abort
 
         call s:sync_main('paste')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.working_dir(cwd . '/test/plugin/_test_data/paste')
         call s:assert.contains(lines, 'copy_file')
 
         wincmd p
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.working_dir(cwd . '/test/plugin/_test_data')
         call s:assert.contains(lines, 'copy_file')
     endfunction
@@ -676,35 +637,34 @@ function! s:suite.__copy_cut_paste__() abort
 endfunction
 
 function! s:suite.__rename__() abort
-    let suite = themis#suite('plugin.kiview.rename')
+    let suite = s:helper.sub_suite('rename')
 
     function! suite.before_each()
-        call KiviewTestBeforeEach()
+        call s:helper.before_each()
 
-        call system(['touch', './test/plugin/_test_data/rename_file'])
+        call s:helper.new_file('rename_file')
 
-        call system(['touch', './test/plugin/_test_data/already'])
-        call writefile(['has contents'], './test/plugin/_test_data/already')
+        call s:helper.new_file_with_content('already', ['has contents'])
 
-        call mkdir('./test/plugin/_test_data/tree', 'p')
-        call system(['touch', './test/plugin/_test_data/tree/file_in_tree'])
+        call s:helper.new_directory('tree')
+        call s:helper.new_file('tree/file_in_tree')
     endfunction
 
     function! suite.after_each()
-        call KiviewTestAfterEach()
+        call s:helper.after_each()
     endfunction
 
     function! suite.rename_one()
         cd ./test/plugin/_test_data
 
-        call s:set_input('renamed_file')
+        call s:helper.set_input('renamed_file')
 
         call s:sync_main('')
 
         call search('rename_file')
         call s:sync_main('rename')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'renamed_file')
         call s:assert.not_contains(lines, 'rename_file')
     endfunction
@@ -712,7 +672,7 @@ function! s:suite.__rename__() abort
     function! suite.rename_in_tree()
         cd ./test/plugin/_test_data
 
-        call s:set_input('renamed_file')
+        call s:helper.set_input('renamed_file')
 
         call s:sync_main('')
 
@@ -722,7 +682,7 @@ function! s:suite.__rename__() abort
         call search('file_in_tree')
         call s:sync_main('rename')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, '  renamed_file')
         call s:assert.not_contains(lines, '  rename_file')
     endfunction
@@ -733,7 +693,7 @@ function! s:suite.__rename__() abort
         call s:sync_main('')
 
         call search('rename_file')
-        call s:set_input('already')
+        call s:helper.set_input('already')
         call s:sync_main('rename')
 
         call s:assert.file_not_empty('already')
@@ -748,7 +708,7 @@ function! s:suite.__rename__() abort
         call s:sync_main('multiple_rename')
         call s:assert.modified(v:false)
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'rename_file')
 
         call setbufline('%', 2, 'renamed_file')
@@ -762,7 +722,7 @@ function! s:suite.__rename__() abort
 
         quit
         call s:sync_main('')
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'renamed_file')
         call s:assert.not_contains(lines, 'rename_file')
     endfunction
@@ -807,7 +767,7 @@ function! s:suite.__rename__() abort
         call s:assert.modified(v:false)
         call s:assert.window_count(3)
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call s:assert.contains(lines, 'renamed_file')
 
         call search('renamed_file')
@@ -851,7 +811,7 @@ function! s:suite.toggle_tree()
 
     call search('autoload/')
 
-    let lines = s:lines()
+    let lines = s:helper.lines()
     call s:sync_main('toggle_tree')
     call s:sync_main('toggle_tree')
     call s:assert.lines(lines)
@@ -867,7 +827,7 @@ endfunction
 function! s:suite.cannot_toggle_parent_node()
     call s:sync_main('')
 
-    let lines = s:lines()
+    let lines = s:helper.lines()
 
     normal! gg
     call s:sync_main('toggle_tree')
@@ -904,23 +864,23 @@ function! s:suite.toggle_parent_and_child()
 endfunction
 
 function! s:suite.__toggle_deep__() abort
-    let suite = themis#suite('plugin.kiview.toggle_deep')
+    let suite = s:helper.sub_suite('toggle_deep')
 
     function! suite.before_each()
-        call KiviewTestBeforeEach()
+        call s:helper.before_each()
 
-        call mkdir('./test/plugin/_test_data/depth0', 'p')
-        call mkdir('./test/plugin/_test_data/depth0/depth1', 'p')
+        call s:helper.new_directory('depth0')
+        call s:helper.new_directory('depth0/depth1')
     endfunction
 
     function! suite.after_each()
-        call KiviewTestAfterEach()
+        call s:helper.after_each()
     endfunction
 
     function! suite.toggle_last_dir()
         call s:sync_main('go -path=./test/plugin/_test_data/depth0')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
 
         call search('depth1\/')
         call s:sync_main('toggle_tree')
@@ -935,7 +895,7 @@ function! s:suite.__toggle_deep__() abort
         call search('depth0\/')
         call s:sync_main('toggle_tree')
 
-        let lines = s:lines()
+        let lines = s:helper.lines()
         call search('depth1\/')
         call s:sync_main('toggle_tree')
         call s:sync_main('toggle_tree')
@@ -947,7 +907,7 @@ endfunction
 
 function! s:suite.open_root()
     call s:sync_main('go -path=/')
-    let lines = s:lines()
+    let lines = s:helper.lines()
 
     normal! 2j
     let line_number = line('.')
