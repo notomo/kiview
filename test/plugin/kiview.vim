@@ -33,7 +33,7 @@ function! s:suite.create_one()
     normal! gg
     call s:assert.syntax_name('KiviewNodeClosed')
 
-    call search('autoload\/')
+    call s:helper.search('autoload\/')
     call s:assert.syntax_name('KiviewNodeClosed')
     call s:assert.ends_with(kiview#get().path, 'autoload')
 endfunction
@@ -79,7 +79,7 @@ function! s:suite.do_parent_child()
     call s:assert.filetype('kiview')
     call s:assert.working_dir(cwd)
 
-    call search('test/')
+    call s:helper.search('test/')
     call s:sync_main('child')
 
     let lines = s:helper.lines()
@@ -90,7 +90,7 @@ function! s:suite.do_parent_child()
     call s:assert.filetype('kiview')
     call s:assert.lines(test_lines)
 
-    call search('\.themisrc')
+    call s:helper.search('\.themisrc')
     call s:sync_main('child')
 
     call s:assert.file_name('.themisrc')
@@ -112,7 +112,7 @@ endfunction
 function! s:suite.quit_option()
     call s:sync_main('')
 
-    call search('Makefile')
+    call s:helper.search('Makefile')
     call s:sync_main('child -quit')
 
     call s:assert.file_name('Makefile')
@@ -122,7 +122,7 @@ endfunction
 function! s:suite.tab_open()
     call s:sync_main('')
 
-    call search('Makefile')
+    call s:helper.search('Makefile')
     call s:sync_main('child -layout=tab')
 
     call s:assert.file_name('Makefile')
@@ -132,7 +132,7 @@ endfunction
 function! s:suite.vertical_open()
     call s:sync_main('')
 
-    call search('Makefile')
+    call s:helper.search('Makefile')
     call s:sync_main('child -layout=vertical')
 
     call s:assert.file_name('Makefile')
@@ -145,7 +145,7 @@ endfunction
 function! s:suite.horizontal_open()
     call s:sync_main('')
 
-    call search('Makefile')
+    call s:helper.search('Makefile')
     call s:sync_main('child -layout=horizontal')
 
     call s:assert.file_name('Makefile')
@@ -160,13 +160,13 @@ function! s:suite.history()
 
     call s:sync_main('')
 
-    call search('src')
+    call s:helper.search('src')
     call s:sync_main('child')
 
     let lines = s:helper.lines()
     call s:assert.contains(lines, 'repository/')
 
-    call search('repository')
+    call s:helper.search('repository')
     call s:sync_main('child')
 
     call s:sync_main('parent')
@@ -205,7 +205,7 @@ function! s:suite.range()
 
     call s:sync_main('')
 
-    let line = search('Cargo\.toml')
+    let line = s:helper.search('Cargo\.toml')
     let command = kiview#main([line, line + 1], 'child -layout=tab', bufnr('%'))
     call command.wait()
 
@@ -259,7 +259,7 @@ function! s:suite.__new__() abort
         call s:sync_main('')
         call s:sync_main('new')
 
-        call search('new\/')
+        call s:helper.search('new\/')
         call s:sync_main('child')
         call s:assert.working_dir(cwd . '/test/plugin/_test_data/new')
 
@@ -270,7 +270,7 @@ function! s:suite.__new__() abort
         let lines = s:helper.lines()
         call s:assert.contains(lines, 'new_file')
 
-        call search('new_file')
+        call s:helper.search('new_file')
         call s:sync_main('child')
 
         call s:assert.file_name('new_file')
@@ -302,9 +302,9 @@ function! s:suite.__new__() abort
 
         call s:sync_main('')
 
-        call search('tree/')
+        call s:helper.search('tree/')
         call s:sync_main('toggle_tree')
-        call search('file_in_tree')
+        call s:helper.search('file_in_tree')
 
         call s:helper.set_input('new_in_tree')
         call s:sync_main('new')
@@ -361,8 +361,8 @@ function! s:suite.__remove__() abort
 
         call s:sync_main('')
 
-        let first_line = search('removed_file1')
-        let last_line = search('removed_file2')
+        let first_line = s:helper.search('removed_file1')
+        let last_line = s:helper.search('removed_file2')
         let command = kiview#main([first_line, last_line], 'remove', bufnr('%'))
         call command.wait()
 
@@ -370,7 +370,7 @@ function! s:suite.__remove__() abort
         call s:assert.not_contains(lines, 'removed_file1')
         call s:assert.not_contains(lines, 'removed_file2')
 
-        call search('removed_dir\/')
+        call s:helper.search('removed_dir\/')
         call s:sync_main('remove')
 
         let lines = s:helper.lines()
@@ -383,9 +383,9 @@ function! s:suite.__remove__() abort
 
         call s:sync_main('')
 
-        call search('tree\/')
+        call s:helper.search('tree\/')
         call s:sync_main('toggle_tree')
-        call search('file_in_tree1')
+        call s:helper.search('file_in_tree1')
         call s:sync_main('toggle_selection')
 
         call s:sync_main('remove')
@@ -401,16 +401,16 @@ function! s:suite.__remove__() abort
 
         call s:sync_main('')
 
-        call search('tree\/')
+        call s:helper.search('tree\/')
         call s:sync_main('toggle_tree')
-        call search('tree2\/')
+        call s:helper.search('tree2\/')
         call s:sync_main('toggle_tree')
 
-        call search('tree\/')
+        call s:helper.search('tree\/')
         call s:sync_main('toggle_selection')
-        call search('file_in_tree1')
+        call s:helper.search('file_in_tree1')
         call s:sync_main('toggle_selection')
-        call search('file_in_tree$')
+        call s:helper.search('file_in_tree$')
         call s:sync_main('toggle_selection')
 
         call s:sync_main('remove')
@@ -428,7 +428,7 @@ function! s:suite.__remove__() abort
 
         call s:sync_main('')
 
-        call search('removed_cancel_file')
+        call s:helper.search('removed_cancel_file')
         call s:sync_main('remove')
 
         let lines = s:helper.lines()
@@ -441,7 +441,7 @@ function! s:suite.__remove__() abort
 
         call s:sync_main('')
 
-        call search('removed_cancel_file')
+        call s:helper.search('removed_cancel_file')
         call s:sync_main('remove')
 
         let lines = s:helper.lines()
@@ -477,14 +477,14 @@ function! s:suite.__copy_cut_paste__() abort
 
         let messenger = s:helper.messenger()
 
-        call search('copy_file')
+        call s:helper.search('copy_file')
         call s:sync_main('cut')
         call s:sync_main('copy') " copy disables cut
 
         call s:assert.contains(messenger.msg, 'Copied')
         call s:assert.contains(messenger.msg, 'test/plugin/_test_data/copy_file')
 
-        call search('paste\/')
+        call s:helper.search('paste\/')
         call s:sync_main('child')
 
         call s:sync_main('paste')
@@ -492,7 +492,7 @@ function! s:suite.__copy_cut_paste__() abort
         let lines = s:helper.lines()
         call s:assert.contains(lines, 'copy_file')
 
-        call search('copy_file')
+        call s:helper.search('copy_file')
         call s:sync_main('child')
 
         call s:assert.file_name('copy_file')
@@ -509,13 +509,13 @@ function! s:suite.__copy_cut_paste__() abort
 
         let messenger = s:helper.messenger()
 
-        call search('cut_file')
+        call s:helper.search('cut_file')
         call s:sync_main('cut')
 
         call s:assert.contains(messenger.msg, 'Cut')
         call s:assert.contains(messenger.msg, 'test/plugin/_test_data/cut_file')
 
-        call search('paste\/')
+        call s:helper.search('paste\/')
         call s:sync_main('child')
 
         call s:sync_main('paste')
@@ -523,7 +523,7 @@ function! s:suite.__copy_cut_paste__() abort
         let lines = s:helper.lines()
         call s:assert.contains(lines, 'cut_file')
 
-        call search('cut_file')
+        call s:helper.search('cut_file')
         call s:sync_main('child')
 
         call s:assert.file_name('cut_file')
@@ -538,14 +538,14 @@ function! s:suite.__copy_cut_paste__() abort
     function! suite.paste_in_tree()
         call s:sync_main('go -path=test/plugin/_test_data')
 
-        call search('copy_file')
+        call s:helper.search('copy_file')
         call s:sync_main('cut')
         call s:sync_main('copy') " copy disables cut
 
-        call search('tree/')
+        call s:helper.search('tree/')
         call s:sync_main('toggle_tree')
 
-        call search('file_in_tree')
+        call s:helper.search('file_in_tree')
         call s:sync_main('paste')
 
         let lines = s:helper.lines()
@@ -556,7 +556,7 @@ function! s:suite.__copy_cut_paste__() abort
     function! suite.copy_and_renamed_paste()
         call s:sync_main('go -path=test/plugin/_test_data')
 
-        call search('copy_file')
+        call s:helper.search('copy_file')
         call s:sync_main('copy')
 
         call s:helper.set_input('r', 'renamed_copy_file')
@@ -571,7 +571,7 @@ function! s:suite.__copy_cut_paste__() abort
         call s:sync_main('go -path=test/plugin/_test_data')
         let test_lines = s:helper.lines()
 
-        call search('copy_file')
+        call s:helper.search('copy_file')
         call s:sync_main('copy')
 
         call s:helper.set_input('r', '')
@@ -583,7 +583,7 @@ function! s:suite.__copy_cut_paste__() abort
     function! suite.cancel_paste_on_already_exists()
         call s:sync_main('go -path=test/plugin/_test_data/has_already')
 
-        call search('already')
+        call s:helper.search('already')
         call s:sync_main('copy')
         call s:sync_main('parent')
 
@@ -598,7 +598,7 @@ function! s:suite.__copy_cut_paste__() abort
     function! suite.force_paste_on_already_exists()
         call s:sync_main('go -path=test/plugin/_test_data/has_already')
 
-        call search('already')
+        call s:helper.search('already')
         call s:sync_main('copy')
         call s:sync_main('parent')
 
@@ -615,11 +615,11 @@ function! s:suite.__copy_cut_paste__() abort
 
         call s:sync_main('go -path=test/plugin/_test_data')
 
-        call search('copy_file')
+        call s:helper.search('copy_file')
         call s:sync_main('copy')
 
         call s:sync_main('-create')
-        call search('paste\/')
+        call s:helper.search('paste\/')
         call s:sync_main('child')
 
         call s:sync_main('paste')
@@ -661,7 +661,7 @@ function! s:suite.__rename__() abort
 
         call s:sync_main('')
 
-        call search('rename_file')
+        call s:helper.search('rename_file')
         call s:sync_main('rename')
 
         let lines = s:helper.lines()
@@ -676,10 +676,10 @@ function! s:suite.__rename__() abort
 
         call s:sync_main('')
 
-        call search('tree/')
+        call s:helper.search('tree/')
         call s:sync_main('toggle_tree')
 
-        call search('file_in_tree')
+        call s:helper.search('file_in_tree')
         call s:sync_main('rename')
 
         let lines = s:helper.lines()
@@ -692,7 +692,7 @@ function! s:suite.__rename__() abort
 
         call s:sync_main('')
 
-        call search('rename_file')
+        call s:helper.search('rename_file')
         call s:helper.set_input('already')
         call s:sync_main('rename')
 
@@ -704,7 +704,7 @@ function! s:suite.__rename__() abort
 
         call s:sync_main('')
 
-        call search('rename_file')
+        call s:helper.search('rename_file')
         call s:sync_main('multiple_rename')
         call s:assert.modified(v:false)
 
@@ -732,9 +732,9 @@ function! s:suite.__rename__() abort
 
         call s:sync_main('')
 
-        call search('rename_file')
+        call s:helper.search('rename_file')
         call s:sync_main('toggle_selection')
-        call search('already')
+        call s:helper.search('already')
         call s:sync_main('toggle_selection')
         call s:sync_main('multiple_rename')
 
@@ -755,7 +755,7 @@ function! s:suite.__rename__() abort
 
         call s:sync_main('')
 
-        call search('rename_file')
+        call s:helper.search('rename_file')
         call s:sync_main('multiple_rename')
 
         call setbufline('%', 2, 'renamed_file')
@@ -770,7 +770,7 @@ function! s:suite.__rename__() abort
         let lines = s:helper.lines()
         call s:assert.contains(lines, 'renamed_file')
 
-        call search('renamed_file')
+        call s:helper.search('renamed_file')
         call setbufline('%', 2, 'twice_renamed_file')
 
         write
@@ -809,7 +809,7 @@ endfunction
 function! s:suite.toggle_tree()
     call s:sync_main('')
 
-    call search('autoload/')
+    call s:helper.search('autoload/')
 
     let lines = s:helper.lines()
     call s:sync_main('toggle_tree')
@@ -818,7 +818,7 @@ function! s:suite.toggle_tree()
 
     call s:sync_main('toggle_tree')
 
-    call search('kiview.vim')
+    call s:helper.search('kiview.vim')
     call s:sync_main('child')
 
     call s:assert.file_name('kiview.vim')
@@ -838,13 +838,13 @@ endfunction
 function! s:suite.toggle_multi_trees()
     call s:sync_main('')
 
-    call search('autoload\/')
+    call s:helper.search('autoload\/')
     call s:sync_main('toggle_tree')
 
-    call search('plugin\/')
+    call s:helper.search('plugin\/')
     call s:sync_main('toggle_tree')
 
-    call search('kiview\.vim')
+    call s:helper.search('kiview\.vim')
     call s:sync_main('child')
 
     call s:assert.path('plugin/kiview.vim')
@@ -853,11 +853,11 @@ endfunction
 function! s:suite.toggle_parent_and_child()
     call s:sync_main('')
 
-    call search('autoload\/')
+    call s:helper.search('autoload\/')
     call s:sync_main('toggle_selection')
     call s:sync_main('toggle_tree')
 
-    call search('kiview\/')
+    call s:helper.search('kiview\/')
     call s:sync_main('toggle_selection')
 
     call s:sync_main('toggle_tree')
@@ -882,7 +882,7 @@ function! s:suite.__toggle_deep__() abort
 
         let lines = s:helper.lines()
 
-        call search('depth1\/')
+        call s:helper.search('depth1\/')
         call s:sync_main('toggle_tree')
         call s:sync_main('toggle_tree')
 
@@ -892,11 +892,11 @@ function! s:suite.__toggle_deep__() abort
     function! suite.toggle_single_dir()
         call s:sync_main('go -path=./test/plugin/_test_data')
 
-        call search('depth0\/')
+        call s:helper.search('depth0\/')
         call s:sync_main('toggle_tree')
 
         let lines = s:helper.lines()
-        call search('depth1\/')
+        call s:helper.search('depth1\/')
         call s:sync_main('toggle_tree')
         call s:sync_main('toggle_tree')
 
@@ -921,10 +921,10 @@ endfunction
 function! s:suite.toggle_selection()
     call s:sync_main('go -path=src')
 
-    call search('\.gitignore')
+    call s:helper.search('\.gitignore')
     call s:sync_main('toggle_selection')
 
-    call search('Cargo\.toml')
+    call s:helper.search('Cargo\.toml')
     call s:sync_main('toggle_selection')
 
     call s:sync_main('child -layout=tab')
@@ -936,9 +936,9 @@ endfunction
 function! s:suite.toggle_all_selection()
     call s:sync_main('go -path=src')
 
-    call search('src\/')
+    call s:helper.search('src\/')
     call s:sync_main('toggle_selection')
-    call search('target\/')
+    call s:helper.search('target\/')
     call s:sync_main('toggle_selection')
 
     call s:sync_main('toggle_all_selection')
@@ -1000,12 +1000,12 @@ endfunction
 function! s:suite.clear_selection_on_error()
     call s:sync_main('go -path=./src')
 
-    call search('\.gitignore')
+    call s:helper.search('\.gitignore')
     call s:sync_main('toggle_selection')
 
     call s:sync_main('go -path=./not_found')
 
-    call search('Makefile')
+    call s:helper.search('Makefile')
     call s:sync_main('child')
 
     call s:assert.file_name('Makefile')
@@ -1030,9 +1030,9 @@ function! s:suite.tab_open_group_node()
     let cwd = getcwd()
 
     call s:sync_main('')
-    call search('test\/')
+    call s:helper.search('test\/')
     call s:sync_main('toggle_selection')
-    call search('Makefile')
+    call s:helper.search('Makefile')
     call s:sync_main('toggle_selection')
     call s:sync_main('child -layout=tab')
 
@@ -1044,7 +1044,7 @@ function! s:suite.tab_open_group_node()
     call s:assert.filetype('kiview')
     call s:assert.working_dir(cwd . '/test')
 
-    call search('plugin\/')
+    call s:helper.search('plugin\/')
     call s:sync_main('child')
 
     call s:assert.working_dir(cwd . '/test/plugin')

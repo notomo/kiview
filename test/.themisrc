@@ -49,6 +49,15 @@ function! KiviewTestHelper(name) abort
         return getbufline('%', 1, '$')
     endfunction
 
+    function! helper.search(pattern) abort
+        let result = search(a:pattern)
+        if result == 0
+            let message = printf('%s not found', a:pattern)
+            call self.assert.fail(message)
+        endif
+        return result
+    endfunction
+
     function! helper.set_input(...) abort
         let f = {'answers': a:000}
         function! f.read(msg) abort
