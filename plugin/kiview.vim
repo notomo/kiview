@@ -3,4 +3,4 @@ if exists('g:loaded_kiview')
 endif
 let g:loaded_kiview = 1
 
-command! -range -nargs=* Kiview call kiview#main([<line1>, <line2>], <q-args>, bufnr('%'))
+command! -range -nargs=* Kiview call kiview#main(<q-args>, {'range': [<line1>, <line2>]})

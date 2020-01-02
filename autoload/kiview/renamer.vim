@@ -74,7 +74,7 @@ function! kiview#renamer#new(source_id, bufnr) abort
             call add(targets, {'from': item.path, 'to': line, 'id': marks[0][0]})
         endfor
         let self.targets = targets
-        call kiview#main([1, 1], 'multiple_rename', self.source_bufnr)
+        call kiview#main('multiple_rename', {'bufnr': self.source_bufnr, 'range': [1, 1]})
         let self.targets = []
     endfunction
 
