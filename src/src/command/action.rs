@@ -1,5 +1,4 @@
 use super::command::{SplitModName, SplitName};
-use super::current::RegisteredTarget;
 use crate::repository::FullPath;
 use serde_derive::Serialize;
 
@@ -26,7 +25,7 @@ pub enum Action {
     #[serde(rename = "confirm_remove")]
     ConfirmRemove { paths: Vec<String> },
     #[serde(rename = "confirm_rename")]
-    ConfirmRename { path: String },
+    ConfirmRename { path: String, relative_path: String },
     #[serde(rename = "confirm_new")]
     ConfirmNew,
 
@@ -38,7 +37,7 @@ pub enum Action {
     ClearRegister,
     #[serde(rename = "choose")]
     Choose {
-        targets: Vec<RegisteredTarget>,
+        targets: Vec<ChosenTarget>,
         has_cut: bool,
     },
 
@@ -121,6 +120,17 @@ pub struct Prop {
     depth: usize,
     is_parent_node: bool,
     parent_id: Option<u64>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct RegisteredTarget {
+    pub path: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ChosenTarget {
+    pub path: String,
+    pub relative_path: String,
 }
 
 impl From<Vec<FullPath>> for Paths {

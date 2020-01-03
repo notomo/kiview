@@ -66,14 +66,15 @@ function! KiviewTestHelper(name) abort
 
     function! helper.set_input(...) abort
         let f = {'answers': a:000}
-        function! f.read(msg) abort
+        function! f.read(msg, default) abort
             let answer = self.answers[0]
+            call themis#log('[default prompt] ' . a:default)
             call themis#log('[prompt] ' . a:msg . answer)
             let self.answers = self.answers[1:]
             return answer
         endfunction
 
-        call kiview#input_reader#set_func({ msg -> f.read(msg) })
+        call kiview#input_reader#set_func({ msg, default -> f.read(msg, default) })
     endfunction
 
     function! helper.messenger() abort

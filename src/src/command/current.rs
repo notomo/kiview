@@ -1,4 +1,4 @@
-use serde_derive::{Deserialize, Serialize};
+use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Current<'a> {
@@ -55,7 +55,7 @@ impl Target {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct RegisteredTarget {
     pub path: String,
 

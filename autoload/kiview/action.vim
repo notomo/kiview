@@ -159,7 +159,7 @@ function! s:confirm_remove(action, input_reader) abort
 endfunction
 
 function! s:confirm_rename(action, input_reader) abort
-    let name = a:input_reader.read('rename to: ', [a:action.path])
+    let name = a:input_reader.read('rename to: ', [a:action.path], a:action.relative_path)
     if empty(name)
         return
     endif
@@ -173,7 +173,7 @@ function! s:choose(action, buffer, input_reader) abort
         if answer ==? 'n'
             continue
         elseif answer ==? 'r'
-            let new_name = a:input_reader.read('rename to: ', [])
+            let new_name = a:input_reader.read('rename to: ', [], target.relative_path)
             if empty(new_name)
                 continue
             endif

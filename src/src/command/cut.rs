@@ -1,4 +1,4 @@
-use super::current::RegisteredTarget;
+use super::action::RegisteredTarget;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
@@ -16,7 +16,6 @@ impl<'a> Command for CutCommand<'a> {
             .iter()
             .map(|target| RegisteredTarget {
                 path: target.to_string(),
-                name: None,
             })
             .collect();
 

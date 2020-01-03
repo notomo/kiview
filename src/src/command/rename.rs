@@ -20,6 +20,14 @@ impl<'a> Command for RenameCommand<'a> {
         let (target, path) = match (self.opts.no_confirm, &self.current.target, &self.opts.path) {
             (false, Some(target), _) => {
                 return Ok(vec![Action::ConfirmRename {
+                    relative_path: match self
+                        .dispatcher
+                        .path(&target.path)
+                        .to_relative(self.current.path)
+                    {
+                        Ok(relative_path) => relative_path,
+                        Err(_) => target.path.clone(),
+                    },
                     path: target.to_string(),
                 }])
             }

@@ -1,4 +1,4 @@
-use super::current::RegisteredTarget;
+use super::action::ChosenTarget;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
@@ -118,9 +118,16 @@ impl<'a> Command for PasteCommand<'a> {
             Action::Choose {
                 targets: already_exists
                     .iter()
-                    .map(|(_, to)| RegisteredTarget {
+                    .map(|(_, to)| ChosenTarget {
+                        relative_path: match self
+                            .dispatcher
+                            .path(&to)
+                            .to_relative(self.current.path)
+                        {
+                            Ok(relative_path) => relative_path,
+                            Err(_) => to.clone(),
+                        },
                         path: to.to_string(),
-                        name: None,
                     })
                     .collect(),
                 has_cut: self.current.has_cut,

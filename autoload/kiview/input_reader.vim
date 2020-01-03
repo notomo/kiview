@@ -13,7 +13,12 @@ function! kiview#input_reader#new() abort
         \ 'func': s:func,
     \ }
 
-    function! input_reader.read(propmt, targets) abort
+    function! input_reader.read(propmt, targets, ...) abort
+        let default = ''
+        if len(a:000) > 0
+            let default = a:000[0]
+        endif
+
         call inputsave()
 
         let message = a:propmt
@@ -21,7 +26,7 @@ function! kiview#input_reader#new() abort
             let message = join(a:targets, "\n") . "\n" . message
         endif
 
-        let input = self.func(message)
+        let input = self.func(message, default)
         call inputrestore()
         return input
     endfunction
