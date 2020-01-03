@@ -621,6 +621,41 @@ function! s:suite.__copy_cut_paste__() abort
         call s:assert.contains(lines, 'copy_file')
     endfunction
 
+    function! suite.directory_copy()
+        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+
+        call s:helper.search('tree\/')
+        call s:helper.sync_execute('copy')
+
+        call s:helper.search('paste\/')
+        call s:helper.sync_execute('child')
+
+        call s:helper.sync_execute('paste')
+
+        let lines = s:helper.lines()
+        call s:assert.contains(lines, 'tree/')
+    endfunction
+
+    function! suite.directory_cut()
+        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+
+        call s:helper.search('tree\/')
+        call s:helper.sync_execute('cut')
+
+        call s:helper.search('paste\/')
+        call s:helper.sync_execute('child')
+
+        call s:helper.sync_execute('paste')
+
+        let lines = s:helper.lines()
+        call s:assert.contains(lines, 'tree/')
+
+        call s:helper.sync_execute('parent')
+
+        let lines = s:helper.lines()
+        call s:assert.not_contains(lines, 'tree/')
+    endfunction
+
 endfunction
 
 function! s:suite.__rename__() abort

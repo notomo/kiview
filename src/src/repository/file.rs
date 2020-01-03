@@ -3,6 +3,8 @@ use crate::repository::{FullPath, Path, PathRepository};
 use std::fs;
 use std::path::Path as StdPath;
 
+extern crate fs_extra;
+
 pub struct FilePathRepository {}
 
 impl PathRepository for FilePathRepository {
@@ -86,7 +88,14 @@ impl PathRepository for FilePathRepository {
     }
 
     fn copy(&self, from: &str, to: &str) -> Result<(), Error> {
-        fs::copy(from, to)?;
+        if StdPath::new(from).is_dir() {
+            let mut options = fs_extra::dir::CopyOptions::new();
+            options.copy_inside = true;
+            fs_extra::dir::copy(from, to, &options)?;
+            return Ok(());
+        }
+
+        fs::copy(from, to).and_then(|_| Ok(()))?;
         Ok(())
     }
 

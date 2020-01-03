@@ -1,4 +1,5 @@
 use failure::{Context, Fail};
+use fs_extra::error::Error as FsExtraError;
 use std::io::Error as IOError;
 use std::option::NoneError;
 use std::path::StripPrefixError;
@@ -48,6 +49,16 @@ impl From<ErrorKind> for Error {
 
 impl From<StripPrefixError> for Error {
     fn from(error: StripPrefixError) -> Error {
+        Error {
+            inner: Context::new(ErrorKind::IO {
+                message: error.to_string(),
+            }),
+        }
+    }
+}
+
+impl From<FsExtraError> for Error {
+    fn from(error: FsExtraError) -> Error {
         Error {
             inner: Context::new(ErrorKind::IO {
                 message: error.to_string(),
