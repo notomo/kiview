@@ -729,6 +729,7 @@ function! s:suite.__rename__() abort
         call s:helper.search('rename_file')
         call s:helper.sync_execute('multiple_rename')
         call s:assert.modified(v:false)
+        call s:assert.line_number(2)
 
         let lines = s:helper.lines()
         call s:assert.contains(lines, 'rename_file')

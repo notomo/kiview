@@ -53,6 +53,7 @@ function! kiview#renamer#new(source_id, bufnr) abort
         call nvim_buf_set_option(self.bufnr, 'bufhidden', 'wipe')
         call nvim_buf_set_option(self.bufnr, 'buftype', 'acwrite')
         call nvim_buf_set_option(self.bufnr, 'modified', v:false)
+        call nvim_win_set_cursor(self.window, [2, 0])
 
         execute printf('autocmd BufWriteCmd <buffer=%s> ++nested call s:write(%s)', self.bufnr, self.source_bufnr)
     endfunction
