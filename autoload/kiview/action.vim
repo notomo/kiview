@@ -10,6 +10,7 @@ function! kiview#action#new_handler(buffer) abort
             \ 'horizontal_open': { action -> s:horizontal_open_targets(action, buffer) },
             \ 'create': { action -> s:create(action, buffer) },
             \ 'add_history': { action -> s:add_history(action, buffer) },
+            \ 'back_history': { action -> s:back_history(action, buffer) },
             \ 'try_to_restore_cursor': { action -> s:try_to_restore_cursor(action, buffer) },
             \ 'set_cursor': { action -> s:set_cursor(action, buffer) },
             \ 'set_path': { action -> s:set_path(action, buffer) },
@@ -115,7 +116,7 @@ function! s:close_tree(action, buffer) abort
 endfunction
 
 function! s:try_to_restore_cursor(action, buffer) abort
-    call a:buffer.history.restore(a:action.path)
+    call a:buffer.history.restore_cursor(a:action.path)
     call a:buffer.current.set(a:action.path)
 endfunction
 
@@ -127,13 +128,21 @@ function! s:set_cursor(action, buffer) abort
     call a:buffer.current.set_cursor(a:action.line_number)
 endfunction
 
+function! s:back_history(action, buffer) abort
+    let path = a:buffer.history.back()
+    if empty(path)
+        return
+    endif
+    return 'go -back -path=' . path
+endfunction
+
 function! s:add_history(action, buffer) abort
-    call a:buffer.history.add(a:action.path, a:action.line_number)
+    call a:buffer.history.add(a:action.path, a:action.line_number, a:action.back)
 endfunction
 
 function! s:create(action, buffer) abort
     call a:buffer.open(a:action.split_name, a:action.mod_name)
-    call a:buffer.history.restore('')
+    call a:buffer.history.restore_cursor('')
     call a:buffer.current.set(a:action.path)
 endfunction
 

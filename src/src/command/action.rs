@@ -46,8 +46,15 @@ pub enum Action {
     #[serde(rename = "toggle_all_selection")]
     ToggleAllSelection,
 
+    #[serde(rename = "back_history")]
+    BackHistory {},
     #[serde(rename = "add_history")]
-    AddHistory { path: String, line_number: u64 },
+    AddHistory {
+        path: String,
+        line_number: u64,
+        #[serde(default)]
+        back: bool,
+    },
     #[serde(rename = "try_to_restore_cursor")]
     TryToRestoreCursor { path: String },
     #[serde(rename = "set_cursor")]

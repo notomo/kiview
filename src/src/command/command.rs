@@ -36,6 +36,8 @@ pub enum CommandName {
     ToggleSelection,
     #[serde(rename = "toggle_all_selection")]
     ToggleAllSelection,
+    #[serde(rename = "back")]
+    Back,
     #[serde(rename = "unknown")]
     Unknown,
 }
@@ -62,6 +64,7 @@ impl From<&str> for CommandName {
             ["toggle_tree"] => CommandName::ToggleTree,
             ["toggle_selection"] => CommandName::ToggleSelection,
             ["toggle_all_selection"] => CommandName::ToggleAllSelection,
+            ["back"] => CommandName::Back,
             [] => CommandName::Go,
             _ => CommandName::Unknown,
         }
@@ -195,6 +198,7 @@ pub enum CommandOption {
     Quit,
     NoConfirm,
     Create,
+    Back,
     Split { value: Split },
     Unknown,
 }
@@ -209,6 +213,7 @@ impl From<&str> for CommandOption {
             ["quit"] => CommandOption::Quit,
             ["no-confirm"] => CommandOption::NoConfirm,
             ["create"] => CommandOption::Create,
+            ["back"] => CommandOption::Back,
             ["path", path] => CommandOption::Path {
                 value: path.to_string(),
             },
@@ -231,6 +236,7 @@ pub struct CommandOptions {
     pub paths: Vec<String>,
     pub no_confirm: bool,
     pub create: bool,
+    pub back: bool,
     pub split: Split,
 }
 
@@ -296,6 +302,11 @@ impl CommandOptions {
             _ => false,
         });
 
+        let back = options.iter().any(|opt| match &opt {
+            CommandOption::Back => true,
+            _ => false,
+        });
+
         let split: Split = options
             .iter()
             .map(|opt| match &opt {
@@ -315,6 +326,7 @@ impl CommandOptions {
             paths: paths,
             no_confirm: no_confirm,
             create: create,
+            back: back,
             split: split,
         }
     }

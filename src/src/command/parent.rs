@@ -38,6 +38,7 @@ impl<'a> Command for ParentCommand<'a> {
             Action::AddHistory {
                 path: self.current.path.to_string(),
                 line_number: self.current.line_number,
+                back: false,
             },
         ])
     }

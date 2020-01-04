@@ -40,6 +40,9 @@ pub use rename::{MultipleRenameCommand, RenameCommand};
 mod toggle;
 pub use toggle::ToggleTreeCommand;
 
+mod back;
+pub use back::BackCommand;
+
 mod unknown;
 pub use unknown::UnknownCommand;
 

@@ -45,6 +45,7 @@ impl<'a> Command for GoCommand<'a> {
             actions.push(Action::AddHistory {
                 path: self.current.path.to_string(),
                 line_number: self.current.line_number,
+                back: self.opts.back,
             });
         }
 

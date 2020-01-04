@@ -55,15 +55,16 @@ impl<'a> Command for ChildCommand<'a> {
                                     Action::TryToRestoreCursor {
                                         path: p.to_string(),
                                     },
-                                    Action::AddHistory {
-                                        path: p.to_string(),
-                                        line_number: self.current.line_number,
-                                    },
                                 ]
                             })
                             .collect();
 
                         error_actions.append(&mut actions);
+                        error_actions.push(Action::AddHistory {
+                            path: self.current.path.to_string(),
+                            line_number: self.current.line_number,
+                            back: false,
+                        });
                         error_actions
                     }
                     _ => {

@@ -1075,3 +1075,33 @@ function! s:suite.tab_open_group_node()
     tabprevious
     call s:assert.working_dir(cwd)
 endfunction
+
+function! s:suite.history_back()
+    call s:helper.sync_execute('')
+    let working_dir = getcwd()
+
+    call s:helper.search('src\/')
+    call s:helper.sync_execute('child')
+    call s:helper.search('target\/')
+    call s:helper.sync_execute('child')
+
+    call s:helper.sync_execute('back')
+    call s:assert.working_dir(working_dir . '/src')
+
+    call s:helper.search('src\/')
+    call s:helper.sync_execute('child')
+    call s:helper.search('command\/')
+    call s:helper.sync_execute('child')
+
+    call s:helper.sync_execute('back')
+    call s:assert.working_dir(working_dir . '/src/src')
+
+    call s:helper.sync_execute('back')
+    call s:assert.working_dir(working_dir . '/src')
+
+    call s:helper.sync_execute('back')
+    call s:assert.working_dir(working_dir)
+
+    call s:helper.sync_execute('back')
+    call s:assert.working_dir(working_dir)
+endfunction
