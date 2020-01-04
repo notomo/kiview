@@ -121,7 +121,7 @@ fn main() {
                     let output = json!({
                         "actions": actions,
                     });
-                    println!("{}", serde_json::to_string_pretty(&output).unwrap());
+                    println!("{}", serde_json::to_string(&output).unwrap());
                 }
                 Err(err) => {
                     eprintln!("{}", err);

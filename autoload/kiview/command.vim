@@ -79,6 +79,7 @@ endfunction
 function! s:build_input(buffer, range) abort
     let input = {
         \ 'path': getcwd(),
+        \ 'name': expand('%'),
         \ 'line_number': 2,
         \ 'registered_targets': a:buffer.register.targets,
         \ 'rename_targets': a:buffer.renamer.targets,

@@ -4,6 +4,8 @@ use serde_derive::Deserialize;
 pub struct Current<'a> {
     pub path: &'a str,
 
+    pub name: &'a str,
+
     pub line_number: u64,
 
     #[serde(default)]

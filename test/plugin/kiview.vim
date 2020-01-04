@@ -27,6 +27,13 @@ function! s:suite.create_one()
     call s:assert.ends_with(kiview#get().path, 'autoload')
 endfunction
 
+function! s:suite.cursor_position_on_create()
+    edit Makefile
+    call s:helper.sync_execute('')
+
+    call s:assert.current_line('Makefile')
+endfunction
+
 function! s:suite.multiple_create()
     call s:helper.sync_execute('')
     call s:helper.sync_execute('') " nop
