@@ -20,10 +20,12 @@ impl PathRepository for FilePathRepository {
             is_parent_node: true,
         }];
 
-        let paths: Vec<_> = fs::read_dir(path)?
+        let mut paths: Vec<_> = fs::read_dir(path)?
             .filter(|result| result.is_ok())
             .map(|result| result.unwrap().path())
             .collect();
+        paths.sort();
+        let paths = paths;
 
         let directories: Vec<_> = paths
             .iter()
