@@ -1,6 +1,6 @@
 
-let s:helper = KiviewTestHelper('plugin.kiview')
-let s:suite = s:helper.suite()
+let s:helper = KiviewTestHelper()
+let s:suite = s:helper.suite('plugin.kiview')
 let s:assert = s:helper.assert()
 
 function! s:suite.create_one()

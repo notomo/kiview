@@ -4,12 +4,11 @@ call themis#option('recursive', 1)
 let s:root = getcwd()
 let s:test_data_dir = './test/plugin/_test_data/'
 
-function! KiviewTestHelper(name) abort
+function! KiviewTestHelper() abort
     let helper = {
-        \ 'name': a:name,
+        \ 'before_each': function('s:before_each'),
+        \ 'after_each': function('s:after_each'),
     \ }
-    let helper.before_each = function('s:before_each')
-    let helper.after_each = function('s:after_each')
 
     function! helper.execute(arg, ...) abort
         let options = get(a:000, 0, {})
@@ -36,8 +35,8 @@ function! KiviewTestHelper(name) abort
         call mkdir(s:test_data_dir . a:path, 'p')
     endfunction
 
-    function! helper.suite() abort
-        let suite = themis#suite(self.name)
+    function! helper.suite(name) abort
+        let suite = themis#suite(a:name)
         let suite.before_each = self.before_each
         let suite.after_each = self.after_each
         return suite
