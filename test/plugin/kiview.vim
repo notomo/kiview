@@ -751,7 +751,6 @@ function! s:suite.__rename__() abort
         call s:assert.window_count(3)
 
         quit
-        call s:helper.sync_execute('')
         let lines = s:helper.lines()
         call s:assert.contains(lines, 'renamed_file')
         call s:assert.not_contains(lines, 'rename_file')

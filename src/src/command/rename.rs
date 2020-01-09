@@ -158,7 +158,14 @@ impl<'a> Command for MultipleRenameCommand<'a> {
                     .filter(|res| res.is_ok())
                     .map(|res| res.as_ref().unwrap().clone())
                     .collect(),
-            })
+            });
+
+            let paths: Paths = self
+                .dispatcher
+                .path_repository()
+                .list(self.current.path)?
+                .into();
+            actions.push(paths.to_write_all_action())
         }
 
         Ok(actions)
