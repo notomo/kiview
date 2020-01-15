@@ -19,6 +19,7 @@ pub trait PathRepository {
     fn list(&self, path: &str) -> Result<Vec<FullPath>, Error>;
     fn create(&self, path: &str) -> Result<(), Error>;
     fn rename(&self, from: &str, to: &str) -> Result<(), Error>;
+    fn rename_or_copy(&self, from: &str, to: &str, is_copy: bool) -> Result<(), Error>;
     fn copy(&self, from: &str, to: &str) -> Result<(), Error>;
     fn remove(&self, paths: Vec<String>) -> Result<(), Error>;
     fn root(&self) -> String;

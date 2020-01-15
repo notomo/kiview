@@ -70,4 +70,7 @@ pub struct RenameTarget {
     pub id: u64,
     pub from: String,
     pub to: String,
+
+    #[serde(default)]
+    pub is_copy: bool,
 }

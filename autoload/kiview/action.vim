@@ -177,23 +177,36 @@ endfunction
 
 function! s:choose(action, buffer, input_reader) abort
     let targets = []
+    let rename_targets = []
     for target in a:action.targets
         let answer = a:input_reader.read('already exists (f)orce (n)o (r)ename: ', [target.path])
         if answer ==? 'n'
             continue
         elseif answer ==? 'r'
-            let new_name = a:input_reader.read('rename to: ', [], target.relative_path)
-            if empty(new_name)
-                continue
-            endif
-            let target.name = new_name
+            call add(rename_targets, target)
+            continue
         endif
         call add(targets, target)
     endfor
 
-    if empty(targets)
+
+    if empty(targets) && empty(rename_targets)
+        return
+    elseif empty(targets) && !empty(rename_targets)
+        let is_copy = !a:action.has_cut ? v:true : v:false
+        let items = map(rename_targets, { _, v -> {'path': v.from, 'relative_path': v.from, 'id': v.from, 'to': v.path, 'is_copy': is_copy}})
+        call a:buffer.renamer.open(a:action.path, items)
         return
     endif
+
+    for target in rename_targets
+        let new_name = a:input_reader.read('rename to: ', [], target.relative_path)
+        if empty(new_name)
+            continue
+        endif
+        let target.name = new_name
+        call add(targets, target)
+    endfor
 
     if a:action.has_cut
         call a:buffer.register.cut(targets)

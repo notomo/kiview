@@ -37,6 +37,7 @@ pub enum Action {
     ClearRegister,
     #[serde(rename = "choose")]
     Choose {
+        path: String,
         targets: Vec<ChosenTarget>,
         has_cut: bool,
     },
@@ -119,6 +120,7 @@ pub struct RenameItem {
     pub id: u64,
     pub path: String,
     pub relative_path: String,
+    pub is_copy: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -136,6 +138,7 @@ pub struct RegisteredTarget {
 
 #[derive(Debug, Serialize)]
 pub struct ChosenTarget {
+    pub from: String,
     pub path: String,
     pub relative_path: String,
 }

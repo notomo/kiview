@@ -451,10 +451,12 @@ function! s:suite.__copy_cut_paste__() abort
         call s:helper.before_each()
 
         call s:helper.new_file('copy_file')
+        call s:helper.new_file('force_paste_file')
         call s:helper.new_file('cut_file')
         call s:helper.new_directory('paste')
         call s:helper.new_directory('tree')
         call s:helper.new_file('tree/file_in_tree')
+        call s:helper.new_file_with_content('tree/force_paste_file', ['has contents'])
 
         call s:helper.new_file_with_content('already', ['has contents'])
 
@@ -547,28 +549,77 @@ function! s:suite.__copy_cut_paste__() abort
         call s:assert.contains(lines, 'copy_file')
     endfunction
 
-    function! suite.copy_and_renamed_paste()
+    function! suite.copy_and_renamed_paste_on_cmdline()
+        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+
+        call s:helper.search('tree')
+        call s:helper.sync_execute('toggle_tree')
+        call s:helper.search('force_paste_file')
+        call s:helper.sync_execute('toggle_selection')
+        call s:helper.search('copy_file')
+        call s:helper.sync_execute('toggle_selection')
+        call s:helper.sync_execute('copy')
+
+        call s:helper.set_input('f', 'r', 'renamed_copy_file')
+        call s:helper.sync_execute('paste')
+
+        let lines = s:helper.lines()
+        call s:assert.contains(lines, 'copy_file')
+        call s:assert.contains(lines, 'renamed_copy_file')
+        call s:assert.contains(lines, 'force_paste_file')
+    endfunction
+
+    function! suite.copy_and_renamed_paste_on_renamer()
         call s:helper.sync_execute('go -path=test/plugin/_test_data')
 
         call s:helper.search('copy_file')
         call s:helper.sync_execute('copy')
 
-        call s:helper.set_input('r', 'renamed_copy_file')
+        call s:helper.set_input('r')
         call s:helper.sync_execute('paste')
+        call s:assert.window_count(3)
+        call s:helper.replace('copy_file', 'renamed_copy_file')
+
+        write
+        let command = kiview#last_command()
+        call command.wait(1000)
+        quit
 
         let lines = s:helper.lines()
         call s:assert.contains(lines, 'copy_file')
         call s:assert.contains(lines, 'renamed_copy_file')
     endfunction
 
-    function! suite.cancel_renamed_paste()
+    function! suite.cancel_renamed_paste_on_renamer()
         call s:helper.sync_execute('go -path=test/plugin/_test_data')
         let test_lines = s:helper.lines()
 
         call s:helper.search('copy_file')
         call s:helper.sync_execute('copy')
 
-        call s:helper.set_input('r', '')
+        call s:helper.set_input('r')
+        call s:helper.sync_execute('paste')
+        call s:assert.window_count(3)
+
+        write
+        let command = kiview#last_command()
+        call command.wait(1000)
+        quit
+
+        call s:assert.lines(test_lines)
+    endfunction
+
+    function! suite.cancel_renamed_paste_on_cmdline()
+        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        let test_lines = s:helper.lines()
+
+        call s:helper.search('copy_file')
+        call s:helper.sync_execute('toggle_selection')
+        call s:helper.search('force_paste_file')
+        call s:helper.sync_execute('toggle_selection')
+        call s:helper.sync_execute('copy')
+
+        call s:helper.set_input('r', 'f', '')
         call s:helper.sync_execute('paste')
 
         call s:assert.lines(test_lines)

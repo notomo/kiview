@@ -81,6 +81,9 @@ impl<'a> Command for PasteCommand<'a> {
         let already_exists: Vec<_> = pairs
             .iter()
             .filter(|(_, to)| !self.opts.no_confirm && self.dispatcher.path(&to).exists())
+            .map(|(from, to)| (from.to_string(), to))
+            .filter(|(from, _)| from.is_ok())
+            .map(|(from, to)| (from.unwrap(), to))
             .collect();
 
         for (from_path, to) in pairs
@@ -116,9 +119,10 @@ impl<'a> Command for PasteCommand<'a> {
             ),
             Action::ClearRegister,
             Action::Choose {
+                path: self.current.path.to_string(),
                 targets: already_exists
-                    .iter()
-                    .map(|(_, to)| ChosenTarget {
+                    .into_iter()
+                    .map(|(from, to)| ChosenTarget {
                         relative_path: match self
                             .dispatcher
                             .path(&to)
@@ -128,6 +132,7 @@ impl<'a> Command for PasteCommand<'a> {
                             Err(_) => to.clone(),
                         },
                         path: to.to_string(),
+                        from: from.to_string(),
                     })
                     .collect(),
                 has_cut: self.current.has_cut,

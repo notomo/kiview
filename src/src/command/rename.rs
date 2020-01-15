@@ -114,6 +114,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
                             Ok(relative_path) => relative_path,
                             Err(_) => target.path.clone(),
                         },
+                        is_copy: false,
                     })
                     .collect(),
             }]);
@@ -131,11 +132,16 @@ impl<'a> Command for MultipleRenameCommand<'a> {
                     Ok(to) => to,
                     Err(err) => return Err(Error::from(err)),
                 };
-                match self.dispatcher.path_repository().rename(&target.from, &to) {
+                match self.dispatcher.path_repository().rename_or_copy(
+                    &target.from,
+                    &to,
+                    target.is_copy,
+                ) {
                     Ok(()) => Ok(RenameItem {
                         id: target.id,
                         path: to,
                         relative_path: target.to.clone(),
+                        is_copy: false,
                     }),
                     Err(err) => Err(Error::from(err)),
                 }
