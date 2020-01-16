@@ -63,6 +63,8 @@ pub struct RegisteredTarget {
 
     #[serde(default)]
     pub name: Option<String>,
+    #[serde(default)]
+    pub from: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

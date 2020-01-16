@@ -30,8 +30,19 @@ impl<'a> Command for PasteCommand<'a> {
             .current
             .registered_targets
             .iter()
-            .unique_by(|target| &target.path)
-            .map(|target| (target, self.dispatcher.path(&target.path)))
+            .unique_by(|target| match &target.from {
+                Some(from) => from,
+                None => &target.path,
+            })
+            .map(|target| {
+                (
+                    target,
+                    self.dispatcher.path(match &target.from {
+                        Some(from) => from,
+                        None => &target.path,
+                    }),
+                )
+            })
             .collect();
 
         let pair_results: Vec<_> = froms

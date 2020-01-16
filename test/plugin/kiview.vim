@@ -458,10 +458,10 @@ function! s:suite.__copy_cut_paste__() abort
         call s:helper.new_file('tree/file_in_tree')
         call s:helper.new_file_with_content('tree/force_paste_file', ['has contents'])
 
-        call s:helper.new_file_with_content('already', ['has contents'])
+        call s:helper.new_file('already')
 
         call s:helper.new_directory('has_already')
-        call s:helper.new_file('has_already/already')
+        call s:helper.new_file_with_content('has_already/already', ['has contents'])
     endfunction
 
     function! suite.after_each()
@@ -637,7 +637,7 @@ function! s:suite.__copy_cut_paste__() abort
 
         let lines = s:helper.lines()
         call s:assert.contains(lines, 'already')
-        call s:assert.file_not_empty('already')
+        call s:assert.file_empty('already')
     endfunction
 
     function! suite.force_paste_on_already_exists()
@@ -652,7 +652,7 @@ function! s:suite.__copy_cut_paste__() abort
 
         let lines = s:helper.lines()
         call s:assert.contains(lines, 'already')
-        call s:assert.file_empty('already')
+        call s:assert.file_not_empty('already')
     endfunction
 
     function! suite.share_clipboard()
