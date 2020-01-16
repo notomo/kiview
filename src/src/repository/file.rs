@@ -105,6 +105,7 @@ impl PathRepository for FilePathRepository {
         }
 
         fs::copy(from, to).and_then(|_| Ok(()))?;
+        debug!("file copied: {} to {}", from, to);
         Ok(())
     }
 
