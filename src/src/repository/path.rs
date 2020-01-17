@@ -16,7 +16,8 @@ impl Dispatcher {
 }
 
 pub trait PathRepository {
-    fn list(&self, path: &str) -> Result<Vec<FullPath>, Error>;
+    fn list(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error>;
+    fn children(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error>;
     fn create(&self, path: &str) -> Result<(), Error>;
     fn rename(&self, from: &str, to: &str) -> Result<(), Error>;
     fn copy(&self, from: &str, to: &str) -> Result<(), Error>;

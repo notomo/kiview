@@ -54,13 +54,7 @@ impl<'a> Command for RenameCommand<'a> {
         let to = self.dispatcher.path(&target_group_path).join(path)?;
         self.path_repository.rename(&from, &to)?;
 
-        let paths: Paths = self
-            .path_repository
-            .list(&target_group_path)?
-            .iter()
-            .skip(1)
-            .collect::<Vec<_>>()
-            .into();
+        let paths: Paths = self.path_repository.children(&target_group_path)?.into();
 
         Ok(vec![paths.to_write_action(
             target.depth as usize,

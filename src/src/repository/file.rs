@@ -8,32 +8,27 @@ extern crate fs_extra;
 pub struct FilePathRepository {}
 
 impl PathRepository for FilePathRepository {
-    fn list(&self, path: &str) -> Result<Vec<FullPath>, Error> {
-        let parent_directory = vec![FullPath {
-            name: String::from(".."),
-            path: StdPath::new(&path)
-                .parent()
-                .unwrap_or_else(|| StdPath::new(&path))
-                .canonicalize()?
-                .to_str()?
-                .to_string(),
-            is_parent_node: true,
-        }];
-
+    fn children(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error> {
         let mut paths: Vec<_> = fs::read_dir(path)?
             .filter_map(|result| result.ok())
             .map(|entry| entry.path())
             .collect();
-        paths.sort();
+        paths.sort_by(|a, b| b.is_dir().cmp(&a.is_dir()));
         let paths = paths;
 
-        let directories: Vec<_> = paths
-            .iter()
-            .filter(|p| p.is_dir())
-            .map(|p| FullPath {
+        let dirs_and_files = paths
+            .into_iter()
+            .map(|p| match p.is_dir() {
+                false => (p, ""),
+                true => (p, "/"),
+            })
+            .map(|(p, suffix)| FullPath {
                 name: p
                     .file_name()
-                    .and_then(|name| name.to_str().and_then(|name| Some(format!("{}/", name))))
+                    .and_then(|name| {
+                        name.to_str()
+                            .and_then(|name| Some(format!("{}{}", name, suffix)))
+                    })
                     .unwrap_or(String::from("")),
                 path: p
                     .canonicalize()
@@ -41,27 +36,24 @@ impl PathRepository for FilePathRepository {
                     .unwrap_or(String::from("")),
                 is_parent_node: false,
             })
-            .filter(|p| p.name != "" && p.path != "")
-            .collect();
+            .filter(|p| p.name != "" && p.path != "");
 
-        let files: Vec<_> = paths
-            .iter()
-            .filter(|p| !p.is_dir())
-            .map(|p| FullPath {
-                name: p
-                    .file_name()
-                    .and_then(|name| name.to_str().and_then(|name| Some(String::from(name))))
-                    .unwrap_or(String::from("")),
-                path: p
-                    .canonicalize()
-                    .and_then(|p| Ok(p.to_str().unwrap_or("").to_string()))
-                    .unwrap_or(String::from("")),
-                is_parent_node: false,
-            })
-            .filter(|p| p.name != "" && p.path != "")
-            .collect();
+        Ok(box dirs_and_files)
+    }
 
-        Ok([&parent_directory[..], &directories[..], &files[..]].concat())
+    fn list(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error> {
+        Ok(box vec![FullPath {
+            name: String::from(".."),
+            path: StdPath::new(path)
+                .parent()
+                .unwrap_or_else(|| StdPath::new(path))
+                .canonicalize()?
+                .to_str()?
+                .to_string(),
+            is_parent_node: true,
+        }]
+        .into_iter()
+        .chain(self.children(path)?))
     }
 
     fn create(&self, path: &str) -> Result<(), Error> {

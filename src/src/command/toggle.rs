@@ -47,8 +47,8 @@ impl<'a> Command for ToggleTreeCommand<'a> {
                     next_sibling_id: target.next_sibling_id,
                 }),
                 false => {
-                    let child_paths: Paths = match self.path_repository.list(&target.path) {
-                        Ok(paths) => paths.iter().skip(1).collect::<Vec<_>>().into(),
+                    let child_paths: Paths = match self.path_repository.children(&target.path) {
+                        Ok(paths) => paths.into(),
                         Err(err) => return Err(Error::from(err)),
                     };
                     Ok(child_paths.to_open_tree_action(target.id, target.depth as usize))

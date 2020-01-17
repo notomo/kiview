@@ -52,13 +52,7 @@ impl<'a> Command for NewCommand<'a> {
             })
             .collect();
 
-        let paths: Paths = self
-            .path_repository
-            .list(&target_group_path)?
-            .iter()
-            .skip(1)
-            .collect::<Vec<_>>()
-            .into();
+        let paths: Paths = self.path_repository.children(&target_group_path)?.into();
 
         let mut actions = vec![paths.to_write_action(
             depth as usize,

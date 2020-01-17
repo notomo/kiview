@@ -48,7 +48,7 @@ pub enum Action {
     ToggleAllSelection,
 
     #[serde(rename = "back_history")]
-    BackHistory {},
+    BackHistory,
     #[serde(rename = "add_history")]
     AddHistory {
         path: String,
@@ -143,24 +143,10 @@ pub struct ChosenTarget {
     pub relative_path: String,
 }
 
-impl From<Vec<FullPath>> for Paths {
-    fn from(paths: Vec<FullPath>) -> Paths {
-        Paths { paths: paths }
-    }
-}
-
-impl From<Vec<&FullPath>> for Paths {
-    fn from(paths: Vec<&FullPath>) -> Paths {
+impl From<Box<dyn Iterator<Item = FullPath>>> for Paths {
+    fn from(paths: Box<dyn Iterator<Item = FullPath>>) -> Paths {
         Paths {
-            paths: paths.into_iter().cloned().collect(),
-        }
-    }
-}
-
-impl From<&Vec<FullPath>> for Paths {
-    fn from(paths: &Vec<FullPath>) -> Paths {
-        Paths {
-            paths: paths.into_iter().cloned().collect(),
+            paths: paths.collect(),
         }
     }
 }

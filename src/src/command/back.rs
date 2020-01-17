@@ -9,6 +9,6 @@ pub struct BackCommand<'a> {
 
 impl<'a> Command for BackCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        Ok(vec![Action::BackHistory {}])
+        Ok(vec![Action::BackHistory])
     }
 }

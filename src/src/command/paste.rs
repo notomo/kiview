@@ -105,13 +105,7 @@ impl<'a> Command for PasteCommand<'a> {
                 .rename_or_copy(&from, &to, !self.current.has_cut)?;
         }
 
-        let paths: Paths = self
-            .path_repository
-            .list(&target_group_path)?
-            .iter()
-            .skip(1)
-            .collect::<Vec<_>>()
-            .into();
+        let paths: Paths = self.path_repository.children(&target_group_path)?.into();
 
         let depth = match &self.current.target {
             Some(target) => target.depth,

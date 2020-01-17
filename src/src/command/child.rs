@@ -48,11 +48,11 @@ impl<'a> Command for ChildCommand<'a> {
                             .collect();
 
                         let mut actions: Vec<_> = results
-                            .iter()
+                            .into_iter()
                             .filter(|(_, res)| res.is_ok())
                             .flat_map(|(p, res)| {
                                 vec![
-                                    Paths::from(res.as_ref().unwrap()).to_write_all_action(),
+                                    Paths::from(res.unwrap()).to_write_all_action(),
                                     Action::TryToRestoreCursor {
                                         path: p.to_string(),
                                     },
@@ -74,14 +74,6 @@ impl<'a> Command for ChildCommand<'a> {
                             .map(|p| (p, self.path_repository.list(&p)))
                             .collect();
 
-                        let items: Vec<_> = results
-                            .iter()
-                            .filter(|(_, res)| res.is_ok())
-                            .map(|(p, res)| {
-                                Paths::from(res.as_ref().unwrap()).to_fork_buffer_item(p)
-                            })
-                            .collect();
-
                         let mut actions: Vec<_> = results
                             .iter()
                             .filter(|(_, res)| res.is_err())
@@ -89,6 +81,12 @@ impl<'a> Command for ChildCommand<'a> {
                                 path: p.to_string(),
                                 message: res.as_ref().err().unwrap().inner.to_string(),
                             })
+                            .collect();
+
+                        let items: Vec<_> = results
+                            .into_iter()
+                            .filter(|(_, res)| res.is_ok())
+                            .map(|(p, res)| Paths::from(res.unwrap()).to_fork_buffer_item(p))
                             .collect();
 
                         actions.push(Action::ForkBuffer {

@@ -67,8 +67,8 @@ impl<'a> Command for RemoveCommand<'a> {
             })
             .unique_by(|(_, parent_path)| parent_path.clone())
             .try_fold(vec![], |mut acc, (target, parent_path)| {
-                let paths: Paths = match self.path_repository.list(&parent_path) {
-                    Ok(ps) => ps.iter().skip(1).collect::<Vec<_>>().into(),
+                let paths: Paths = match self.path_repository.children(&parent_path) {
+                    Ok(ps) => ps.into(),
                     Err(err) => return Err(err.into()),
                 };
 
