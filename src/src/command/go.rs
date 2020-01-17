@@ -54,13 +54,7 @@ impl<'a> Command for GoCommand<'a> {
                 mod_name: self.opts.split.mod_name,
             });
 
-            let numbers = paths
-                .into_iter()
-                .enumerate()
-                .filter(|(_, p)| &p.name == self.current.name)
-                .map(|(line_number, _)| (line_number + 1) as u64)
-                .collect::<Vec<u64>>();
-            if let Some(&line_number) = numbers.get(0) {
+            if let Some(line_number) = paths.search(|p| p.name == self.current.name) {
                 actions.push(Action::SetCursor {
                     line_number: line_number,
                 });

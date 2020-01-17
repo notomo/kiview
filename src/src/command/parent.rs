@@ -20,28 +20,24 @@ impl<'a> Command for ParentCommand<'a> {
         };
 
         let paths: Paths = self.path_repository.list(&parent_path)?.into();
-        let write_all = paths.to_write_all_action();
 
-        let numbers = paths
-            .into_iter()
-            .enumerate()
-            .filter(|(_, p)| &p.path == self.current.path)
-            .map(|(line_number, _)| line_number + 1)
-            .collect::<Vec<usize>>();
+        let mut actions = vec![paths.to_write_all_action()];
 
-        let last_path_line_number = *numbers.get(0).unwrap_or(&0) as u64;
-
-        Ok(vec![
-            write_all,
-            Action::SetCursor {
+        if let Some(last_path_line_number) = paths.search(|p| p.path == self.current.path) {
+            actions.push(Action::SetCursor {
                 line_number: last_path_line_number,
-            },
+            });
+        }
+
+        actions.extend(vec![
             Action::SetPath { path: parent_path },
             Action::AddHistory {
                 path: self.current.path.to_string(),
                 line_number: self.current.line_number,
                 back: false,
             },
-        ])
+        ]);
+
+        Ok(actions)
     }
 }

@@ -258,4 +258,16 @@ impl Paths {
                 .collect::<Vec<Prop>>(),
         }
     }
+
+    /// returns 1-based indicies number found by f()
+    pub fn search(&self, f: impl Fn(&FullPath) -> bool) -> Option<u64> {
+        self.paths
+            .iter()
+            .enumerate()
+            .filter(|(_, p)| f(p))
+            .map(|(index, _)| (index + 1) as u64)
+            .collect::<Vec<_>>()
+            .get(0)
+            .and_then(|n| Some(*n))
+    }
 }
