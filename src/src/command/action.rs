@@ -152,7 +152,7 @@ impl From<Vec<FullPath>> for Paths {
 impl From<Vec<&FullPath>> for Paths {
     fn from(paths: Vec<&FullPath>) -> Paths {
         Paths {
-            paths: paths.into_iter().map(|p| p.clone()).collect(),
+            paths: paths.into_iter().cloned().collect(),
         }
     }
 }
@@ -160,7 +160,7 @@ impl From<Vec<&FullPath>> for Paths {
 impl From<&Vec<FullPath>> for Paths {
     fn from(paths: &Vec<FullPath>) -> Paths {
         Paths {
-            paths: paths.into_iter().map(|p| p.clone()).collect(),
+            paths: paths.into_iter().cloned().collect(),
         }
     }
 }

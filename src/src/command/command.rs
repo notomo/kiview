@@ -257,34 +257,31 @@ impl CommandOptions {
 
         let layout: Layout = options
             .iter()
-            .map(|opt| match &opt {
+            .filter_map(|opt| match &opt {
                 CommandOption::Layout { value } => Some(value.clone()),
                 _ => None,
             })
-            .filter(|opt| opt.is_some())
-            .collect::<Vec<Option<Layout>>>()
+            .collect::<Vec<Layout>>()
             .get(0)
-            .and_then(|layout| *layout)
+            .cloned()
             .unwrap_or(Layout::Open);
 
         let path: Option<String> = options
             .iter()
-            .map(|opt| match &opt {
+            .filter_map(|opt| match &opt {
                 CommandOption::Path { value } => Some(value.clone()),
                 _ => None,
             })
-            .filter(|opt| opt.is_some())
-            .collect::<Vec<Option<String>>>()
+            .collect::<Vec<String>>()
             .get(0)
-            .and_then(|path| path.clone());
+            .cloned();
 
         let paths: Vec<String> = options
             .iter()
-            .map(|opt| match &opt {
+            .filter_map(|opt| match &opt {
                 CommandOption::Paths { value } => Some(value.clone()),
                 _ => None,
             })
-            .filter_map(|opt| opt)
             .collect();
 
         let quit = options.iter().any(|opt| match &opt {
@@ -309,14 +306,13 @@ impl CommandOptions {
 
         let split: Split = options
             .iter()
-            .map(|opt| match &opt {
+            .filter_map(|opt| match &opt {
                 CommandOption::Split { value } => Some(value.clone()),
                 _ => None,
             })
-            .filter(|opt| opt.is_some())
-            .collect::<Vec<Option<Split>>>()
+            .collect::<Vec<Split>>()
             .get(0)
-            .and_then(|split| *split)
+            .cloned()
             .unwrap_or(Split::from(""));
 
         CommandOptions {

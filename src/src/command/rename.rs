@@ -159,11 +159,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
 
         if actions.len() == 0 {
             actions.push(Action::CompleteRenamer {
-                items: results
-                    .into_iter()
-                    .filter(|res| res.is_ok())
-                    .map(|res| res.as_ref().unwrap().clone())
-                    .collect(),
+                items: results.into_iter().filter_map(|res| res.ok()).collect(),
             });
 
             let paths: Paths = self

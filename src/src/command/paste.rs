@@ -70,8 +70,7 @@ impl<'a> Command for PasteCommand<'a> {
 
         let errors: Vec<_> = pair_results
             .iter()
-            .filter(|pair| pair.is_err())
-            .map(|pair| pair.as_ref().err().unwrap())
+            .filter_map(|pair| pair.as_ref().err())
             .collect();
         if errors.len() != 0 {
             return Err(Error::from(ErrorKind::IO {
@@ -85,8 +84,7 @@ impl<'a> Command for PasteCommand<'a> {
 
         let pairs: Vec<_> = pair_results
             .iter()
-            .filter(|pair| pair.is_ok())
-            .map(|pair| pair.as_ref().unwrap())
+            .filter_map(|pair| pair.as_ref().ok())
             .collect();
 
         let already_exists: Vec<_> = pairs

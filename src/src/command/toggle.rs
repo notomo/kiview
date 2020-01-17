@@ -58,8 +58,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
 
         let errors: Vec<_> = results
             .iter()
-            .filter(|result| result.is_err())
-            .map(|result| result.as_ref().err().unwrap())
+            .filter_map(|result| result.as_ref().err())
             .collect();
         if errors.len() != 0 {
             return Err(Error::from(ErrorKind::IO {
@@ -73,8 +72,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
 
         let actions: Vec<_> = results
             .into_iter()
-            .filter(|result| result.is_ok())
-            .map(|result| result.unwrap())
+            .filter_map(|result| result.ok())
             .collect();
 
         Ok(actions)

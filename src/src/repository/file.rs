@@ -21,8 +21,8 @@ impl PathRepository for FilePathRepository {
         }];
 
         let mut paths: Vec<_> = fs::read_dir(path)?
-            .filter(|result| result.is_ok())
-            .map(|result| result.unwrap().path())
+            .filter_map(|result| result.ok())
+            .map(|entry| entry.path())
             .collect();
         paths.sort();
         let paths = paths;
