@@ -6,11 +6,13 @@ use crate::command::Current;
 use crate::command::Error;
 use crate::command::Paths;
 use crate::repository::Dispatcher;
+use crate::repository::PathRepository;
 use itertools::Itertools;
 
 pub struct RemoveCommand<'a> {
     pub current: Current<'a>,
     pub dispatcher: Dispatcher,
+    pub path_repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
@@ -43,7 +45,7 @@ impl<'a> Command for RemoveCommand<'a> {
             return Ok(vec![Action::ConfirmRemove { paths: paths }]);
         }
 
-        self.dispatcher.path_repository().remove(paths)?;
+        self.path_repository.remove(paths)?;
 
         let mut targets = targets;
         targets.sort_by(|a, b| a.depth.cmp(&b.depth));
@@ -60,13 +62,13 @@ impl<'a> Command for RemoveCommand<'a> {
             .map(|target| {
                 let parent_path = match self.dispatcher.path(&target.path).parent() {
                     Some(path) => path,
-                    None => self.dispatcher.path_repository().root(),
+                    None => self.path_repository.root(),
                 };
                 (target, parent_path)
             })
             .unique_by(|(_, parent_path)| parent_path.clone())
             .try_fold(vec![], |mut acc, (target, parent_path)| {
-                let paths: Paths = match self.dispatcher.path_repository().list(&parent_path) {
+                let paths: Paths = match self.path_repository.list(&parent_path) {
                     Ok(ps) => ps.iter().skip(1).collect::<Vec<_>>().into(),
                     Err(err) => return Err(err.into()),
                 };

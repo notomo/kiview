@@ -4,10 +4,12 @@ use crate::command::Current;
 use crate::command::Error;
 use crate::command::Paths;
 use crate::repository::Dispatcher;
+use crate::repository::PathRepository;
 
 pub struct ParentCommand<'a> {
     pub current: Current<'a>,
     pub dispatcher: Dispatcher,
+    pub path_repository: Box<dyn PathRepository>,
 }
 
 impl<'a> Command for ParentCommand<'a> {
@@ -17,7 +19,7 @@ impl<'a> Command for ParentCommand<'a> {
             None => return Ok(vec![]),
         };
 
-        let paths: Paths = self.dispatcher.path_repository().list(&parent_path)?.into();
+        let paths: Paths = self.path_repository.list(&parent_path)?.into();
         let write_all = paths.to_write_all_action();
 
         let numbers = paths

@@ -7,16 +7,17 @@ use crate::command::Paths;
 use crate::command::{Error, ErrorKind};
 use crate::itertools::Itertools;
 use crate::repository::Dispatcher;
+use crate::repository::PathRepository;
 
 pub struct PasteCommand<'a> {
     pub current: Current<'a>,
     pub dispatcher: Dispatcher,
+    pub path_repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
 impl<'a> Command for PasteCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        let repository = self.dispatcher.path_repository();
         let target_group_path = match &self.current.target {
             Some(target) if !target.is_parent_node => self
                 .dispatcher
@@ -100,12 +101,12 @@ impl<'a> Command for PasteCommand<'a> {
             .filter(|(_, to)| self.opts.no_confirm || !self.dispatcher.path(&to).exists())
         {
             let from = from_path.to_string()?;
-            repository.rename_or_copy(&from, &to, !self.current.has_cut)?;
+            self.path_repository
+                .rename_or_copy(&from, &to, !self.current.has_cut)?;
         }
 
         let paths: Paths = self
-            .dispatcher
-            .path_repository()
+            .path_repository
             .list(&target_group_path)?
             .iter()
             .skip(1)

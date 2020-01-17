@@ -5,10 +5,12 @@ use crate::command::Current;
 use crate::command::Error;
 use crate::command::Paths;
 use crate::repository::Dispatcher;
+use crate::repository::PathRepository;
 
 pub struct NewCommand<'a> {
     pub current: Current<'a>,
     pub dispatcher: Dispatcher,
+    pub path_repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
@@ -37,20 +39,21 @@ impl<'a> Command for NewCommand<'a> {
             .iter()
             .map(
                 |p| match self.dispatcher.path(&target_group_path).join(&p) {
-                    Ok(new_path) => self.dispatcher.path_repository().create(&new_path),
+                    Ok(new_path) => self.path_repository.create(&new_path),
                     Err(err) => Err(err),
                 },
             )
-            .filter(|res| res.is_err())
-            .map(|res| Action::ShowError {
-                path: String::from(""),
-                message: res.as_ref().err().unwrap().inner.to_string(),
+            .filter_map(|res| match res {
+                Err(err) => Some(Action::ShowError {
+                    path: String::from(""),
+                    message: err.inner.to_string(),
+                }),
+                _ => None,
             })
             .collect();
 
         let paths: Paths = self
-            .dispatcher
-            .path_repository()
+            .path_repository
             .list(&target_group_path)?
             .iter()
             .skip(1)

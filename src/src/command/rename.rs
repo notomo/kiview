@@ -7,11 +7,13 @@ use crate::command::Current;
 use crate::command::Paths;
 use crate::command::{Error, ErrorKind};
 use crate::repository::Dispatcher;
+use crate::repository::PathRepository;
 use itertools::Itertools;
 
 pub struct RenameCommand<'a> {
     pub current: Current<'a>,
     pub dispatcher: Dispatcher,
+    pub path_repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
@@ -50,11 +52,10 @@ impl<'a> Command for RenameCommand<'a> {
             true => self.current.path.to_string(),
         };
         let to = self.dispatcher.path(&target_group_path).join(path)?;
-        self.dispatcher.path_repository().rename(&from, &to)?;
+        self.path_repository.rename(&from, &to)?;
 
         let paths: Paths = self
-            .dispatcher
-            .path_repository()
+            .path_repository
             .list(&target_group_path)?
             .iter()
             .skip(1)
@@ -72,6 +73,7 @@ impl<'a> Command for RenameCommand<'a> {
 pub struct MultipleRenameCommand<'a> {
     pub current: Current<'a>,
     pub dispatcher: Dispatcher,
+    pub path_repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
@@ -132,11 +134,10 @@ impl<'a> Command for MultipleRenameCommand<'a> {
                     Ok(to) => to,
                     Err(err) => return Err(Error::from(err)),
                 };
-                match self.dispatcher.path_repository().rename_or_copy(
-                    &target.from,
-                    &to,
-                    target.is_copy,
-                ) {
+                match self
+                    .path_repository
+                    .rename_or_copy(&target.from, &to, target.is_copy)
+                {
                     Ok(()) => Ok(RenameItem {
                         id: target.id,
                         path: to,
@@ -150,10 +151,12 @@ impl<'a> Command for MultipleRenameCommand<'a> {
 
         let mut actions: Vec<_> = results
             .iter()
-            .filter(|res| res.is_err())
-            .map(|res| Action::ShowError {
-                path: String::from(""),
-                message: res.as_ref().err().unwrap().inner.to_string(),
+            .filter_map(|res| match res {
+                Err(err) => Some(Action::ShowError {
+                    path: String::from(""),
+                    message: err.inner.to_string(),
+                }),
+                _ => None,
             })
             .collect();
 
@@ -162,11 +165,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
                 items: results.into_iter().filter_map(|res| res.ok()).collect(),
             });
 
-            let paths: Paths = self
-                .dispatcher
-                .path_repository()
-                .list(self.current.path)?
-                .into();
+            let paths: Paths = self.path_repository.list(self.current.path)?.into();
             actions.push(paths.to_write_all_action())
         }
 

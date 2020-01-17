@@ -5,11 +5,13 @@ use crate::command::Current;
 use crate::command::Error;
 use crate::command::Paths;
 use crate::repository::Dispatcher;
+use crate::repository::PathRepository;
 
 pub struct GoCommand<'a> {
     pub current: Current<'a>,
-    pub opts: &'a CommandOptions,
     pub dispatcher: Dispatcher,
+    pub path_repository: Box<dyn PathRepository>,
+    pub opts: &'a CommandOptions,
 }
 
 impl<'a> Command for GoCommand<'a> {
@@ -22,11 +24,7 @@ impl<'a> Command for GoCommand<'a> {
             })
             .canonicalize()?;
 
-        let paths: Paths = self
-            .dispatcher
-            .path_repository()
-            .list(&current_path)?
-            .into();
+        let paths: Paths = self.path_repository.list(&current_path)?.into();
 
         if self.current.used && self.opts.create {
             return Ok(vec![Action::ForkBuffer {

@@ -6,11 +6,13 @@ use crate::command::Current;
 use crate::command::Paths;
 use crate::command::{Error, ErrorKind};
 use crate::repository::Dispatcher;
+use crate::repository::PathRepository;
 use itertools::Itertools;
 
 pub struct ToggleTreeCommand<'a> {
     pub current: Current<'a>,
     pub dispatcher: Dispatcher,
+    pub path_repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
@@ -46,11 +48,10 @@ impl<'a> Command for ToggleTreeCommand<'a> {
                     next_sibling_id: target.next_sibling_id,
                 }),
                 false => {
-                    let child_paths: Paths =
-                        match self.dispatcher.path_repository().list(&target.path) {
-                            Ok(paths) => paths.iter().skip(1).collect::<Vec<_>>().into(),
-                            Err(err) => return Err(Error::from(err)),
-                        };
+                    let child_paths: Paths = match self.path_repository.list(&target.path) {
+                        Ok(paths) => paths.iter().skip(1).collect::<Vec<_>>().into(),
+                        Err(err) => return Err(Error::from(err)),
+                    };
                     Ok(child_paths.to_open_tree_action(target.id, target.depth as usize))
                 }
             })
