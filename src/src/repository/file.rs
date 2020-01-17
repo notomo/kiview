@@ -89,13 +89,6 @@ impl PathRepository for FilePathRepository {
         Ok(fs::rename(from, to)?)
     }
 
-    fn rename_or_copy(&self, from: &str, to: &str, is_copy: bool) -> Result<(), Error> {
-        if is_copy {
-            return self.copy(from, to);
-        }
-        self.rename(from, to)
-    }
-
     fn copy(&self, from: &str, to: &str) -> Result<(), Error> {
         if StdPath::new(from).is_dir() {
             let mut options = fs_extra::dir::CopyOptions::new();
