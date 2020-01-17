@@ -102,10 +102,7 @@ impl<'a> Command for PasteCommand<'a> {
             .filter(|(_, to)| self.opts.no_confirm || !self.dispatcher.path(&to).exists())
         {
             let from = from_path.to_string()?;
-            match self.current.has_cut {
-                true => repository.rename(&from, &to),
-                false => repository.copy(&from, &to),
-            }?;
+            repository.rename_or_copy(&from, &to, !self.current.has_cut)?;
         }
 
         let paths: Paths = self
