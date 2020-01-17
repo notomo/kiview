@@ -21,13 +21,12 @@ impl<'a> Command for ToggleTreeCommand<'a> {
         let results: Vec<_> = self
             .current
             .targets()
-            .into_iter()
             .filter(|target| {
                 !target.is_parent_node && self.dispatcher.path(&target.path).is_group_node()
             })
             .group_by(|target| target.depth)
             .into_iter()
-            .fold(vec![], |mut acc: Vec<Target>, (_, targets)| {
+            .fold(vec![], |mut acc: Vec<&Target>, (_, targets)| {
                 let mut child_acc: Vec<_> = vec![];
                 for target in targets {
                     let count = acc

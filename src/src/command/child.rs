@@ -23,7 +23,6 @@ impl<'a> Command for ChildCommand<'a> {
         let mut actions: Vec<_> = self
             .current
             .targets()
-            .iter()
             .group_by(|target| self.dispatcher.path(&target.path).is_group_node())
             .into_iter()
             .flat_map(|(is_group_node, targets)| {

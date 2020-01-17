@@ -13,7 +13,6 @@ impl<'a> Command for CopyCommand<'a> {
         let targets = self
             .current
             .targets()
-            .iter()
             .map(|target| RegisteredTarget {
                 path: target.to_string(),
             })

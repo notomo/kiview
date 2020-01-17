@@ -82,10 +82,9 @@ impl<'a> Command for MultipleRenameCommand<'a> {
         let targets = self
             .current
             .targets()
-            .into_iter()
             .group_by(|target| target.depth)
             .into_iter()
-            .fold(vec![], |mut acc: Vec<Target>, (_, targets)| {
+            .fold(vec![], |mut acc: Vec<&Target>, (_, targets)| {
                 let mut child_acc: Vec<_> = vec![];
                 for target in targets {
                     let count = acc

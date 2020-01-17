@@ -31,11 +31,11 @@ pub struct Current<'a> {
 }
 
 impl<'a> Current<'a> {
-    pub fn targets(&self) -> Vec<Target> {
+    pub fn targets(&self) -> impl Iterator<Item = &Target> {
         if self.selected_targets.len() != 0 {
-            return self.selected_targets.clone();
+            return self.selected_targets.iter();
         }
-        self.targets.clone()
+        self.targets.iter()
     }
 }
 
