@@ -1,5 +1,4 @@
 use super::action::RenameItem;
-use super::current::Target;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
@@ -7,7 +6,6 @@ use crate::command::Current;
 use crate::command::Paths;
 use crate::command::{Error, ErrorKind};
 use crate::repository::PathRepository;
-use itertools::Itertools;
 
 pub struct RenameCommand<'a> {
     pub current: Current<'a>,
@@ -72,23 +70,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
         let targets = self
             .current
-            .targets()
-            .group_by(|target| target.depth)
-            .into_iter()
-            .fold(vec![], |mut acc: Vec<&Target>, (_, targets)| {
-                let mut child_acc: Vec<_> = vec![];
-                for target in targets {
-                    let count = acc
-                        .iter()
-                        .filter(|x| self.repository.new_path(&target.path).contained(&x.path))
-                        .count();
-                    if count == 0 {
-                        child_acc.push(target)
-                    }
-                }
-                acc.extend(child_acc);
-                acc
-            });
+            .dedup_targets(&self.repository, |target| !target.is_parent_node);
 
         if self.current.rename_targets.len() == 0 && !self.current.renamer_opened {
             return Ok(vec![Action::OpenRenamer {

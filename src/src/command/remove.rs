@@ -1,4 +1,3 @@
-use super::current::Target;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
@@ -18,23 +17,7 @@ impl<'a> Command for RemoveCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
         let targets = self
             .current
-            .targets()
-            .group_by(|target| target.depth)
-            .into_iter()
-            .fold(vec![], |mut acc: Vec<&Target>, (_, targets)| {
-                let mut child_acc: Vec<_> = vec![];
-                for target in targets {
-                    let count = acc
-                        .iter()
-                        .filter(|x| self.repository.new_path(&target.path).contained(&x.path))
-                        .count();
-                    if count == 0 {
-                        child_acc.push(target)
-                    }
-                }
-                acc.extend(child_acc);
-                acc
-            });
+            .dedup_targets(&self.repository, |target| !target.is_parent_node);
 
         let paths: Vec<_> = targets.iter().map(|target| target.path.clone()).collect();
 

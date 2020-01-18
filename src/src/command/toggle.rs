@@ -1,4 +1,3 @@
-use super::current::Target;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
@@ -6,7 +5,6 @@ use crate::command::Current;
 use crate::command::Paths;
 use crate::command::{Error, ErrorKind};
 use crate::repository::PathRepository;
-use itertools::Itertools;
 
 pub struct ToggleTreeCommand<'a> {
     pub current: Current<'a>,
@@ -18,25 +16,8 @@ impl<'a> Command for ToggleTreeCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
         let results: Vec<_> = self
             .current
-            .targets()
-            .filter(|target| {
+            .dedup_targets(&self.repository, |target| {
                 !target.is_parent_node && self.repository.new_path(&target.path).is_group_node()
-            })
-            .group_by(|target| target.depth)
-            .into_iter()
-            .fold(vec![], |mut acc: Vec<&Target>, (_, targets)| {
-                let mut child_acc: Vec<_> = vec![];
-                for target in targets {
-                    let count = acc
-                        .iter()
-                        .filter(|x| self.repository.new_path(&target.path).contained(&x.path))
-                        .count();
-                    if count == 0 {
-                        child_acc.push(target)
-                    }
-                }
-                acc.extend(child_acc);
-                acc
             })
             .iter()
             .map(|target| match target.opened {

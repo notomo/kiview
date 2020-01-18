@@ -1,3 +1,6 @@
+use crate::repository::PathRepository;
+
+use itertools::Itertools;
 use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -36,6 +39,31 @@ impl<'a> Current<'a> {
             return self.selected_targets.iter();
         }
         self.targets.iter()
+    }
+
+    /// if parent and its children exists, this returns parent target only.
+    pub fn dedup_targets(
+        &self,
+        repository: &Box<dyn PathRepository>,
+        f: impl Fn(&Target) -> bool,
+    ) -> Vec<&Target> {
+        self.targets()
+            .filter(|target| f(target))
+            .group_by(|target| target.depth)
+            .into_iter()
+            .fold(vec![], |mut acc: Vec<&Target>, (_, targets)| {
+                let mut child_acc: Vec<_> = vec![];
+                for target in targets {
+                    if !acc
+                        .iter()
+                        .any(|x| repository.new_path(&target.path).contained(&x.path))
+                    {
+                        child_acc.push(target)
+                    }
+                }
+                acc.extend(child_acc);
+                acc
+            })
     }
 }
 
