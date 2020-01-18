@@ -23,12 +23,30 @@ pub trait PathRepository {
     fn copy(&self, from: &str, to: &str) -> Result<(), Error>;
     fn remove(&self, paths: Vec<String>) -> Result<(), Error>;
     fn root(&self) -> String;
+    fn new_path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a>;
 
     fn rename_or_copy(&self, from: &str, to: &str, is_copy: bool) -> Result<(), Error> {
         if is_copy {
             return self.copy(from, to);
         }
         self.rename(from, to)
+    }
+
+    fn rename_or_copy_with(
+        &self,
+        from: &str,
+        to: &str,
+        joined: &str,
+        is_copy: bool,
+    ) -> Result<String, Error> {
+        let new_path = self.new_path(to).join(joined)?;
+        self.rename_or_copy(from, &new_path, is_copy)?;
+        Ok(new_path)
+    }
+
+    fn create_with<'a>(&self, base_path: &'a str, joined: &'a str) -> Result<(), Error> {
+        let new_path = self.new_path(base_path).join(joined)?;
+        Ok(self.create(&new_path)?)
     }
 }
 

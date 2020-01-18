@@ -117,6 +117,12 @@ impl PathRepository for FilePathRepository {
     fn root(&self) -> String {
         String::from("/")
     }
+
+    fn new_path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a> {
+        box FilePath {
+            path: std::path::Path::new(path),
+        }
+    }
 }
 
 pub struct FilePath<'a> {

@@ -25,41 +25,34 @@ impl<'a> Command for NewCommand<'a> {
                 .dispatcher
                 .path(&target.path)
                 .parent()
-                .unwrap_or(target.path.clone()),
+                .unwrap_or_else(|| self.current.path.to_string()),
             Some(_) | None => self.current.path.to_string(),
         };
-        let depth = match &self.current.target {
-            Some(target) => target.depth,
-            None => 0,
-        };
 
-        let errors: Vec<_> = self
+        let results: Vec<_> = self
             .opts
             .paths
             .iter()
-            .map(
-                |p| match self.dispatcher.path(&target_group_path).join(&p) {
-                    Ok(new_path) => self.path_repository.create(&new_path),
-                    Err(err) => Err(err),
-                },
-            )
-            .filter_map(|res| match res {
-                Err(err) => Some(Action::ShowError {
-                    path: String::from(""),
-                    message: err.inner.to_string(),
-                }),
-                _ => None,
-            })
+            .map(|path| self.path_repository.create_with(&target_group_path, &path))
             .collect();
 
         let paths: Paths = self.path_repository.children(&target_group_path)?.into();
 
-        let mut actions = vec![paths.to_write_action(
-            depth as usize,
+        let actions: Vec<_> = vec![paths.to_write_action(
+            match &self.current.target {
+                Some(target) => target.depth,
+                None => 0,
+            } as usize,
             self.current.target.as_ref().and_then(|t| t.parent_id),
             self.current.target.as_ref().and_then(|t| t.last_sibling_id),
-        )];
-        actions.extend(errors);
+        )]
+        .into_iter()
+        .chain(
+            results
+                .into_iter()
+                .filter_map(|res| Action::show_error(res)),
+        )
+        .collect();
 
         Ok(actions)
     }

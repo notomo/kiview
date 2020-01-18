@@ -1,4 +1,5 @@
 use super::command::{SplitModName, SplitName};
+use super::error::Error;
 use crate::repository::FullPath;
 use serde_derive::Serialize;
 
@@ -106,6 +107,19 @@ pub enum Action {
     },
     #[serde(rename = "complete_renamer")]
     CompleteRenamer { items: Vec<RenameItem> },
+}
+
+impl Action {
+    pub fn show_error<T, E: Into<Error>>(res: Result<T, E>) -> Option<Self> {
+        let err: Error = match res {
+            Err(err) => err.into(),
+            _ => return None,
+        };
+        Some(Self::ShowError {
+            path: String::from(""),
+            message: err.inner.to_string(),
+        })
+    }
 }
 
 #[derive(Debug, Serialize)]

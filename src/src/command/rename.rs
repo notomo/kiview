@@ -123,44 +123,37 @@ impl<'a> Command for MultipleRenameCommand<'a> {
             .rename_targets
             .iter()
             .map(|target| {
-                let to = match self.dispatcher.path(self.current.path).join(&target.to) {
-                    Ok(to) => to,
-                    Err(err) => return Err(Error::from(err)),
-                };
-                match self
-                    .path_repository
-                    .rename_or_copy(&target.from, &to, target.is_copy)
-                {
-                    Ok(()) => Ok(RenameItem {
+                match self.path_repository.rename_or_copy_with(
+                    &target.from,
+                    self.current.path,
+                    &target.to,
+                    target.is_copy,
+                ) {
+                    Ok(to) => Ok(RenameItem {
                         id: target.id,
                         path: to,
                         relative_path: target.to.clone(),
                         is_copy: false,
                     }),
-                    Err(err) => Err(Error::from(err)),
+                    Err(err) => Err(err),
                 }
             })
             .collect();
 
-        let mut actions: Vec<_> = results
-            .iter()
-            .filter_map(|res| match res {
-                Err(err) => Some(Action::ShowError {
-                    path: String::from(""),
-                    message: err.inner.to_string(),
-                }),
-                _ => None,
-            })
-            .collect();
-
-        if actions.len() == 0 {
-            actions.push(Action::CompleteRenamer {
-                items: results.into_iter().filter_map(|res| res.ok()).collect(),
-            });
-
+        let actions = if results.iter().all(|res| res.is_ok()) {
             let paths: Paths = self.path_repository.list(self.current.path)?.into();
-            actions.push(paths.to_write_all_action())
-        }
+            vec![
+                Action::CompleteRenamer {
+                    items: results.into_iter().filter_map(|res| res.ok()).collect(),
+                },
+                paths.to_write_all_action(),
+            ]
+        } else {
+            results
+                .into_iter()
+                .filter_map(|res| Action::show_error(res))
+                .collect()
+        };
 
         Ok(actions)
     }
