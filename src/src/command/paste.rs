@@ -112,7 +112,7 @@ impl<'a> Command for PasteCommand<'a> {
 
         Ok(vec![
             paths.to_write_action(
-                depth as usize,
+                depth,
                 self.current.target.as_ref().and_then(|t| t.parent_id),
                 self.current.target.as_ref().and_then(|t| t.last_sibling_id),
             ),

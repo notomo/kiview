@@ -53,7 +53,7 @@ impl<'a> Command for RenameCommand<'a> {
         let paths: Paths = self.repository.children(&target_group_path)?.into();
 
         Ok(vec![paths.to_write_action(
-            target.depth as usize,
+            target.depth,
             target.parent_id,
             self.current.target.as_ref().and_then(|t| t.last_sibling_id),
         )])

@@ -43,7 +43,7 @@ impl<'a> Command for RemoveCommand<'a> {
             .map(
                 |(target, parent_path)| match self.repository.children(&parent_path) {
                     Ok(children) => Paths::from(children).to_write_action(
-                        target.depth as usize,
+                        target.depth,
                         target.parent_id,
                         target.last_sibling_id,
                     ),

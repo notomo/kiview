@@ -140,7 +140,7 @@ pub struct RenameItem {
 #[derive(Debug, Serialize)]
 pub struct Prop {
     path: String,
-    depth: usize,
+    depth: u64,
     is_parent_node: bool,
     parent_id: Option<u64>,
 }
@@ -180,9 +180,9 @@ impl IntoIterator for Paths {
 }
 
 impl Paths {
-    pub fn to_open_tree_action(&self, id: u64, current_depth: usize) -> Action {
+    pub fn to_open_tree_action(&self, id: u64, current_depth: u64) -> Action {
         let indent = std::iter::repeat(" ")
-            .take(current_depth)
+            .take(current_depth as usize)
             .collect::<String>();
         let lines: Vec<_> = self
             .paths
@@ -217,7 +217,7 @@ impl Paths {
                 .iter()
                 .map(|p| Prop {
                     path: p.path.clone(),
-                    depth: 0 as usize,
+                    depth: 0,
                     is_parent_node: p.is_parent_node,
                     parent_id: None,
                 })
@@ -227,11 +227,13 @@ impl Paths {
 
     pub fn to_write_action(
         &self,
-        depth: usize,
+        depth: u64,
         parent_id: Option<u64>,
         last_sibling_id: Option<u64>,
     ) -> Action {
-        let indent = std::iter::repeat(" ").take(depth).collect::<String>();
+        let indent = std::iter::repeat(" ")
+            .take(depth as usize)
+            .collect::<String>();
         let lines: Vec<_> = self
             .paths
             .iter()
@@ -265,7 +267,7 @@ impl Paths {
                 .iter()
                 .map(|p| Prop {
                     path: p.path.clone(),
-                    depth: 0 as usize,
+                    depth: 0,
                     is_parent_node: p.is_parent_node,
                     parent_id: None,
                 })
