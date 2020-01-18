@@ -3,23 +3,21 @@ use crate::command::Command;
 use crate::command::Current;
 use crate::command::Error;
 use crate::command::Paths;
-use crate::repository::Dispatcher;
 use crate::repository::PathRepository;
 
 pub struct ParentCommand<'a> {
     pub current: Current<'a>,
-    pub dispatcher: Dispatcher,
-    pub path_repository: Box<dyn PathRepository>,
+    pub repository: Box<dyn PathRepository>,
 }
 
 impl<'a> Command for ParentCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        let parent_path = match self.dispatcher.path(self.current.path).parent() {
+        let parent_path = match self.repository.new_path(self.current.path).parent() {
             Some(parent_path) => parent_path,
             None => return Ok(vec![]),
         };
 
-        let paths: Paths = self.path_repository.list(&parent_path)?.into();
+        let paths: Paths = self.repository.list(&parent_path)?.into();
 
         let mut actions = vec![paths.to_write_all_action()];
 

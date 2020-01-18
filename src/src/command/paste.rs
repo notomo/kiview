@@ -6,13 +6,11 @@ use crate::command::Current;
 use crate::command::Paths;
 use crate::command::{Error, ErrorKind};
 use crate::itertools::Itertools;
-use crate::repository::Dispatcher;
 use crate::repository::PathRepository;
 
 pub struct PasteCommand<'a> {
     pub current: Current<'a>,
-    pub dispatcher: Dispatcher,
-    pub path_repository: Box<dyn PathRepository>,
+    pub repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
@@ -20,8 +18,8 @@ impl<'a> Command for PasteCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
         let target_group_path = match &self.current.target {
             Some(target) if !target.is_parent_node => self
-                .dispatcher
-                .path(&target.path)
+                .repository
+                .new_path(&target.path)
                 .parent()
                 .unwrap_or(target.path.clone()),
             Some(_) | None => self.current.path.to_string(),
@@ -38,7 +36,7 @@ impl<'a> Command for PasteCommand<'a> {
             .map(|target| {
                 (
                     target,
-                    self.dispatcher.path(match &target.from {
+                    self.repository.new_path(match &target.from {
                         Some(from) => from,
                         None => &target.path,
                     }),
@@ -62,7 +60,7 @@ impl<'a> Command for PasteCommand<'a> {
                     return res;
                 }
                 let (from, name) = res.unwrap();
-                match self.dispatcher.path(&target_group_path).join(&name) {
+                match self.repository.new_path(&target_group_path).join(&name) {
                     Ok(to) => Ok((from, to)),
                     Err(err) => Err(err.into()),
                 }
@@ -90,7 +88,7 @@ impl<'a> Command for PasteCommand<'a> {
 
         let already_exists: Vec<_> = pairs
             .iter()
-            .filter(|(_, to)| !self.opts.no_confirm && self.dispatcher.path(&to).exists())
+            .filter(|(_, to)| !self.opts.no_confirm && self.repository.new_path(&to).exists())
             .map(|(from, to)| (from.to_string(), to))
             .filter(|(from, _)| from.is_ok())
             .map(|(from, to)| (from.unwrap(), to))
@@ -98,14 +96,14 @@ impl<'a> Command for PasteCommand<'a> {
 
         for (from_path, to) in pairs
             .iter()
-            .filter(|(_, to)| self.opts.no_confirm || !self.dispatcher.path(&to).exists())
+            .filter(|(_, to)| self.opts.no_confirm || !self.repository.new_path(&to).exists())
         {
             let from = from_path.to_string()?;
-            self.path_repository
+            self.repository
                 .rename_or_copy(&from, &to, !self.current.has_cut)?;
         }
 
-        let paths: Paths = self.path_repository.children(&target_group_path)?.into();
+        let paths: Paths = self.repository.children(&target_group_path)?.into();
 
         let depth = match &self.current.target {
             Some(target) => target.depth,
@@ -125,8 +123,8 @@ impl<'a> Command for PasteCommand<'a> {
                     .into_iter()
                     .map(|(from, to)| ChosenTarget {
                         relative_path: match self
-                            .dispatcher
-                            .path(&to)
+                            .repository
+                            .new_path(&to)
                             .to_relative(self.current.path)
                         {
                             Ok(relative_path) => relative_path,

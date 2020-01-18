@@ -4,27 +4,25 @@ use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Error;
 use crate::command::Paths;
-use crate::repository::Dispatcher;
 use crate::repository::PathRepository;
 
 pub struct GoCommand<'a> {
     pub current: Current<'a>,
-    pub dispatcher: Dispatcher,
-    pub path_repository: Box<dyn PathRepository>,
+    pub repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
 impl<'a> Command for GoCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
         let current_path = self
-            .dispatcher
-            .path(match &self.opts.path {
+            .repository
+            .new_path(match &self.opts.path {
                 Some(opt_path) => opt_path.as_str(),
                 None => self.current.path,
             })
             .canonicalize()?;
 
-        let paths: Paths = self.path_repository.list(&current_path)?.into();
+        let paths: Paths = self.repository.list(&current_path)?.into();
 
         if self.current.used && self.opts.create {
             return Ok(vec![Action::ForkBuffer {

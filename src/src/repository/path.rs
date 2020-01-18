@@ -1,15 +1,9 @@
 use crate::repository::Error;
-use crate::repository::{FilePath, FilePathRepository};
+use crate::repository::FilePathRepository;
 
 pub struct Dispatcher {}
 
 impl Dispatcher {
-    pub fn path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a> {
-        box FilePath {
-            path: std::path::Path::new(path),
-        }
-    }
-
     pub fn path_repository(&self) -> Box<dyn PathRepository> {
         box FilePathRepository {}
     }

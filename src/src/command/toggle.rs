@@ -5,14 +5,12 @@ use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Paths;
 use crate::command::{Error, ErrorKind};
-use crate::repository::Dispatcher;
 use crate::repository::PathRepository;
 use itertools::Itertools;
 
 pub struct ToggleTreeCommand<'a> {
     pub current: Current<'a>,
-    pub dispatcher: Dispatcher,
-    pub path_repository: Box<dyn PathRepository>,
+    pub repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
@@ -22,7 +20,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
             .current
             .targets()
             .filter(|target| {
-                !target.is_parent_node && self.dispatcher.path(&target.path).is_group_node()
+                !target.is_parent_node && self.repository.new_path(&target.path).is_group_node()
             })
             .group_by(|target| target.depth)
             .into_iter()
@@ -31,7 +29,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
                 for target in targets {
                     let count = acc
                         .iter()
-                        .filter(|x| self.dispatcher.path(&target.path).contained(&x.path))
+                        .filter(|x| self.repository.new_path(&target.path).contained(&x.path))
                         .count();
                     if count == 0 {
                         child_acc.push(target)
@@ -47,7 +45,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
                     next_sibling_id: target.next_sibling_id,
                 }),
                 false => {
-                    let child_paths: Paths = match self.path_repository.children(&target.path) {
+                    let child_paths: Paths = match self.repository.children(&target.path) {
                         Ok(paths) => paths.into(),
                         Err(err) => return Err(Error::from(err)),
                     };

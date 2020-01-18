@@ -4,13 +4,11 @@ use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Error;
 use crate::command::Paths;
-use crate::repository::Dispatcher;
 use crate::repository::PathRepository;
 
 pub struct NewCommand<'a> {
     pub current: Current<'a>,
-    pub dispatcher: Dispatcher,
-    pub path_repository: Box<dyn PathRepository>,
+    pub repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
@@ -22,8 +20,8 @@ impl<'a> Command for NewCommand<'a> {
 
         let target_group_path = match &self.current.target {
             Some(target) if !target.is_parent_node => self
-                .dispatcher
-                .path(&target.path)
+                .repository
+                .new_path(&target.path)
                 .parent()
                 .unwrap_or_else(|| self.current.path.to_string()),
             Some(_) | None => self.current.path.to_string(),
@@ -33,10 +31,10 @@ impl<'a> Command for NewCommand<'a> {
             .opts
             .paths
             .iter()
-            .map(|path| self.path_repository.create_with(&target_group_path, &path))
+            .map(|path| self.repository.create_with(&target_group_path, &path))
             .collect();
 
-        let paths: Paths = self.path_repository.children(&target_group_path)?.into();
+        let paths: Paths = self.repository.children(&target_group_path)?.into();
 
         let actions: Vec<_> = vec![paths.to_write_action(
             match &self.current.target {

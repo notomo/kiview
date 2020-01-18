@@ -77,31 +77,26 @@ fn main() {
                 CommandName::Quit => box command::QuitCommand {},
                 CommandName::Parent => box command::ParentCommand {
                     current: current,
-                    dispatcher: dispatcher,
-                    path_repository: path_repository,
+                    repository: path_repository,
                 } as Box<dyn Command>,
                 CommandName::Child => box command::ChildCommand {
                     current: current,
-                    dispatcher: dispatcher,
-                    path_repository: path_repository,
+                    repository: path_repository,
                     opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::Go => box command::GoCommand {
                     current: current,
-                    dispatcher: dispatcher,
-                    path_repository: path_repository,
+                    repository: path_repository,
                     opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::New => box command::NewCommand {
                     current: current,
-                    dispatcher: dispatcher,
-                    path_repository: path_repository,
+                    repository: path_repository,
                     opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::Remove => box command::RemoveCommand {
                     current: current,
-                    dispatcher: dispatcher,
-                    path_repository: path_repository,
+                    repository: path_repository,
                     opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::Copy => {
@@ -112,26 +107,22 @@ fn main() {
                 }
                 CommandName::Paste => box command::PasteCommand {
                     current: current,
-                    dispatcher: dispatcher,
-                    path_repository: path_repository,
+                    repository: path_repository,
                     opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::Rename => box command::RenameCommand {
                     current: current,
-                    dispatcher: dispatcher,
-                    path_repository: path_repository,
+                    repository: path_repository,
                     opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::MultipleRename => box command::MultipleRenameCommand {
                     current: current,
-                    dispatcher: dispatcher,
-                    path_repository: path_repository,
+                    repository: path_repository,
                     opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::ToggleTree => box command::ToggleTreeCommand {
                     current: current,
-                    dispatcher: dispatcher,
-                    path_repository: path_repository,
+                    repository: path_repository,
                     opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::ToggleSelection => {

@@ -4,7 +4,6 @@ use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Error;
 use crate::command::Paths;
-use crate::repository::Dispatcher;
 use crate::repository::PathRepository;
 
 use super::command::{Layout, SplitModName, SplitName};
@@ -13,8 +12,7 @@ use itertools::Itertools;
 
 pub struct ChildCommand<'a> {
     pub current: Current<'a>,
-    pub dispatcher: Dispatcher,
-    pub path_repository: Box<dyn PathRepository>,
+    pub repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
@@ -23,7 +21,7 @@ impl<'a> Command for ChildCommand<'a> {
         let mut actions: Vec<_> = self
             .current
             .targets()
-            .group_by(|target| self.dispatcher.path(&target.path).is_group_node())
+            .group_by(|target| self.repository.new_path(&target.path).is_group_node())
             .into_iter()
             .flat_map(|(is_group_node, targets)| {
                 let paths = targets
@@ -35,7 +33,7 @@ impl<'a> Command for ChildCommand<'a> {
                     (true, Layout::Open) => {
                         let results: Vec<_> = paths
                             .iter()
-                            .map(|p| (p, self.path_repository.list(&p)))
+                            .map(|p| (p, self.repository.list(&p)))
                             .collect();
 
                         let mut error_actions: Vec<_> = results
@@ -71,7 +69,7 @@ impl<'a> Command for ChildCommand<'a> {
                     _ => {
                         let results: Vec<_> = paths
                             .iter()
-                            .map(|p| (p, self.path_repository.list(&p)))
+                            .map(|p| (p, self.repository.list(&p)))
                             .collect();
 
                         let mut actions: Vec<_> = results

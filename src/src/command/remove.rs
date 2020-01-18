@@ -5,14 +5,12 @@ use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::Error;
 use crate::command::Paths;
-use crate::repository::Dispatcher;
 use crate::repository::PathRepository;
 use itertools::Itertools;
 
 pub struct RemoveCommand<'a> {
     pub current: Current<'a>,
-    pub dispatcher: Dispatcher,
-    pub path_repository: Box<dyn PathRepository>,
+    pub repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
 
@@ -28,7 +26,7 @@ impl<'a> Command for RemoveCommand<'a> {
                 for target in targets {
                     let count = acc
                         .iter()
-                        .filter(|x| self.dispatcher.path(&target.path).contained(&x.path))
+                        .filter(|x| self.repository.new_path(&target.path).contained(&x.path))
                         .count();
                     if count == 0 {
                         child_acc.push(target)
@@ -44,7 +42,7 @@ impl<'a> Command for RemoveCommand<'a> {
             return Ok(vec![Action::ConfirmRemove { paths: paths }]);
         }
 
-        self.path_repository.remove(paths)?;
+        self.repository.remove(paths)?;
 
         let mut targets = targets;
         targets.sort_by(|a, b| a.depth.cmp(&b.depth));
@@ -59,15 +57,15 @@ impl<'a> Command for RemoveCommand<'a> {
             .into_iter()
             .take_while(|target| target.depth <= min_depth)
             .map(|target| {
-                let parent_path = match self.dispatcher.path(&target.path).parent() {
+                let parent_path = match self.repository.new_path(&target.path).parent() {
                     Some(path) => path,
-                    None => self.path_repository.root(),
+                    None => self.repository.root(),
                 };
                 (target, parent_path)
             })
             .unique_by(|(_, parent_path)| parent_path.clone())
             .try_fold(vec![], |mut acc, (target, parent_path)| {
-                let paths: Paths = match self.path_repository.children(&parent_path) {
+                let paths: Paths = match self.repository.children(&parent_path) {
                     Ok(ps) => ps.into(),
                     Err(err) => return Err(err.into()),
                 };
