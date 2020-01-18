@@ -114,10 +114,6 @@ impl PathRepository for FilePathRepository {
         Ok(())
     }
 
-    fn root(&self) -> String {
-        String::from("/")
-    }
-
     fn new_path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a> {
         box FilePath {
             path: std::path::Path::new(path),
@@ -171,5 +167,9 @@ impl<'a> Path for FilePath<'a> {
 
     fn to_relative(&self, base: &str) -> Result<String, Error> {
         Ok(self.path.strip_prefix(base)?.to_str()?.to_string())
+    }
+
+    fn root(&self) -> String {
+        String::from("/")
     }
 }

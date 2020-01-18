@@ -16,7 +16,6 @@ pub trait PathRepository {
     fn rename(&self, from: &str, to: &str) -> Result<(), Error>;
     fn copy(&self, from: &str, to: &str) -> Result<(), Error>;
     fn remove(&self, paths: Vec<String>) -> Result<(), Error>;
-    fn root(&self) -> String;
     fn new_path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a>;
 
     fn rename_or_copy(&self, from: &str, to: &str, is_copy: bool) -> Result<(), Error> {
@@ -54,6 +53,14 @@ pub trait Path {
     fn to_string(&self) -> Result<String, Error>;
     fn contained(&self, haystack: &str) -> bool;
     fn to_relative(&self, base: &str) -> Result<String, Error>;
+    fn root(&self) -> String;
+
+    fn parent_or_root(&self) -> String {
+        match self.parent() {
+            Some(path) => path,
+            None => self.root(),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

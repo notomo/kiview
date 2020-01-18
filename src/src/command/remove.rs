@@ -18,7 +18,6 @@ impl<'a> Command for RemoveCommand<'a> {
         let targets = self
             .current
             .dedup_targets(&self.repository, |target| !target.is_parent_node);
-
         let paths: Vec<_> = targets.iter().map(|target| target.path.clone()).collect();
 
         if !self.opts.no_confirm {
@@ -27,39 +26,34 @@ impl<'a> Command for RemoveCommand<'a> {
 
         self.repository.remove(paths)?;
 
+        // for break by take_while()
         let mut targets = targets;
         targets.sort_by(|a, b| a.depth.cmp(&b.depth));
         let targets = targets;
+        let min_depth = targets.iter().map(|target| target.depth).min().unwrap_or(0);
 
-        let min_depth = match targets.iter().map(|target| target.depth).min() {
-            Some(depth) => depth,
-            None => 0,
-        };
-
-        targets
+        let actions: Vec<_> = targets
             .into_iter()
-            .take_while(|target| target.depth <= min_depth)
+            .take_while(|target| target.depth == min_depth)
             .map(|target| {
-                let parent_path = match self.repository.new_path(&target.path).parent() {
-                    Some(path) => path,
-                    None => self.repository.root(),
-                };
+                let parent_path = self.repository.new_path(&target.path).parent_or_root();
                 (target, parent_path)
             })
             .unique_by(|(_, parent_path)| parent_path.clone())
-            .try_fold(vec![], |mut acc, (target, parent_path)| {
-                let paths: Paths = match self.repository.children(&parent_path) {
-                    Ok(ps) => ps.into(),
-                    Err(err) => return Err(err.into()),
-                };
-
-                let action = paths.to_write_action(
-                    target.depth as usize,
-                    target.parent_id,
-                    target.last_sibling_id,
-                );
-                acc.push(action);
-                Ok(acc)
-            })
+            .map(
+                |(target, parent_path)| match self.repository.children(&parent_path) {
+                    Ok(children) => Paths::from(children).to_write_action(
+                        target.depth as usize,
+                        target.parent_id,
+                        target.last_sibling_id,
+                    ),
+                    Err(err) => Action::ShowError {
+                        path: parent_path,
+                        message: err.inner.to_string(),
+                    },
+                },
+            )
+            .collect();
+        Ok(actions)
     }
 }
