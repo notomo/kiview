@@ -70,6 +70,10 @@ function! kiview#current#new(bufnr) abort
             if has_key(self.selected, mark_id)
                 call nvim_buf_clear_namespace(self.bufnr, s:hl_namespace, row, row + 1)
                 call remove(self.selected, mark_id)
+                let prop = self.props[mark_id]
+                if has_key(prop, 'opened') && prop.opened
+                    call nvim_buf_add_highlight(self.bufnr, s:group_hl_namespace, 'KiviewNodeOpen', row, 0, -1)
+                endif
                 continue
             endif
             call nvim_buf_add_highlight(self.bufnr, s:hl_namespace, 'KiviewSelected', row, 0, -1)
