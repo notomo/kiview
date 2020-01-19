@@ -1,14 +1,11 @@
 mod command;
-pub use command::{Command, CommandName, CommandOptions};
+pub use command::{Command, CommandName, CommandOptions, SimpleCommand};
 
 mod current;
 pub use current::Current;
 
 mod parent;
 pub use parent::ParentCommand;
-
-mod quit;
-pub use quit::QuitCommand;
 
 mod child;
 pub use child::ChildCommand;
@@ -29,7 +26,7 @@ mod cut;
 pub use cut::CutCommand;
 
 mod select;
-pub use select::{ToggleAllSelectionCommand, ToggleSelectionCommand};
+pub use select::ToggleSelectionCommand;
 
 mod paste;
 pub use paste::PasteCommand;
@@ -39,9 +36,6 @@ pub use rename::{MultipleRenameCommand, RenameCommand};
 
 mod toggle;
 pub use toggle::ToggleTreeCommand;
-
-mod back;
-pub use back::BackCommand;
 
 mod unknown;
 pub use unknown::UnknownCommand;

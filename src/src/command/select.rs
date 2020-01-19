@@ -19,11 +19,3 @@ impl<'a> Command for ToggleSelectionCommand<'a> {
         Ok(vec![Action::ToggleSelection { ids: ids }])
     }
 }
-
-pub struct ToggleAllSelectionCommand {}
-
-impl Command for ToggleAllSelectionCommand {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
-        Ok(vec![Action::ToggleAllSelection])
-    }
-}

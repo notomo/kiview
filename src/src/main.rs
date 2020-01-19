@@ -20,7 +20,7 @@ use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
 
 mod command;
-use command::{Command, CommandName, CommandOptions, Current};
+use command::{Action, Command, CommandName, CommandOptions, Current};
 
 mod repository;
 
@@ -74,7 +74,9 @@ fn main() {
             let path_repository = dispatcher.path_repository();
 
             let actions = match &command_name {
-                CommandName::Quit => box command::QuitCommand {},
+                CommandName::Quit => box command::SimpleCommand {
+                    action: Action::Quit,
+                } as Box<dyn Command>,
                 CommandName::Parent => box command::ParentCommand {
                     current: current,
                     repository: path_repository,
@@ -128,12 +130,12 @@ fn main() {
                 CommandName::ToggleSelection => {
                     box command::ToggleSelectionCommand { current: current } as Box<dyn Command>
                 }
-                CommandName::ToggleAllSelection => {
-                    box command::ToggleAllSelectionCommand {} as Box<dyn Command>
-                }
-                CommandName::Back => {
-                    box command::BackCommand { current: current } as Box<dyn Command>
-                }
+                CommandName::ToggleAllSelection => box command::SimpleCommand {
+                    action: Action::ToggleAllSelection,
+                } as Box<dyn Command>,
+                CommandName::Back => box command::SimpleCommand {
+                    action: Action::BackHistory,
+                } as Box<dyn Command>,
                 CommandName::Unknown => {
                     box command::UnknownCommand { command_name: &arg } as Box<dyn Command>
                 }

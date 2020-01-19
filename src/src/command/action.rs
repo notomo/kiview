@@ -3,7 +3,7 @@ use super::error::Error;
 use crate::repository::FullPath;
 use serde_derive::Serialize;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[serde(tag = "name")]
 pub enum Action {
     #[serde(rename = "open")]
@@ -122,7 +122,7 @@ impl Action {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct ForkBufferItem {
     path: String,
     lines: Vec<String>,
@@ -137,7 +137,7 @@ pub struct RenameItem {
     pub is_copy: bool,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Prop {
     path: String,
     depth: u64,
@@ -145,12 +145,12 @@ pub struct Prop {
     parent_id: Option<u64>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct RegisteredTarget {
     pub path: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct ChosenTarget {
     pub from: String,
     pub path: String,

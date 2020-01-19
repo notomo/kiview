@@ -6,6 +6,16 @@ pub trait Command {
     fn actions(&self) -> Result<Vec<Action>, Error>;
 }
 
+pub struct SimpleCommand {
+    pub action: Action,
+}
+
+impl Command for SimpleCommand {
+    fn actions(&self) -> Result<Vec<Action>, Error> {
+        Ok(vec![self.action.clone()])
+    }
+}
+
 #[derive(Debug, Serialize)]
 pub enum CommandName {
     #[serde(rename = "quit")]
