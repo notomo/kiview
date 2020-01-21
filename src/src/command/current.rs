@@ -90,7 +90,7 @@ pub struct RegisteredTarget {
     pub path: String,
 
     #[serde(default)]
-    pub name: Option<String>,
+    pub new_name: Option<String>,
     #[serde(default)]
     pub from: Option<String>,
 }

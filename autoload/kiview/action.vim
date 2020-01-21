@@ -178,17 +178,16 @@ endfunction
 function! s:choose(action, buffer, input_reader) abort
     let targets = []
     let rename_targets = []
-    for target in a:action.targets
-        let answer = a:input_reader.read('already exists (f)orce (n)o (r)ename: ', [target.path])
+    for item in a:action.items
+        let answer = a:input_reader.read('already exists (f)orce (n)o (r)ename: ', [item.path])
         if answer ==? 'n'
             continue
         elseif answer ==? 'r'
-            call add(rename_targets, target)
+            call add(rename_targets, item)
             continue
         endif
-        call add(targets, target)
+        call add(targets, item)
     endfor
-
 
     if empty(targets) && empty(rename_targets)
         return
@@ -204,7 +203,7 @@ function! s:choose(action, buffer, input_reader) abort
         if empty(new_name)
             continue
         endif
-        let target.name = new_name
+        let target.new_name = new_name
         call add(targets, target)
     endfor
 
@@ -263,5 +262,5 @@ function! s:open_renamer(action, buffer) abort
 endfunction
 
 function! s:complete_renamer(action, buffer) abort
-    call a:buffer.renamer.complete(a:action.items)
+    call a:buffer.renamer.complete(a:action.items, a:action.has_error)
 endfunction

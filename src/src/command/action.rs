@@ -39,7 +39,7 @@ pub enum Action {
     #[serde(rename = "choose")]
     Choose {
         path: String,
-        targets: Vec<ChosenTarget>,
+        items: Vec<ChooseItem>,
         has_cut: bool,
     },
 
@@ -106,7 +106,10 @@ pub enum Action {
         items: Vec<RenameItem>,
     },
     #[serde(rename = "complete_renamer")]
-    CompleteRenamer { items: Vec<RenameItem> },
+    CompleteRenamer {
+        items: Vec<RenameItem>,
+        has_error: bool,
+    },
 }
 
 impl Action {
@@ -151,7 +154,7 @@ pub struct RegisteredTarget {
 }
 
 #[derive(Debug, Serialize, Clone)]
-pub struct ChosenTarget {
+pub struct ChooseItem {
     pub from: String,
     pub path: String,
     pub relative_path: String,

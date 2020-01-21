@@ -18,6 +18,12 @@ pub trait PathRepository {
     fn remove(&self, paths: Vec<String>) -> Result<(), Error>;
     fn new_path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a>;
 
+    fn rename_with(&self, from: &str, base_path: &str, joined: &str) -> Result<String, Error> {
+        let new_path = self.new_path(base_path).join(joined)?;
+        self.rename(from, &new_path)?;
+        Ok(new_path)
+    }
+
     fn rename_or_copy(&self, from: &str, to: &str, is_copy: bool) -> Result<(), Error> {
         if is_copy {
             return self.copy(from, to);

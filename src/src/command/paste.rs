@@ -1,4 +1,4 @@
-use super::action::ChosenTarget;
+use super::action::ChooseItem;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
@@ -21,11 +21,11 @@ impl<'a> Command for PasteCommand<'a> {
                 .repository
                 .new_path(&target.path)
                 .parent()
-                .unwrap_or(target.path.clone()),
+                .unwrap_or_else(|| self.current.path.to_string()),
             Some(_) | None => self.current.path.to_string(),
         };
 
-        let froms: Vec<_> = self
+        let (items, errors): (Vec<ChooseItem>, Vec<Action>) = self
             .current
             .registered_targets
             .iter()
@@ -33,109 +33,69 @@ impl<'a> Command for PasteCommand<'a> {
                 Some(from) => from,
                 None => &target.path,
             })
-            .map(|target| {
-                (
-                    target,
-                    self.repository.new_path(match &target.from {
-                        Some(from) => from,
-                        None => &target.path,
+            .try_fold((vec![], vec![]), |(mut items, mut errors), target| {
+                let from = self.repository.new_path(match &target.from {
+                    Some(from) => from,
+                    None => &target.path,
+                });
+                let from_name = from.name();
+                let from = from.to_string()?;
+
+                let new_name = match (&target.new_name, &from_name) {
+                    (Some(name), _) => name,
+                    (None, Some(name)) => name,
+                    _ => return Err(ErrorKind::invalid("new name not found")),
+                };
+                let to = self
+                    .repository
+                    .new_path(&target_group_path)
+                    .join(&new_name)?;
+
+                match (self.opts.no_confirm, self.repository.new_path(&to).exists()) {
+                    (false, true) => items.push(ChooseItem {
+                        relative_path: self
+                            .repository
+                            .new_path(&to)
+                            .to_relative(self.current.path)?,
+                        path: to.clone(),
+                        from: from,
                     }),
-                )
-            })
-            .collect();
-
-        let pair_results: Vec<_> = froms
-            .iter()
-            .map(
-                |(target, from_path)| match (target.name.clone(), from_path.name()) {
-                    (Some(name), _) => Ok((from_path, name)),
-                    (None, Some(name)) => Ok((from_path, name)),
-                    (None, None) => Err(Error::from(ErrorKind::IO {
-                        message: String::from("name not found"),
-                    })),
-                },
-            )
-            .map(|res| {
-                if res.is_err() {
-                    return res;
-                }
-                let (from, name) = res.unwrap();
-                match self.repository.new_path(&target_group_path).join(&name) {
-                    Ok(to) => Ok((from, to)),
-                    Err(err) => Err(err.into()),
-                }
-            })
-            .collect();
-
-        let errors: Vec<_> = pair_results
-            .iter()
-            .filter_map(|pair| pair.as_ref().err())
-            .collect();
-        if errors.len() != 0 {
-            return Err(Error::from(ErrorKind::IO {
-                message: errors
-                    .iter()
-                    .map(|e| e.to_string())
-                    .collect::<Vec<_>>()
-                    .join("\n"),
-            }));
-        }
-
-        let pairs: Vec<_> = pair_results
-            .iter()
-            .filter_map(|pair| pair.as_ref().ok())
-            .collect();
-
-        let already_exists: Vec<_> = pairs
-            .iter()
-            .filter(|(_, to)| !self.opts.no_confirm && self.repository.new_path(&to).exists())
-            .map(|(from, to)| (from.to_string(), to))
-            .filter(|(from, _)| from.is_ok())
-            .map(|(from, to)| (from.unwrap(), to))
-            .collect();
-
-        for (from_path, to) in pairs
-            .iter()
-            .filter(|(_, to)| self.opts.no_confirm || !self.repository.new_path(&to).exists())
-        {
-            let from = from_path.to_string()?;
-            self.repository
-                .rename_or_copy(&from, &to, !self.current.has_cut)?;
-        }
+                    _ => {
+                        if let Err(err) =
+                            self.repository
+                                .rename_or_copy(&from, &to, !self.current.has_cut)
+                        {
+                            errors.push(Action::ShowError {
+                                path: to.clone(),
+                                message: err.inner.to_string(),
+                            })
+                        }
+                    }
+                };
+                Ok((items, errors))
+            })?;
 
         let paths: Paths = self.repository.children(&target_group_path)?.into();
 
-        let depth = match &self.current.target {
-            Some(target) => target.depth,
-            None => 0,
-        };
-
-        Ok(vec![
+        let actions: Vec<_> = vec![
             paths.to_write_action(
-                depth,
+                match &self.current.target {
+                    Some(target) => target.depth,
+                    None => 0,
+                },
                 self.current.target.as_ref().and_then(|t| t.parent_id),
                 self.current.target.as_ref().and_then(|t| t.last_sibling_id),
             ),
             Action::ClearRegister,
-            Action::Choose {
-                path: self.current.path.to_string(),
-                targets: already_exists
-                    .into_iter()
-                    .map(|(from, to)| ChosenTarget {
-                        relative_path: match self
-                            .repository
-                            .new_path(&to)
-                            .to_relative(self.current.path)
-                        {
-                            Ok(relative_path) => relative_path,
-                            Err(_) => to.clone(),
-                        },
-                        path: to.to_string(),
-                        from: from.to_string(),
-                    })
-                    .collect(),
-                has_cut: self.current.has_cut,
-            },
-        ])
+        ]
+        .into_iter()
+        .chain(errors)
+        .chain(vec![Action::Choose {
+            path: self.current.path.to_string(),
+            items: items,
+            has_cut: self.current.has_cut,
+        }])
+        .collect();
+        Ok(actions)
     }
 }

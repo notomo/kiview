@@ -20,6 +20,15 @@ pub enum ErrorKind {
     AlreadyExists { path: String },
 }
 
+impl ErrorKind {
+    pub fn invalid(message: &str) -> Error {
+        ErrorKind::Invalid {
+            message: String::from(message),
+        }
+        .into()
+    }
+}
+
 #[derive(Debug)]
 pub struct Error {
     pub inner: Context<ErrorKind>,
