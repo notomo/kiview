@@ -16,7 +16,7 @@ impl<'a> Command for GoCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
         let current_path = self
             .repository
-            .new_path(match &self.opts.path {
+            .path(match &self.opts.path {
                 Some(opt_path) => opt_path.as_str(),
                 None => self.current.path,
             })

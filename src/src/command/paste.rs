@@ -19,7 +19,7 @@ impl<'a> Command for PasteCommand<'a> {
         let target_group_path = match &self.current.target {
             Some(target) if !target.is_parent_node => self
                 .repository
-                .new_path(&target.path)
+                .path(&target.path)
                 .parent()
                 .unwrap_or_else(|| self.current.path.to_string()),
             Some(_) | None => self.current.path.to_string(),
@@ -34,7 +34,7 @@ impl<'a> Command for PasteCommand<'a> {
                 None => &target.path,
             })
             .try_fold((vec![], vec![]), |(mut items, mut errors), target| {
-                let from = self.repository.new_path(match &target.from {
+                let from = self.repository.path(match &target.from {
                     Some(from) => from,
                     None => &target.path,
                 });
@@ -46,17 +46,11 @@ impl<'a> Command for PasteCommand<'a> {
                     (None, Some(name)) => name,
                     _ => return Err(ErrorKind::invalid("new name not found")),
                 };
-                let to = self
-                    .repository
-                    .new_path(&target_group_path)
-                    .join(&new_name)?;
+                let to = self.repository.path(&target_group_path).join(&new_name)?;
 
-                match (self.opts.no_confirm, self.repository.new_path(&to).exists()) {
+                match (self.opts.no_confirm, self.repository.path(&to).exists()) {
                     (false, true) => items.push(ChooseItem {
-                        relative_path: self
-                            .repository
-                            .new_path(&to)
-                            .to_relative(self.current.path)?,
+                        relative_path: self.repository.path(&to).to_relative(self.current.path)?,
                         path: to.clone(),
                         from: from,
                     }),

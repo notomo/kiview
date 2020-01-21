@@ -17,7 +17,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
         let actions: Vec<_> = self
             .current
             .dedup_targets(&self.repository, |target| {
-                !target.is_parent_node && self.repository.new_path(&target.path).is_group_node()
+                !target.is_parent_node && self.repository.path(&target.path).is_group_node()
             })
             .iter()
             .map(|target| match target.opened {

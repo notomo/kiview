@@ -114,7 +114,7 @@ impl PathRepository for FilePathRepository {
         Ok(())
     }
 
-    fn new_path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a> {
+    fn path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a> {
         box FilePath {
             path: std::path::Path::new(path),
         }

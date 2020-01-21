@@ -56,7 +56,7 @@ impl<'a> Current<'a> {
                 for target in targets {
                     if !acc
                         .iter()
-                        .any(|x| repository.new_path(&target.path).contained(&x.path))
+                        .any(|x| repository.path(&target.path).contained(&x.path))
                     {
                         child_acc.push(target)
                     }

@@ -16,10 +16,10 @@ pub trait PathRepository {
     fn rename(&self, from: &str, to: &str) -> Result<(), Error>;
     fn copy(&self, from: &str, to: &str) -> Result<(), Error>;
     fn remove(&self, paths: Vec<String>) -> Result<(), Error>;
-    fn new_path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a>;
+    fn path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a>;
 
     fn rename_with(&self, from: &str, base_path: &str, joined: &str) -> Result<String, Error> {
-        let new_path = self.new_path(base_path).join(joined)?;
+        let new_path = self.path(base_path).join(joined)?;
         self.rename(from, &new_path)?;
         Ok(new_path)
     }
@@ -38,13 +38,13 @@ pub trait PathRepository {
         joined: &str,
         is_copy: bool,
     ) -> Result<String, Error> {
-        let new_path = self.new_path(to).join(joined)?;
+        let new_path = self.path(to).join(joined)?;
         self.rename_or_copy(from, &new_path, is_copy)?;
         Ok(new_path)
     }
 
     fn create_with<'a>(&self, base_path: &'a str, joined: &'a str) -> Result<(), Error> {
-        let new_path = self.new_path(base_path).join(joined)?;
+        let new_path = self.path(base_path).join(joined)?;
         Ok(self.create(&new_path)?)
     }
 }

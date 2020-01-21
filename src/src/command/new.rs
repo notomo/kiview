@@ -21,7 +21,7 @@ impl<'a> Command for NewCommand<'a> {
         let target_group_path = match &self.current.target {
             Some(target) if !target.is_parent_node => self
                 .repository
-                .new_path(&target.path)
+                .path(&target.path)
                 .parent()
                 .unwrap_or_else(|| self.current.path.to_string()),
             Some(_) | None => self.current.path.to_string(),

@@ -20,7 +20,7 @@ impl<'a> Command for RenameCommand<'a> {
                 return Ok(vec![Action::ConfirmRename {
                     relative_path: self
                         .repository
-                        .new_path(&target.path)
+                        .path(&target.path)
                         .to_relative(self.current.path)?,
                     path: target.to_string(),
                 }])
@@ -33,9 +33,9 @@ impl<'a> Command for RenameCommand<'a> {
             }
         };
 
-        let from = self.repository.new_path(&target.path).to_string()?;
+        let from = self.repository.path(&target.path).to_string()?;
         let target_group_path = match target.is_parent_node {
-            false => self.repository.new_path(&target.path).parent()?,
+            false => self.repository.path(&target.path).parent()?,
             true => self.current.path.to_string(),
         };
         self.repository
@@ -67,7 +67,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
                 .try_fold(vec![], |mut items, target| {
                     let relative_path = self
                         .repository
-                        .new_path(&target.path)
+                        .path(&target.path)
                         .to_relative(self.current.path)?;
                     items.push(RenameItem {
                         id: target.id,

@@ -12,7 +12,7 @@ pub struct ParentCommand<'a> {
 
 impl<'a> Command for ParentCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        let parent_path = match self.repository.new_path(self.current.path).parent() {
+        let parent_path = match self.repository.path(self.current.path).parent() {
             Some(parent_path) => parent_path,
             None => return Ok(vec![]),
         };

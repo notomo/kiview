@@ -36,7 +36,7 @@ impl<'a> Command for RemoveCommand<'a> {
             .into_iter()
             .take_while(|target| target.depth == min_depth)
             .map(|target| {
-                let parent_path = self.repository.new_path(&target.path).parent_or_root();
+                let parent_path = self.repository.path(&target.path).parent_or_root();
                 (target, parent_path)
             })
             .unique_by(|(_, parent_path)| parent_path.clone())
