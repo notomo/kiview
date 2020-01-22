@@ -8,7 +8,7 @@ function! kiview#action#new_handler(buffer) abort
             \ 'tab_open': { action -> s:tab_open_targets(action, buffer) },
             \ 'vertical_open': { action -> s:vertical_open_targets(action, buffer) },
             \ 'horizontal_open': { action -> s:horizontal_open_targets(action, buffer) },
-            \ 'create': { action -> s:create(action, buffer) },
+            \ 'open_view': { action -> s:open_view(action, buffer) },
             \ 'add_history': { action -> s:add_history(action, buffer) },
             \ 'back_history': { action -> s:back_history(action, buffer) },
             \ 'try_to_restore_cursor': { action -> s:try_to_restore_cursor(action, buffer) },
@@ -140,7 +140,7 @@ function! s:add_history(action, buffer) abort
     call a:buffer.history.add(a:action.path, a:action.line_number, a:action.back)
 endfunction
 
-function! s:create(action, buffer) abort
+function! s:open_view(action, buffer) abort
     call a:buffer.open(a:action.split_name, a:action.mod_name)
     call a:buffer.history.restore_cursor('')
     call a:buffer.current.set(a:action.path)

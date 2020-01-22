@@ -12,7 +12,7 @@ pub struct Current<'a> {
     pub line_number: u64,
 
     #[serde(default)]
-    pub used: bool,
+    pub opened: bool,
 
     pub has_cut: bool,
     pub renamer_opened: bool,

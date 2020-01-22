@@ -14,7 +14,7 @@ pub struct GoCommand<'a> {
 
 impl<'a> Command for GoCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        let current_path = self
+        let target_group_path = self
             .repository
             .path(match &self.opts.path {
                 Some(opt_path) => opt_path.as_str(),
@@ -22,11 +22,11 @@ impl<'a> Command for GoCommand<'a> {
             })
             .canonicalize()?;
 
-        let paths: Paths = self.repository.list(&current_path)?.into();
+        let paths: Paths = self.repository.list(&target_group_path)?.into();
 
-        if self.current.used && self.opts.create {
+        if self.current.opened && self.opts.create {
             return Ok(vec![Action::ForkBuffer {
-                items: vec![paths.to_fork_buffer_item(&current_path)],
+                items: vec![paths.to_fork_buffer_item(&target_group_path)],
                 split_name: self.opts.split.name,
                 mod_name: self.opts.split.mod_name,
             }]);
@@ -34,20 +34,22 @@ impl<'a> Command for GoCommand<'a> {
 
         let mut actions = vec![paths.to_write_all_action()];
 
-        if self.current.path != current_path {
-            actions.push(Action::TryToRestoreCursor {
-                path: current_path.clone(),
-            });
-            actions.push(Action::AddHistory {
-                path: self.current.path.to_string(),
-                line_number: self.current.line_number,
-                back: self.opts.back,
-            });
+        if self.current.path != target_group_path {
+            actions.extend(vec![
+                Action::TryToRestoreCursor {
+                    path: target_group_path.clone(),
+                },
+                Action::AddHistory {
+                    path: self.current.path.to_string(),
+                    line_number: self.current.line_number,
+                    back: self.opts.back,
+                },
+            ]);
         }
 
-        if !self.current.used {
-            actions.push(Action::Create {
-                path: current_path,
+        if !self.current.opened {
+            actions.push(Action::OpenView {
+                path: target_group_path,
                 split_name: self.opts.split.name,
                 mod_name: self.opts.split.mod_name,
             });

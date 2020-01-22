@@ -12,7 +12,6 @@ let s:split_names = {
 function! kiview#buffer#get_or_create(bufnr) abort
     let buffer = kiview#buffer#find(a:bufnr)
     if !empty(buffer)
-        let buffer.used = v:true
         return buffer
     endif
 
@@ -35,7 +34,7 @@ function! kiview#buffer#new() abort
 
     let buffer = {
         \ 'bufnr': bufnr,
-        \ 'used': v:false,
+        \ 'opened': v:false,
         \ 'register': kiview#register#new(),
         \ 'renamer': kiview#renamer#new(s:id, bufnr),
         \ 'history': kiview#history#new(bufnr),
@@ -51,8 +50,9 @@ function! kiview#buffer#new() abort
         setlocal nonumber
         call nvim_win_set_width(win_getid(), 38)
         call nvim_buf_set_option(self.bufnr, 'bufhidden', 'wipe')
+        let self.opened = v:true
 
-        call self.logger.log('opend bufnr: ' . self.bufnr)
+        call self.logger.log('opened bufnr: ' . self.bufnr)
     endfunction
 
     function! buffer.write(lines, start, end) abort

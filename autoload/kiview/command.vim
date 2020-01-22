@@ -87,12 +87,12 @@ function! s:build_input(buffer, range) abort
         \ 'has_cut': a:buffer.register.has_cut,
     \ }
 
-    if a:buffer.used
+    if a:buffer.opened
         let input.line_number = line('.')
         let input.target = a:buffer.current.get_target(input.line_number)
         let input.targets = a:buffer.current.get_targets(a:range[0], a:range[1])
         let input.selected_targets = a:buffer.current.get_selected_targets()
-        let input.used = v:true
+        let input.opened = v:true
     endif
 
     return json_encode(input)

@@ -14,8 +14,9 @@ pub enum Action {
     VerticalOpen { paths: Vec<String> },
     #[serde(rename = "horizontal_open")]
     HorizontalOpen { paths: Vec<String> },
-    #[serde(rename = "create")]
-    Create {
+
+    #[serde(rename = "open_view")]
+    OpenView {
         path: String,
         split_name: SplitName,
         mod_name: SplitModName,
