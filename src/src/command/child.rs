@@ -18,7 +18,7 @@ pub struct ChildCommand<'a> {
 
 impl<'a> Command for ChildCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        let mut actions: Vec<_> = self
+        let actions: Vec<_> = self
             .current
             .targets()
             .group_by(|target| self.repository.path(&target.path).is_group_node())
@@ -30,7 +30,13 @@ impl<'a> Command for ChildCommand<'a> {
                     .collect();
 
                 match (is_group_node, self.opts.layout) {
-                    (false, _) => vec![self.opts.layout.leaf_node_action(paths)],
+                    (false, _) => {
+                        let mut actions = vec![self.opts.layout.leaf_node_action(paths)];
+                        if self.opts.quit {
+                            actions.push(Action::Quit);
+                        };
+                        actions
+                    }
                     (true, Layout::Open) => paths
                         .iter()
                         .flat_map(|path| match self.repository.list(&path) {
@@ -80,10 +86,6 @@ impl<'a> Command for ChildCommand<'a> {
                 }
             })
             .collect();
-
-        if self.opts.quit {
-            actions.push(Action::Quit);
-        }
 
         Ok(actions)
     }
