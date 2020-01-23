@@ -117,6 +117,22 @@ pub struct Split {
     pub mod_name: SplitModName,
 }
 
+impl Split {
+    pub fn leaf_node_action(&self, paths: Vec<String>) -> Vec<Action> {
+        if paths.len() == 0 {
+            return vec![];
+        }
+        match self.name {
+            SplitName::Unknown | SplitName::No => vec![],
+            _ => vec![Action::OpenLeaves {
+                paths: paths,
+                split_name: self.name,
+                mod_name: self.mod_name,
+            }],
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Serialize)]
 pub enum SplitName {
     #[serde(rename = "tab")]
@@ -210,6 +226,7 @@ pub enum CommandOption {
     Create,
     Back,
     Split { value: Split },
+    Open { value: Split },
     Unknown,
 }
 
@@ -233,6 +250,9 @@ impl From<&str> for CommandOption {
             ["split", split] => CommandOption::Split {
                 value: Split::from(*split),
             },
+            ["open", split] => CommandOption::Open {
+                value: Split::from(*split),
+            },
             _ => CommandOption::Unknown,
         }
     }
@@ -248,6 +268,7 @@ pub struct CommandOptions {
     pub create: bool,
     pub back: bool,
     pub split: Split,
+    pub open: Split,
 }
 
 impl CommandOptions {
@@ -325,6 +346,17 @@ impl CommandOptions {
             .cloned()
             .unwrap_or(Split::from(""));
 
+        let open: Split = options
+            .iter()
+            .filter_map(|opt| match &opt {
+                CommandOption::Open { value } => Some(value.clone()),
+                _ => None,
+            })
+            .collect::<Vec<Split>>()
+            .get(0)
+            .cloned()
+            .unwrap_or(Split::from("no"));
+
         CommandOptions {
             layout: layout,
             quit: quit,
@@ -334,6 +366,7 @@ impl CommandOptions {
             create: create,
             back: back,
             split: split,
+            open: open,
         }
     }
 }

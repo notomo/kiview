@@ -276,6 +276,18 @@ function! s:suite.__new__() abort
         call s:assert.file_name('new_file')
     endfunction
 
+    function! suite.new_with_open()
+        cd ./test/plugin/_test_data
+
+        call s:helper.set_input('new_file')
+
+        call s:helper.sync_execute('')
+        call s:helper.sync_execute('new -open=tab')
+
+        call s:assert.file_name('new_file')
+        call s:assert.tab_count(2)
+    endfunction
+
     function! suite.cancel_new()
         call s:helper.set_input('')
 

@@ -13,7 +13,7 @@ function! kiview#command#new(buffer, range, event_service, arg, parent_id) abort
         \ 'buffer': a:buffer,
         \ 'range': a:range,
         \ 'event_service': a:event_service,
-        \ 'action_handler': kiview#action#new_handler(a:buffer),
+        \ 'action_handler': kiview#action#new_handler(a:buffer, a:arg),
         \ 'children': [],
         \ 'logger': kiview#logger#new('command: ' . s:id).label('parent: ' . a:parent_id),
     \ }

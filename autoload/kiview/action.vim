@@ -1,6 +1,7 @@
 
-function! kiview#action#new_handler(buffer) abort
+function! kiview#action#new_handler(buffer, arg) abort
     let buffer = a:buffer
+    let arg = a:arg
     let input_reader = kiview#input_reader#new()
     let handler = {
         \ 'funcs': {
@@ -8,6 +9,7 @@ function! kiview#action#new_handler(buffer) abort
             \ 'tab_open': { action -> s:tab_open_targets(action, buffer) },
             \ 'vertical_open': { action -> s:vertical_open_targets(action, buffer) },
             \ 'horizontal_open': { action -> s:horizontal_open_targets(action, buffer) },
+            \ 'open_leaves': { action -> s:open_leaves(action, buffer) },
             \ 'open_view': { action -> s:open_view(action, buffer) },
             \ 'add_history': { action -> s:add_history(action, buffer) },
             \ 'back_history': { action -> s:back_history(action, buffer) },
@@ -19,7 +21,7 @@ function! kiview#action#new_handler(buffer) abort
             \ 'open_tree': { action -> s:open_tree(action, buffer) },
             \ 'close_tree': { action -> s:close_tree(action, buffer) },
             \ 'quit': { action -> s:quit(buffer) },
-            \ 'confirm_new': { action -> s:confirm_new(input_reader) },
+            \ 'confirm_new': { action -> s:confirm_new(input_reader, arg) },
             \ 'confirm_remove': { action -> s:confirm_remove(action, input_reader) },
             \ 'confirm_rename': { action -> s:confirm_rename(action, input_reader) },
             \ 'open_renamer': { action -> s:open_renamer(action, buffer) },
@@ -44,6 +46,20 @@ function! kiview#action#new_handler(buffer) abort
     endfunction
 
     return handler
+endfunction
+
+let s:split_names = {
+    \ 'tab': 'tabedit',
+    \ 'vertical': 'vsplit',
+    \ 'horizontal': 'split',
+\ }
+
+function! s:open_leaves(action, buffer) abort
+    let split = s:split_names[a:action.split_name]
+    for path in a:action.paths
+        execute a:action.mod_name split path
+    endfor
+    call a:buffer.current.clear_selection()
 endfunction
 
 function! s:open_targets(action, buffer) abort
@@ -150,13 +166,13 @@ function! s:quit(buffer) abort
     call a:buffer.close_windows()
 endfunction
 
-function! s:confirm_new(input_reader) abort
+function! s:confirm_new(input_reader, arg) abort
     let name = a:input_reader.read('new: ', [])
     if empty(name)
         return
     endif
     let paths = map(split(name, '\v\s+'), {_, v -> '-paths=' . v})
-    return 'new ' . join(paths, ' ')
+    return a:arg . ' ' . join(paths, ' ')
 endfunction
 
 function! s:confirm_remove(action, input_reader) abort

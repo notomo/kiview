@@ -1,5 +1,4 @@
 use super::command::{SplitModName, SplitName};
-use super::error::Error;
 use crate::repository::FullPath;
 use serde_derive::Serialize;
 
@@ -14,6 +13,13 @@ pub enum Action {
     VerticalOpen { paths: Vec<String> },
     #[serde(rename = "horizontal_open")]
     HorizontalOpen { paths: Vec<String> },
+
+    #[serde(rename = "open_leaves")]
+    OpenLeaves {
+        paths: Vec<String>,
+        split_name: SplitName,
+        mod_name: SplitModName,
+    },
 
     #[serde(rename = "open_view")]
     OpenView {
@@ -111,19 +117,6 @@ pub enum Action {
         items: Vec<RenameItem>,
         has_error: bool,
     },
-}
-
-impl Action {
-    pub fn show_error<T, E: Into<Error>>(res: Result<T, E>) -> Option<Self> {
-        let err: Error = match res {
-            Err(err) => err.into(),
-            _ => return None,
-        };
-        Some(Self::ShowError {
-            path: String::from(""),
-            message: err.inner.to_string(),
-        })
-    }
 }
 
 #[derive(Debug, Serialize, Clone)]

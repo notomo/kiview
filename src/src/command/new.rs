@@ -27,12 +27,25 @@ impl<'a> Command for NewCommand<'a> {
             Some(_) | None => self.current.path.to_string(),
         };
 
-        let results: Vec<_> = self
-            .opts
-            .paths
-            .iter()
-            .map(|path| self.repository.create_with(&target_group_path, &path))
-            .collect();
+        let (open_paths, errors) =
+            self.opts
+                .paths
+                .iter()
+                .fold((vec![], vec![]), |(mut open_paths, mut errors), path| {
+                    match self.repository.create_with(&target_group_path, &path) {
+                        Ok(_) => {
+                            // HACK: not supported group node open
+                            if !self.repository.path(&path).is_group_node() {
+                                open_paths.push(path.to_string());
+                            };
+                        }
+                        Err(err) => errors.push(Action::ShowError {
+                            path: path.to_string(),
+                            message: err.inner.to_string(),
+                        }),
+                    };
+                    (open_paths, errors)
+                });
 
         let paths: Paths = self.repository.children(&target_group_path)?.into();
 
@@ -45,11 +58,8 @@ impl<'a> Command for NewCommand<'a> {
             self.current.target.as_ref().and_then(|t| t.last_sibling_id),
         )]
         .into_iter()
-        .chain(
-            results
-                .into_iter()
-                .filter_map(|res| Action::show_error(res)),
-        )
+        .chain(self.opts.open.leaf_node_action(open_paths))
+        .chain(errors)
         .collect();
 
         Ok(actions)
