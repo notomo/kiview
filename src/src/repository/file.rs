@@ -13,7 +13,7 @@ impl PathRepository for FilePathRepository {
             .filter_map(|result| result.ok())
             .map(|entry| entry.path())
             .collect();
-        paths.sort_by(|a, b| b.is_dir().cmp(&a.is_dir()));
+        paths.sort_by(|a, b| b.is_dir().cmp(&a.is_dir()).then(a.cmp(b)));
         let paths = paths;
 
         let dirs_and_files = paths

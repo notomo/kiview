@@ -22,6 +22,11 @@ function! s:suite.create_one()
     normal! gg
     call s:assert.syntax_name('KiviewNodeClosed')
 
+    normal! j
+    call s:assert.current_line('.git/')
+    normal! j
+    call s:assert.current_line('autoload/')
+
     call s:helper.search('autoload\/')
     call s:assert.syntax_name('KiviewNodeClosed')
     call s:assert.ends_with(kiview#get().path, 'autoload')
