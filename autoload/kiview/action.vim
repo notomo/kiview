@@ -199,6 +199,7 @@ function! s:choose(action, buffer, input_reader) abort
         if answer ==? 'n'
             continue
         elseif answer ==? 'r'
+            let item.force = v:false
             call add(rename_targets, item)
             continue
         elseif answer ==? 'f'
@@ -235,15 +236,15 @@ function! s:choose(action, buffer, input_reader) abort
 endfunction
 
 function! s:copy(action, buffer) abort
-    call a:buffer.register.copy(a:action.targets)
+    call a:buffer.register.copy(a:action.items)
     call a:buffer.current.clear_selection()
-    call kiview#messenger#new().info('Copied: ', a:action.targets)
+    call kiview#messenger#new().info('Copied: ', a:action.items)
 endfunction
 
 function! s:cut(action, buffer) abort
-    call a:buffer.register.cut(a:action.targets)
+    call a:buffer.register.cut(a:action.items)
     call a:buffer.current.clear_selection()
-    call kiview#messenger#new().info('Cut: ', a:action.targets)
+    call kiview#messenger#new().info('Cut: ', a:action.items)
 endfunction
 
 function! s:clear_register(buffer) abort

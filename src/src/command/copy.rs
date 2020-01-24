@@ -1,4 +1,4 @@
-use super::action::RegisteredTarget;
+use super::action::RegisteredItem;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
@@ -10,14 +10,32 @@ pub struct CopyCommand<'a> {
 
 impl<'a> Command for CopyCommand<'a> {
     fn actions(&self) -> Result<Vec<Action>, Error> {
-        let targets = self
+        let items = self
             .current
             .targets()
-            .map(|target| RegisteredTarget {
+            .map(|target| RegisteredItem {
                 path: target.to_string(),
             })
             .collect();
 
-        Ok(vec![Action::Copy { targets: targets }])
+        Ok(vec![Action::Copy { items: items }])
+    }
+}
+
+pub struct CutCommand<'a> {
+    pub current: Current<'a>,
+}
+
+impl<'a> Command for CutCommand<'a> {
+    fn actions(&self) -> Result<Vec<Action>, Error> {
+        let items = self
+            .current
+            .targets()
+            .map(|target| RegisteredItem {
+                path: target.to_string(),
+            })
+            .collect();
+
+        Ok(vec![Action::Cut { items: items }])
     }
 }

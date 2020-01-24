@@ -38,9 +38,9 @@ pub enum Action {
     ConfirmNew,
 
     #[serde(rename = "copy")]
-    Copy { targets: Vec<RegisteredTarget> },
+    Copy { items: Vec<RegisteredItem> },
     #[serde(rename = "cut")]
-    Cut { targets: Vec<RegisteredTarget> },
+    Cut { items: Vec<RegisteredItem> },
     #[serde(rename = "clear_register")]
     ClearRegister,
     #[serde(rename = "choose")]
@@ -143,7 +143,7 @@ pub struct Prop {
 }
 
 #[derive(Debug, Serialize, Clone)]
-pub struct RegisteredTarget {
+pub struct RegisteredItem {
     pub path: String,
 }
 
@@ -154,6 +154,11 @@ pub struct ChooseItem {
     pub relative_path: String,
 }
 
+#[derive(Debug)]
+pub struct Paths {
+    paths: Vec<FullPath>,
+}
+
 impl From<Box<dyn Iterator<Item = FullPath>>> for Paths {
     fn from(paths: Box<dyn Iterator<Item = FullPath>>) -> Paths {
         Paths {
@@ -162,63 +167,27 @@ impl From<Box<dyn Iterator<Item = FullPath>>> for Paths {
     }
 }
 
-#[derive(Debug)]
-pub struct Paths {
-    paths: Vec<FullPath>,
-}
-
-impl IntoIterator for Paths {
-    type Item = FullPath;
-    type IntoIter = ::std::vec::IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.paths.into_iter()
-    }
-}
-
 impl Paths {
+    const INDENT_DEPTH: u64 = 2;
+
     pub fn to_open_tree_action(&self, id: u64, current_depth: u64) -> Action {
-        let indent = std::iter::repeat(" ")
-            .take(current_depth as usize)
-            .collect::<String>();
-        let lines: Vec<_> = self
-            .paths
-            .iter()
-            .map(|p| format!("{}  {}", indent, p.name))
-            .collect();
-
-        let depth = current_depth + 2;
-
+        let depth = current_depth + Self::INDENT_DEPTH;
+        let parent_id = Some(id);
+        let lines = self.lines(depth);
         Action::OpenTree {
             id: id,
             count: (&lines).len(),
             lines: lines,
-            props: self
-                .paths
-                .iter()
-                .map(|p| Prop {
-                    path: p.path.clone(),
-                    depth: depth,
-                    is_parent_node: p.is_parent_node,
-                    parent_id: Some(id),
-                })
-                .collect::<Vec<Prop>>(),
+            props: self.props(depth, parent_id),
         }
     }
 
     pub fn to_write_all_action(&self) -> Action {
+        let depth = 0;
+        let parent_id = None;
         Action::WriteAll {
-            lines: self.paths.iter().map(|p| p.name.clone()).collect(),
-            props: self
-                .paths
-                .iter()
-                .map(|p| Prop {
-                    path: p.path.clone(),
-                    depth: 0,
-                    is_parent_node: p.is_parent_node,
-                    parent_id: None,
-                })
-                .collect::<Vec<Prop>>(),
+            lines: self.lines(depth),
+            props: self.props(depth, parent_id),
         }
     }
 
@@ -228,47 +197,23 @@ impl Paths {
         parent_id: Option<u64>,
         last_sibling_id: Option<u64>,
     ) -> Action {
-        let indent = std::iter::repeat(" ")
-            .take(depth as usize)
-            .collect::<String>();
-        let lines: Vec<_> = self
-            .paths
-            .iter()
-            .map(|p| format!("{}{}", indent, p.name))
-            .collect();
-
+        let lines = self.lines(depth);
         Action::Write {
             count: (&lines).len(),
             parent_id: parent_id,
             last_sibling_id: last_sibling_id,
             lines: lines,
-            props: self
-                .paths
-                .iter()
-                .map(|p| Prop {
-                    path: p.path.clone(),
-                    depth: depth,
-                    is_parent_node: p.is_parent_node,
-                    parent_id: parent_id,
-                })
-                .collect::<Vec<Prop>>(),
+            props: self.props(depth, parent_id),
         }
     }
 
     pub fn to_fork_buffer_item(&self, path: &str) -> ForkBufferItem {
+        let depth = 0;
+        let parent_id = None;
         ForkBufferItem {
             path: path.to_string(),
-            lines: self.paths.iter().map(|p| p.name.clone()).collect(),
-            props: self
-                .paths
-                .iter()
-                .map(|p| Prop {
-                    path: p.path.clone(),
-                    depth: 0,
-                    is_parent_node: p.is_parent_node,
-                    parent_id: None,
-                })
-                .collect::<Vec<Prop>>(),
+            lines: self.lines(depth),
+            props: self.props(depth, parent_id),
         }
     }
 
@@ -282,5 +227,27 @@ impl Paths {
             .collect::<Vec<_>>()
             .get(0)
             .and_then(|n| Some(*n))
+    }
+
+    fn lines(&self, depth: u64) -> Vec<String> {
+        let indent = std::iter::repeat(" ")
+            .take(depth as usize)
+            .collect::<String>();
+        self.paths
+            .iter()
+            .map(|p| format!("{}{}", indent, p.name))
+            .collect()
+    }
+
+    fn props(&self, depth: u64, parent_id: Option<u64>) -> Vec<Prop> {
+        self.paths
+            .iter()
+            .map(|p| Prop {
+                path: p.path.clone(),
+                depth: depth,
+                is_parent_node: p.is_parent_node,
+                parent_id: parent_id,
+            })
+            .collect()
     }
 }

@@ -21,9 +21,7 @@ pub use remove::RemoveCommand;
 
 mod copy;
 pub use copy::CopyCommand;
-
-mod cut;
-pub use cut::CutCommand;
+pub use copy::CutCommand;
 
 mod select;
 pub use select::ToggleSelectionCommand;
