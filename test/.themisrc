@@ -231,6 +231,8 @@ function! s:before_each() abort
 endfunction
 
 function! s:after_each() abort
+    tabedit
+    tabonly!
     silent! %bwipeout!
     execute 'cd' s:root
     call kiview#logger#clear()

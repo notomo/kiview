@@ -110,7 +110,6 @@ fn main() {
                 CommandName::Paste => box command::PasteCommand {
                     current: current,
                     repository: path_repository,
-                    opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::Rename => box command::RenameCommand {
                     current: current,
@@ -120,12 +119,10 @@ fn main() {
                 CommandName::MultipleRename => box command::MultipleRenameCommand {
                     current: current,
                     repository: path_repository,
-                    opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::ToggleTree => box command::ToggleTreeCommand {
                     current: current,
                     repository: path_repository,
-                    opts: &command_opts,
                 } as Box<dyn Command>,
                 CommandName::ToggleSelection => {
                     box command::ToggleSelectionCommand { current: current } as Box<dyn Command>

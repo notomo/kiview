@@ -1,8 +1,8 @@
+use super::action::Paths;
+use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
-use crate::command::Error;
-use crate::command::Paths;
 use crate::repository::PathRepository;
 
 pub struct ParentCommand<'a> {
@@ -11,7 +11,7 @@ pub struct ParentCommand<'a> {
 }
 
 impl<'a> Command for ParentCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         let parent_path = match self.repository.path(self.current.path).parent() {
             Some(parent_path) => parent_path,
             None => return Ok(vec![]),

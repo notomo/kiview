@@ -892,6 +892,8 @@ function! s:suite.__rename__() abort
     endfunction
 
     function! suite.rename_on_parent_back_node()
+        call s:assert.window_count(1)
+
         call s:helper.sync_execute('')
         normal! gg
 

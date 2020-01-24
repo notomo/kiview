@@ -1,12 +1,11 @@
+use super::action::Paths;
+use super::command::CommandResult;
+use super::command::{Layout, SplitModName, SplitName};
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
-use crate::command::Error;
-use crate::command::Paths;
 use crate::repository::PathRepository;
-
-use super::command::{Layout, SplitModName, SplitName};
 
 use itertools::Itertools;
 
@@ -17,7 +16,7 @@ pub struct ChildCommand<'a> {
 }
 
 impl<'a> Command for ChildCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         let actions: Vec<_> = self
             .current
             .targets()

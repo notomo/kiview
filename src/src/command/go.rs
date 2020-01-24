@@ -1,9 +1,9 @@
+use super::action::Paths;
+use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
-use crate::command::Error;
-use crate::command::Paths;
 use crate::repository::PathRepository;
 
 pub struct GoCommand<'a> {
@@ -13,7 +13,7 @@ pub struct GoCommand<'a> {
 }
 
 impl<'a> Command for GoCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         let target_group_path = self
             .repository
             .path(match &self.opts.path {

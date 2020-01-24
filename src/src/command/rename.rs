@@ -1,9 +1,10 @@
+use super::action::Paths;
 use super::action::RenameItem;
+use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
-use crate::command::Paths;
 use crate::command::{Error, ErrorKind};
 use crate::repository::PathRepository;
 
@@ -14,7 +15,7 @@ pub struct RenameCommand<'a> {
 }
 
 impl<'a> Command for RenameCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         let (target, path) = match (self.opts.no_confirm, &self.current.target, &self.opts.path) {
             (false, Some(target), _) => {
                 return Ok(vec![Action::ConfirmRename {
@@ -54,11 +55,10 @@ impl<'a> Command for RenameCommand<'a> {
 pub struct MultipleRenameCommand<'a> {
     pub current: Current<'a>,
     pub repository: Box<dyn PathRepository>,
-    pub opts: &'a CommandOptions,
 }
 
 impl<'a> Command for MultipleRenameCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         if self.current.rename_targets.len() == 0 && !self.current.renamer_opened {
             let items: Result<Vec<RenameItem>, Error> = self
                 .current

@@ -1,9 +1,9 @@
+use super::action::Paths;
+use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
-use crate::command::Error;
-use crate::command::Paths;
 use crate::repository::PathRepository;
 use itertools::Itertools;
 
@@ -14,7 +14,7 @@ pub struct RemoveCommand<'a> {
 }
 
 impl<'a> Command for RemoveCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         let targets = self
             .current
             .dedup_targets(&self.repository, |target| !target.is_parent_node);

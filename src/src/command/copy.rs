@@ -1,15 +1,15 @@
 use super::action::RegisteredItem;
+use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
-use crate::command::Error;
 
 pub struct CopyCommand<'a> {
     pub current: Current<'a>,
 }
 
 impl<'a> Command for CopyCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         let items = self
             .current
             .targets()
@@ -28,7 +28,7 @@ pub struct CutCommand<'a> {
 }
 
 impl<'a> Command for CutCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         let items = self
             .current
             .targets()

@@ -1,9 +1,9 @@
+use super::action::Paths;
+use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::CommandOptions;
 use crate::command::Current;
-use crate::command::Error;
-use crate::command::Paths;
 use crate::repository::PathRepository;
 
 pub struct NewCommand<'a> {
@@ -13,7 +13,7 @@ pub struct NewCommand<'a> {
 }
 
 impl<'a> Command for NewCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         if self.opts.paths.len() == 0 {
             return Ok(vec![Action::ConfirmNew]);
         };

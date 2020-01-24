@@ -1,21 +1,20 @@
 use super::action::ChooseItem;
+use super::action::Paths;
+use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
-use crate::command::CommandOptions;
 use crate::command::Current;
-use crate::command::Paths;
-use crate::command::{Error, ErrorKind};
+use crate::command::ErrorKind;
 use crate::itertools::Itertools;
 use crate::repository::PathRepository;
 
 pub struct PasteCommand<'a> {
     pub current: Current<'a>,
     pub repository: Box<dyn PathRepository>,
-    pub opts: &'a CommandOptions,
 }
 
 impl<'a> Command for PasteCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         let target_group_path = match &self.current.target {
             Some(target) if !target.is_parent_node => self
                 .repository

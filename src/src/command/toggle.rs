@@ -1,19 +1,17 @@
+use super::action::Paths;
+use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
-use crate::command::CommandOptions;
 use crate::command::Current;
-use crate::command::Error;
-use crate::command::Paths;
 use crate::repository::PathRepository;
 
 pub struct ToggleTreeCommand<'a> {
     pub current: Current<'a>,
     pub repository: Box<dyn PathRepository>,
-    pub opts: &'a CommandOptions,
 }
 
 impl<'a> Command for ToggleTreeCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         let actions: Vec<_> = self
             .current
             .dedup_targets(&self.repository, |target| {

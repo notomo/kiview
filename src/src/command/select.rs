@@ -1,14 +1,14 @@
+use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
-use crate::command::Error;
 
 pub struct ToggleSelectionCommand<'a> {
     pub current: Current<'a>,
 }
 
 impl<'a> Command for ToggleSelectionCommand<'a> {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         let ids = self
             .current
             .targets

@@ -2,8 +2,10 @@ use crate::command::Action;
 use crate::command::Error;
 use serde_derive::Serialize;
 
+pub type CommandResult = Result<Vec<Action>, Error>;
+
 pub trait Command {
-    fn actions(&self) -> Result<Vec<Action>, Error>;
+    fn actions(&self) -> CommandResult;
 }
 
 pub struct SimpleCommand {
@@ -11,7 +13,7 @@ pub struct SimpleCommand {
 }
 
 impl Command for SimpleCommand {
-    fn actions(&self) -> Result<Vec<Action>, Error> {
+    fn actions(&self) -> CommandResult {
         Ok(vec![self.action.clone()])
     }
 }
