@@ -273,6 +273,7 @@ function! s:fork_buffer(action, buffer) abort
         call new_buffer.open(a:action.split_name, a:action.mod_name)
         call new_buffer.current.set(item.path)
     endfor
+    call a:buffer.current.clear_selection()
 endfunction
 
 function! s:open_renamer(action, buffer) abort
