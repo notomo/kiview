@@ -48,17 +48,19 @@ impl<'a> Command for PasteCommand<'a> {
                 };
                 let to = self.repository.path(&target_group_path).join(&new_name)?;
 
-                match (self.opts.no_confirm, self.repository.path(&to).exists()) {
+                match (target.force, self.repository.path(&to).exists()) {
                     (false, true) => items.push(ChooseItem {
                         relative_path: self.repository.path(&to).to_relative(self.current.path)?,
                         path: to.clone(),
                         from: from,
                     }),
                     _ => {
-                        if let Err(err) =
-                            self.repository
-                                .rename_or_copy(&from, &to, !self.current.has_cut)
-                        {
+                        if let Err(err) = self.repository.rename_or_copy(
+                            &from,
+                            &to,
+                            !self.current.has_cut,
+                            target.force,
+                        ) {
                             errors.push(Action::ShowError {
                                 path: to.clone(),
                                 message: err.inner.to_string(),

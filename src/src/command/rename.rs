@@ -39,7 +39,7 @@ impl<'a> Command for RenameCommand<'a> {
             true => self.current.path.to_string(),
         };
         self.repository
-            .rename_with(&from, &target_group_path, path)?;
+            .rename_with(&from, &target_group_path, path, false)?;
 
         let paths: Paths = self.repository.children(&target_group_path)?.into();
 
@@ -93,6 +93,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
                     self.current.path,
                     &target.to,
                     target.is_copy,
+                    false,
                 ) {
                     Ok(to) => items.push(RenameItem {
                         id: target.id,

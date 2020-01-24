@@ -202,6 +202,12 @@ function! s:assert() abort
         call self.empty(contents, message)
     endfunction
 
+    function! assert.file_not_exists(file_path) abort
+        let readable =  filereadable(a:file_path)
+        let message = printf('%s should not exist, but exists', a:file_path)
+        call self.false(readable, message)
+    endfunction
+
     function! assert.ends_with(haystack, expected) abort
         let ends_with = a:haystack =~# a:expected . '$'
         let message = printf('%s should be ends with %s', a:haystack, a:expected)

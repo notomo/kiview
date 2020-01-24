@@ -13,22 +13,34 @@ pub trait PathRepository {
     fn list(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error>;
     fn children(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error>;
     fn create(&self, path: &str) -> Result<(), Error>;
-    fn rename(&self, from: &str, to: &str) -> Result<(), Error>;
+    fn rename(&self, from: &str, to: &str, force: bool) -> Result<(), Error>;
     fn copy(&self, from: &str, to: &str) -> Result<(), Error>;
     fn remove(&self, paths: Vec<String>) -> Result<(), Error>;
     fn path<'a>(&self, path: &'a str) -> Box<dyn Path + 'a>;
 
-    fn rename_with(&self, from: &str, base_path: &str, joined: &str) -> Result<String, Error> {
+    fn rename_with(
+        &self,
+        from: &str,
+        base_path: &str,
+        joined: &str,
+        force: bool,
+    ) -> Result<String, Error> {
         let new_path = self.path(base_path).join(joined)?;
-        self.rename(from, &new_path)?;
+        self.rename(from, &new_path, force)?;
         Ok(new_path)
     }
 
-    fn rename_or_copy(&self, from: &str, to: &str, is_copy: bool) -> Result<(), Error> {
+    fn rename_or_copy(
+        &self,
+        from: &str,
+        to: &str,
+        is_copy: bool,
+        force: bool,
+    ) -> Result<(), Error> {
         if is_copy {
             return self.copy(from, to);
         }
-        self.rename(from, to)
+        self.rename(from, to, force)
     }
 
     fn rename_or_copy_with(
@@ -37,9 +49,10 @@ pub trait PathRepository {
         to: &str,
         joined: &str,
         is_copy: bool,
+        force: bool,
     ) -> Result<String, Error> {
         let new_path = self.path(to).join(joined)?;
-        self.rename_or_copy(from, &new_path, is_copy)?;
+        self.rename_or_copy(from, &new_path, is_copy, force)?;
         Ok(new_path)
     }
 

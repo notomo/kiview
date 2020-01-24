@@ -70,8 +70,8 @@ impl PathRepository for FilePathRepository {
         }?)
     }
 
-    fn rename(&self, from: &str, to: &str) -> Result<(), Error> {
-        if StdPath::new(to).exists() {
+    fn rename(&self, from: &str, to: &str, force: bool) -> Result<(), Error> {
+        if !force && StdPath::new(to).exists() {
             return Err(ErrorKind::AlreadyExists {
                 path: to.to_string(),
             }

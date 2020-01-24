@@ -201,8 +201,10 @@ function! s:choose(action, buffer, input_reader) abort
         elseif answer ==? 'r'
             call add(rename_targets, item)
             continue
+        elseif answer ==? 'f'
+            let item.force = v:true
+            call add(targets, item)
         endif
-        call add(targets, item)
     endfor
 
     if empty(targets) && empty(rename_targets)

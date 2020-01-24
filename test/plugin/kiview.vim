@@ -672,6 +672,22 @@ function! s:suite.__copy_cut_paste__() abort
         call s:assert.file_not_empty('already')
     endfunction
 
+    function! suite.force_cut_paste_on_already_exists()
+        call s:helper.sync_execute('go -path=test/plugin/_test_data/has_already')
+
+        call s:helper.search('already')
+        call s:helper.sync_execute('cut')
+        call s:helper.sync_execute('parent')
+
+        call s:helper.set_input('f')
+        call s:helper.sync_execute('paste')
+
+        let lines = s:helper.lines()
+        call s:assert.contains(lines, 'already')
+        call s:assert.file_not_empty('already')
+        call s:assert.file_not_exists('./has_already/already')
+    endfunction
+
     function! suite.share_clipboard()
         let cwd = getcwd()
 
