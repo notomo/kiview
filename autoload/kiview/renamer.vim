@@ -15,6 +15,10 @@ function! kiview#renamer#new(source_id, bufnr) abort
     \ }
 
     function! renamer.open(path, items) abort
+        if empty(a:items)
+            return
+        endif
+
         let self.bufnr = nvim_create_buf(v:false, v:true)
         let self.items = a:items
 

@@ -891,6 +891,16 @@ function! s:suite.__rename__() abort
         call command.wait(1000)
     endfunction
 
+    function! suite.rename_on_parent_back_node()
+        call s:helper.sync_execute('')
+        normal! gg
+
+        call s:helper.sync_execute('multiple_rename')
+
+        call s:assert.window_count(2)
+        call s:assert.filetype('kiview')
+    endfunction
+
 endfunction
 
 function! s:suite.go_error()

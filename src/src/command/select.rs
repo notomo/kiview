@@ -13,6 +13,7 @@ impl<'a> Command for ToggleSelectionCommand<'a> {
             .current
             .targets
             .iter()
+            .filter(|target| !target.is_parent_node)
             .map(|target| target.id)
             .collect();
 

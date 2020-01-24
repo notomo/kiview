@@ -13,6 +13,7 @@ impl<'a> Command for CopyCommand<'a> {
         let items = self
             .current
             .targets()
+            .filter(|target| !target.is_parent_node)
             .map(|target| RegisteredItem {
                 path: target.to_string(),
             })
@@ -31,6 +32,7 @@ impl<'a> Command for CutCommand<'a> {
         let items = self
             .current
             .targets()
+            .filter(|target| !target.is_parent_node)
             .map(|target| RegisteredItem {
                 path: target.to_string(),
             })
