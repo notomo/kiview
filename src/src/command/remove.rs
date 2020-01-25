@@ -1,16 +1,33 @@
 use super::action::Paths;
+use super::command::CommandOption;
 use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
-use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::repository::PathRepository;
 use itertools::Itertools;
 
+pub struct RemoveCommandOptions {
+    no_confirm: bool,
+}
+
+impl From<Vec<CommandOption>> for RemoveCommandOptions {
+    fn from(opts: Vec<CommandOption>) -> Self {
+        let mut no_confirm = false;
+        opts.into_iter().for_each(|opt| match opt {
+            CommandOption::NoConfirm => no_confirm = true,
+            _ => (),
+        });
+        RemoveCommandOptions {
+            no_confirm: no_confirm,
+        }
+    }
+}
+
 pub struct RemoveCommand<'a> {
     pub current: &'a Current<'a>,
     pub repository: Box<dyn PathRepository>,
-    pub opts: &'a CommandOptions,
+    pub opts: RemoveCommandOptions,
 }
 
 impl<'a> Command for RemoveCommand<'a> {

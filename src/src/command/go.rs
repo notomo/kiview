@@ -1,15 +1,47 @@
 use super::action::Paths;
 use super::command::CommandResult;
+use super::command::{CommandOption, Split, SplitModName, SplitName};
 use crate::command::Action;
 use crate::command::Command;
-use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::repository::PathRepository;
+
+pub struct GoCommandOptions {
+    back: bool,
+    create: bool,
+    path: Option<String>,
+    split: Split,
+}
+
+impl From<Vec<CommandOption>> for GoCommandOptions {
+    fn from(opts: Vec<CommandOption>) -> Self {
+        let mut split = Split {
+            name: SplitName::Vertical,
+            mod_name: SplitModName::LeftAbove,
+        };
+        let mut back = false;
+        let mut create = false;
+        let mut path = None;
+        opts.into_iter().for_each(|opt| match opt {
+            CommandOption::Back => back = true,
+            CommandOption::Create => create = true,
+            CommandOption::Path { value } => path = Some(value),
+            CommandOption::Split { value } => split = value,
+            _ => (),
+        });
+        GoCommandOptions {
+            split: split,
+            back: back,
+            create: create,
+            path: path,
+        }
+    }
+}
 
 pub struct GoCommand<'a> {
     pub current: &'a Current<'a>,
     pub repository: Box<dyn PathRepository>,
-    pub opts: &'a CommandOptions,
+    pub opts: GoCommandOptions,
 }
 
 impl<'a> Command for GoCommand<'a> {

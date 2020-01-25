@@ -1,18 +1,38 @@
 use super::action::Paths;
 use super::command::CommandResult;
-use super::command::{Layout, SplitModName, SplitName};
+use super::command::{CommandOption, Layout, SplitModName, SplitName};
 use crate::command::Action;
 use crate::command::Command;
-use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::repository::PathRepository;
 
 use itertools::Itertools;
 
+pub struct ChildCommandOptions {
+    layout: Layout,
+    quit: bool,
+}
+
+impl From<Vec<CommandOption>> for ChildCommandOptions {
+    fn from(opts: Vec<CommandOption>) -> Self {
+        let mut layout = Layout::Open;
+        let mut quit = false;
+        opts.into_iter().for_each(|opt| match opt {
+            CommandOption::Layout { value } => layout = value,
+            CommandOption::Quit => quit = true,
+            _ => (),
+        });
+        ChildCommandOptions {
+            layout: layout,
+            quit: quit,
+        }
+    }
+}
+
 pub struct ChildCommand<'a> {
     pub current: &'a Current<'a>,
     pub repository: Box<dyn PathRepository>,
-    pub opts: &'a CommandOptions,
+    pub opts: ChildCommandOptions,
 }
 
 impl<'a> Command for ChildCommand<'a> {

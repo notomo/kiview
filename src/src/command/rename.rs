@@ -1,17 +1,38 @@
 use super::action::Paths;
 use super::action::RenameItem;
+use super::command::CommandOption;
 use super::command::CommandResult;
 use crate::command::Action;
 use crate::command::Command;
-use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::command::{Error, ErrorKind};
 use crate::repository::PathRepository;
 
+pub struct RenameCommandOptions {
+    no_confirm: bool,
+    path: Option<String>,
+}
+
+impl From<Vec<CommandOption>> for RenameCommandOptions {
+    fn from(opts: Vec<CommandOption>) -> Self {
+        let mut no_confirm = false;
+        let mut path = None;
+        opts.into_iter().for_each(|opt| match opt {
+            CommandOption::NoConfirm => no_confirm = true,
+            CommandOption::Path { value } => path = Some(value),
+            _ => (),
+        });
+        RenameCommandOptions {
+            no_confirm: no_confirm,
+            path: path,
+        }
+    }
+}
+
 pub struct RenameCommand<'a> {
     pub current: &'a Current<'a>,
     pub repository: Box<dyn PathRepository>,
-    pub opts: &'a CommandOptions,
+    pub opts: RenameCommandOptions,
 }
 
 impl<'a> Command for RenameCommand<'a> {

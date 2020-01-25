@@ -205,10 +205,6 @@ impl From<&str> for Split {
                 name: SplitName::from(*name),
                 mod_name: SplitModName::from(*mod_name),
             },
-            [""] => Split {
-                name: SplitName::Vertical,
-                mod_name: SplitModName::LeftAbove,
-            },
             [name] => Split {
                 name: SplitName::from(*name),
                 mod_name: SplitModName::No,
@@ -263,122 +259,21 @@ impl From<&str> for CommandOption {
     }
 }
 
-#[derive(Debug)]
-pub struct CommandOptions {
-    pub layout: Layout,
-    pub quit: bool,
-    pub path: Option<String>,
-    pub paths: Vec<String>,
-    pub no_confirm: bool,
-    pub create: bool,
-    pub back: bool,
-    pub split: Split,
-    pub open: Split,
-}
-
-impl CommandOptions {
-    pub fn new(arg: &str) -> Self {
-        let options: Vec<CommandOption> = arg
-            .split_whitespace()
-            .filter(|arg| arg.starts_with("-"))
-            .map(|arg| {
-                arg.chars()
-                    .into_iter()
-                    .skip(1)
-                    .collect::<String>()
-                    .as_str()
-                    .into()
-            })
-            .collect();
-
-        let layout: Layout = options
-            .iter()
-            .filter_map(|opt| match &opt {
-                CommandOption::Layout { value } => Some(value.clone()),
-                _ => None,
-            })
-            .collect::<Vec<Layout>>()
-            .get(0)
-            .cloned()
-            .unwrap_or(Layout::Open);
-
-        let path: Option<String> = options
-            .iter()
-            .filter_map(|opt| match &opt {
-                CommandOption::Path { value } => Some(value.clone()),
-                _ => None,
-            })
-            .collect::<Vec<String>>()
-            .get(0)
-            .cloned();
-
-        let paths: Vec<String> = options
-            .iter()
-            .filter_map(|opt| match &opt {
-                CommandOption::Paths { value } => Some(value.clone()),
-                _ => None,
-            })
-            .collect();
-
-        let quit = options.iter().any(|opt| match &opt {
-            CommandOption::Quit => true,
-            _ => false,
-        });
-
-        let no_confirm = options.iter().any(|opt| match &opt {
-            CommandOption::NoConfirm => true,
-            _ => false,
-        });
-
-        let create = options.iter().any(|opt| match &opt {
-            CommandOption::Create => true,
-            _ => false,
-        });
-
-        let back = options.iter().any(|opt| match &opt {
-            CommandOption::Back => true,
-            _ => false,
-        });
-
-        let split: Split = options
-            .iter()
-            .filter_map(|opt| match &opt {
-                CommandOption::Split { value } => Some(value.clone()),
-                _ => None,
-            })
-            .collect::<Vec<Split>>()
-            .get(0)
-            .cloned()
-            .unwrap_or(Split::from(""));
-
-        let open: Split = options
-            .iter()
-            .filter_map(|opt| match &opt {
-                CommandOption::Open { value } => Some(value.clone()),
-                _ => None,
-            })
-            .collect::<Vec<Split>>()
-            .get(0)
-            .cloned()
-            .unwrap_or(Split::from("no"));
-
-        CommandOptions {
-            layout: layout,
-            quit: quit,
-            path: path,
-            paths: paths,
-            no_confirm: no_confirm,
-            create: create,
-            back: back,
-            split: split,
-            open: open,
-        }
-    }
-}
-
 pub fn parse_command_actions(arg: &str, current: &Current) -> CommandResult {
     let command_name = CommandName::from(arg);
-    let command_opts = CommandOptions::new(arg);
+
+    let opts: Vec<CommandOption> = arg
+        .split_whitespace()
+        .filter(|arg| arg.starts_with("-"))
+        .map(|arg| {
+            arg.chars()
+                .into_iter()
+                .skip(1)
+                .collect::<String>()
+                .as_str()
+                .into()
+        })
+        .collect();
 
     let dispatcher = Dispatcher {};
     let path_repository = dispatcher.path_repository();
@@ -394,22 +289,22 @@ pub fn parse_command_actions(arg: &str, current: &Current) -> CommandResult {
         CommandName::Child => box command::ChildCommand {
             current: current,
             repository: path_repository,
-            opts: &command_opts,
+            opts: opts.into(),
         } as Box<dyn Command>,
         CommandName::Go => box command::GoCommand {
             current: current,
             repository: path_repository,
-            opts: &command_opts,
+            opts: opts.into(),
         } as Box<dyn Command>,
         CommandName::New => box command::NewCommand {
             current: current,
             repository: path_repository,
-            opts: &command_opts,
+            opts: opts.into(),
         } as Box<dyn Command>,
         CommandName::Remove => box command::RemoveCommand {
             current: current,
             repository: path_repository,
-            opts: &command_opts,
+            opts: opts.into(),
         } as Box<dyn Command>,
         CommandName::Copy => box command::CopyCommand { current: current } as Box<dyn Command>,
         CommandName::Cut => box command::CutCommand { current: current } as Box<dyn Command>,
@@ -420,7 +315,7 @@ pub fn parse_command_actions(arg: &str, current: &Current) -> CommandResult {
         CommandName::Rename => box command::RenameCommand {
             current: current,
             repository: path_repository,
-            opts: &command_opts,
+            opts: opts.into(),
         } as Box<dyn Command>,
         CommandName::MultipleRename => box command::MultipleRenameCommand {
             current: current,

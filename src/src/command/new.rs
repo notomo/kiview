@@ -1,15 +1,39 @@
 use super::action::Paths;
 use super::command::CommandResult;
+use super::command::{CommandOption, Split, SplitModName, SplitName};
 use crate::command::Action;
 use crate::command::Command;
-use crate::command::CommandOptions;
 use crate::command::Current;
 use crate::repository::PathRepository;
+
+pub struct NewCommandOptions {
+    paths: Vec<String>,
+    open: Split,
+}
+
+impl From<Vec<CommandOption>> for NewCommandOptions {
+    fn from(opts: Vec<CommandOption>) -> Self {
+        let mut open = Split {
+            name: SplitName::No,
+            mod_name: SplitModName::No,
+        };
+        let mut paths = vec![];
+        opts.into_iter().for_each(|opt| match opt {
+            CommandOption::Open { value } => open = value,
+            CommandOption::Paths { value } => paths.push(value),
+            _ => (),
+        });
+        NewCommandOptions {
+            open: open,
+            paths: paths,
+        }
+    }
+}
 
 pub struct NewCommand<'a> {
     pub current: &'a Current<'a>,
     pub repository: Box<dyn PathRepository>,
-    pub opts: &'a CommandOptions,
+    pub opts: NewCommandOptions,
 }
 
 impl<'a> Command for NewCommand<'a> {
