@@ -21,39 +21,23 @@ impl Command for SimpleCommand {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 pub enum CommandName {
-    #[serde(rename = "quit")]
     Quit,
-    #[serde(rename = "parent")]
     Parent,
-    #[serde(rename = "child")]
     Child,
-    #[serde(rename = "go")]
     Go,
-    #[serde(rename = "new")]
     New,
-    #[serde(rename = "remove")]
     Remove,
-    #[serde(rename = "copy")]
     Copy,
-    #[serde(rename = "cut")]
     Cut,
-    #[serde(rename = "paste")]
     Paste,
-    #[serde(rename = "rename")]
     Rename,
-    #[serde(rename = "multiple_rename")]
     MultipleRename,
-    #[serde(rename = "toggle_tree")]
     ToggleTree,
-    #[serde(rename = "toggle_selection")]
     ToggleSelection,
-    #[serde(rename = "toggle_all_selection")]
     ToggleAllSelection,
-    #[serde(rename = "back")]
     Back,
-    #[serde(rename = "unknown")]
     Unknown,
 }
 
