@@ -1,5 +1,8 @@
+use crate::command;
 use crate::command::Action;
+use crate::command::Current;
 use crate::command::Error;
+use crate::repository::Dispatcher;
 use serde_derive::Serialize;
 
 pub type CommandResult = Result<Vec<Action>, Error>;
@@ -371,4 +374,75 @@ impl CommandOptions {
             open: open,
         }
     }
+}
+
+pub fn parse_command_actions(arg: &str, current: &Current) -> CommandResult {
+    let command_name = CommandName::from(arg);
+    let command_opts = CommandOptions::new(arg);
+
+    let dispatcher = Dispatcher {};
+    let path_repository = dispatcher.path_repository();
+
+    let command = match &command_name {
+        CommandName::Quit => box SimpleCommand {
+            action: Action::Quit,
+        } as Box<dyn Command>,
+        CommandName::Parent => box command::ParentCommand {
+            current: current,
+            repository: path_repository,
+        } as Box<dyn Command>,
+        CommandName::Child => box command::ChildCommand {
+            current: current,
+            repository: path_repository,
+            opts: &command_opts,
+        } as Box<dyn Command>,
+        CommandName::Go => box command::GoCommand {
+            current: current,
+            repository: path_repository,
+            opts: &command_opts,
+        } as Box<dyn Command>,
+        CommandName::New => box command::NewCommand {
+            current: current,
+            repository: path_repository,
+            opts: &command_opts,
+        } as Box<dyn Command>,
+        CommandName::Remove => box command::RemoveCommand {
+            current: current,
+            repository: path_repository,
+            opts: &command_opts,
+        } as Box<dyn Command>,
+        CommandName::Copy => box command::CopyCommand { current: current } as Box<dyn Command>,
+        CommandName::Cut => box command::CutCommand { current: current } as Box<dyn Command>,
+        CommandName::Paste => box command::PasteCommand {
+            current: current,
+            repository: path_repository,
+        } as Box<dyn Command>,
+        CommandName::Rename => box command::RenameCommand {
+            current: current,
+            repository: path_repository,
+            opts: &command_opts,
+        } as Box<dyn Command>,
+        CommandName::MultipleRename => box command::MultipleRenameCommand {
+            current: current,
+            repository: path_repository,
+        } as Box<dyn Command>,
+        CommandName::ToggleTree => box command::ToggleTreeCommand {
+            current: current,
+            repository: path_repository,
+        } as Box<dyn Command>,
+        CommandName::ToggleSelection => {
+            box command::ToggleSelectionCommand { current: current } as Box<dyn Command>
+        }
+        CommandName::ToggleAllSelection => box SimpleCommand {
+            action: Action::ToggleAllSelection,
+        } as Box<dyn Command>,
+        CommandName::Back => box SimpleCommand {
+            action: Action::BackHistory,
+        } as Box<dyn Command>,
+        CommandName::Unknown => {
+            box command::UnknownCommand { command_name: &arg } as Box<dyn Command>
+        }
+    };
+
+    command.actions()
 }

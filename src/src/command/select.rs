@@ -4,7 +4,7 @@ use crate::command::Command;
 use crate::command::Current;
 
 pub struct ToggleSelectionCommand<'a> {
-    pub current: Current<'a>,
+    pub current: &'a Current<'a>,
 }
 
 impl<'a> Command for ToggleSelectionCommand<'a> {

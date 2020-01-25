@@ -9,7 +9,7 @@ use crate::itertools::Itertools;
 use crate::repository::PathRepository;
 
 pub struct PasteCommand<'a> {
-    pub current: Current<'a>,
+    pub current: &'a Current<'a>,
     pub repository: Box<dyn PathRepository>,
 }
 

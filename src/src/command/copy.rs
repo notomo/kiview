@@ -5,7 +5,7 @@ use crate::command::Command;
 use crate::command::Current;
 
 pub struct CopyCommand<'a> {
-    pub current: Current<'a>,
+    pub current: &'a Current<'a>,
 }
 
 impl<'a> Command for CopyCommand<'a> {
@@ -24,7 +24,7 @@ impl<'a> Command for CopyCommand<'a> {
 }
 
 pub struct CutCommand<'a> {
-    pub current: Current<'a>,
+    pub current: &'a Current<'a>,
 }
 
 impl<'a> Command for CutCommand<'a> {

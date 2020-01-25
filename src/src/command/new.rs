@@ -7,7 +7,7 @@ use crate::command::Current;
 use crate::repository::PathRepository;
 
 pub struct NewCommand<'a> {
-    pub current: Current<'a>,
+    pub current: &'a Current<'a>,
     pub repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }

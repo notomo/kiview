@@ -20,7 +20,7 @@ use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
 
 mod command;
-use command::{Action, Command, CommandName, CommandOptions, Current};
+use command::{parse_command_actions, Current};
 
 mod repository;
 
@@ -63,83 +63,12 @@ fn main() {
     match matches.subcommand() {
         ("do", Some(cmd)) => {
             let arg = cmd.value_of("arg").unwrap();
-            let command_name = CommandName::from(arg);
-            let command_opts = CommandOptions::new(arg);
 
             let mut line = String::new();
             std::io::stdin().lock().read_line(&mut line).unwrap();
             let current: Current = serde_json::from_str(&line).unwrap();
 
-            let dispatcher = repository::Dispatcher {};
-            let path_repository = dispatcher.path_repository();
-
-            let actions = match &command_name {
-                CommandName::Quit => box command::SimpleCommand {
-                    action: Action::Quit,
-                } as Box<dyn Command>,
-                CommandName::Parent => box command::ParentCommand {
-                    current: current,
-                    repository: path_repository,
-                } as Box<dyn Command>,
-                CommandName::Child => box command::ChildCommand {
-                    current: current,
-                    repository: path_repository,
-                    opts: &command_opts,
-                } as Box<dyn Command>,
-                CommandName::Go => box command::GoCommand {
-                    current: current,
-                    repository: path_repository,
-                    opts: &command_opts,
-                } as Box<dyn Command>,
-                CommandName::New => box command::NewCommand {
-                    current: current,
-                    repository: path_repository,
-                    opts: &command_opts,
-                } as Box<dyn Command>,
-                CommandName::Remove => box command::RemoveCommand {
-                    current: current,
-                    repository: path_repository,
-                    opts: &command_opts,
-                } as Box<dyn Command>,
-                CommandName::Copy => {
-                    box command::CopyCommand { current: current } as Box<dyn Command>
-                }
-                CommandName::Cut => {
-                    box command::CutCommand { current: current } as Box<dyn Command>
-                }
-                CommandName::Paste => box command::PasteCommand {
-                    current: current,
-                    repository: path_repository,
-                } as Box<dyn Command>,
-                CommandName::Rename => box command::RenameCommand {
-                    current: current,
-                    repository: path_repository,
-                    opts: &command_opts,
-                } as Box<dyn Command>,
-                CommandName::MultipleRename => box command::MultipleRenameCommand {
-                    current: current,
-                    repository: path_repository,
-                } as Box<dyn Command>,
-                CommandName::ToggleTree => box command::ToggleTreeCommand {
-                    current: current,
-                    repository: path_repository,
-                } as Box<dyn Command>,
-                CommandName::ToggleSelection => {
-                    box command::ToggleSelectionCommand { current: current } as Box<dyn Command>
-                }
-                CommandName::ToggleAllSelection => box command::SimpleCommand {
-                    action: Action::ToggleAllSelection,
-                } as Box<dyn Command>,
-                CommandName::Back => box command::SimpleCommand {
-                    action: Action::BackHistory,
-                } as Box<dyn Command>,
-                CommandName::Unknown => {
-                    box command::UnknownCommand { command_name: &arg } as Box<dyn Command>
-                }
-            }
-            .actions();
-
-            match actions {
+            match parse_command_actions(arg, &current) {
                 Ok(actions) => {
                     let output = json!({
                         "actions": actions,

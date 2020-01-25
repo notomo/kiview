@@ -9,7 +9,7 @@ use crate::command::{Error, ErrorKind};
 use crate::repository::PathRepository;
 
 pub struct RenameCommand<'a> {
-    pub current: Current<'a>,
+    pub current: &'a Current<'a>,
     pub repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }
@@ -53,7 +53,7 @@ impl<'a> Command for RenameCommand<'a> {
 }
 
 pub struct MultipleRenameCommand<'a> {
-    pub current: Current<'a>,
+    pub current: &'a Current<'a>,
     pub repository: Box<dyn PathRepository>,
 }
 

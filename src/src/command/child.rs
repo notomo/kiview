@@ -10,7 +10,7 @@ use crate::repository::PathRepository;
 use itertools::Itertools;
 
 pub struct ChildCommand<'a> {
-    pub current: Current<'a>,
+    pub current: &'a Current<'a>,
     pub repository: Box<dyn PathRepository>,
     pub opts: &'a CommandOptions,
 }

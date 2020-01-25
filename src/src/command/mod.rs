@@ -1,8 +1,11 @@
 mod command;
-pub use command::{Command, CommandName, CommandOptions, SimpleCommand};
+pub use command::{parse_command_actions, Command, CommandOptions};
 
 mod current;
 pub use current::Current;
+
+mod action;
+pub use action::Action;
 
 mod parent;
 pub use parent::ParentCommand;
@@ -37,9 +40,6 @@ pub use toggle::ToggleTreeCommand;
 
 mod unknown;
 pub use unknown::UnknownCommand;
-
-mod action;
-pub use action::Action;
 
 mod error;
 pub use error::{Error, ErrorKind};
