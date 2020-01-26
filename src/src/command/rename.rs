@@ -68,7 +68,7 @@ impl<'a> Command for RenameCommand<'a> {
         Ok(vec![paths.to_write_action(
             target.depth,
             target.parent_id,
-            self.current.target.as_ref().and_then(|t| t.last_sibling_id),
+            target.last_sibling_id,
         )])
     }
 }
