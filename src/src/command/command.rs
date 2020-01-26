@@ -41,14 +41,39 @@ pub enum CommandName {
     Unknown,
 }
 
-impl From<&str> for CommandName {
-    fn from(arg: &str) -> Self {
+impl CommandName {
+    pub fn all() -> Vec<String> {
+        vec![
+            "quit",
+            "parent",
+            "child",
+            "go",
+            "new",
+            "remove",
+            "copy",
+            "cut",
+            "paste",
+            "rename",
+            "multiple_rename",
+            "toggle_tree",
+            "toggle_selection",
+            "toggle_all_selection",
+            "back",
+        ]
+        .into_iter()
+        .map(|s| s.to_string())
+        .collect()
+    }
+}
+
+impl CommandName {
+    fn parse(arg: &str) -> (Self, bool) {
         let command_names: Vec<_> = arg
             .split_whitespace()
             .filter(|arg| !arg.starts_with("-"))
             .collect();
 
-        match &command_names[..] {
+        let name = match &command_names[..] {
             ["quit"] => CommandName::Quit,
             ["parent"] => CommandName::Parent,
             ["child"] => CommandName::Child,
@@ -66,7 +91,15 @@ impl From<&str> for CommandName {
             ["back"] => CommandName::Back,
             [] => CommandName::Go,
             _ => CommandName::Unknown,
-        }
+        };
+        (name, command_names.len() == 0)
+    }
+}
+
+impl From<&str> for CommandName {
+    fn from(arg: &str) -> Self {
+        let (name, _) = CommandName::parse(arg);
+        name
     }
 }
 
@@ -278,4 +311,12 @@ pub fn parse_command_actions(arg: &str, current: &Current) -> CommandResult {
     };
 
     command.actions()
+}
+
+pub fn command_complete(arg: &str) -> Vec<String> {
+    let (_name, empty) = CommandName::parse(arg);
+    if empty {
+        return CommandName::all();
+    }
+    vec![]
 }

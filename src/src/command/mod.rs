@@ -1,5 +1,5 @@
 mod command;
-pub use command::{parse_command_actions, Command};
+pub use command::{command_complete, parse_command_actions, Command};
 
 mod current;
 pub use current::Current;

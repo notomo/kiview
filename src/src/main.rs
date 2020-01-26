@@ -20,7 +20,7 @@ use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
 
 mod command;
-use command::{parse_command_actions, Current};
+use command::{command_complete, parse_command_actions, Current};
 
 mod repository;
 
@@ -83,7 +83,8 @@ fn main() {
         }
         ("complete", Some(cmd)) => {
             let arg = cmd.value_of("arg").unwrap();
-            println!("{:?}", arg);
+            let output = command_complete(&arg).join("\n");
+            println!("{}", output);
         }
         _ => (),
     }
