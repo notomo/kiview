@@ -145,6 +145,9 @@ function! s:confirm_new(input_reader, arg) abort
 endfunction
 
 function! s:confirm_remove(action, input_reader) abort
+    if empty(a:action.paths)
+        return
+    endif
     let answer = a:input_reader.read('remove? Y/n: ', a:action.paths)
     if empty(answer) || answer !=? 'Y'
         return

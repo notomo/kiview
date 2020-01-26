@@ -38,7 +38,7 @@ pub struct RenameCommand<'a> {
 impl<'a> Command for RenameCommand<'a> {
     fn actions(&self) -> CommandResult {
         let (target, path) = match (self.opts.no_confirm, &self.current.target, &self.opts.path) {
-            (false, Some(target), _) => {
+            (false, Some(target), _) if !target.is_parent_node => {
                 return Ok(vec![Action::ConfirmRename {
                     relative_path: self
                         .repository
@@ -48,11 +48,12 @@ impl<'a> Command for RenameCommand<'a> {
                 }])
             }
             (true, Some(target), Some(path)) => (target, path),
-            _ => {
+            (true, _, _) => {
                 return Err(ErrorKind::invalid(
                     "no confirm rename required -path and -current-target",
                 ))
             }
+            _ => return Ok(vec![]),
         };
 
         let from = self.repository.path(&target.path).to_string()?;
