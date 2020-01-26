@@ -124,7 +124,7 @@ function! s:suite.tab_open()
     call s:helper.sync_execute('')
 
     call s:helper.search('Makefile')
-    call s:helper.sync_execute('child -layout=tab')
+    call s:helper.sync_execute('child -split=tab')
 
     call s:assert.file_name('Makefile')
     call s:assert.tab_count(2)
@@ -134,7 +134,7 @@ function! s:suite.vertical_open()
     call s:helper.sync_execute('')
 
     call s:helper.search('Makefile')
-    call s:helper.sync_execute('child -layout=vertical')
+    call s:helper.sync_execute('child -split=vertical')
 
     call s:assert.file_name('Makefile')
     call s:assert.window_count(3)
@@ -147,7 +147,7 @@ function! s:suite.horizontal_open()
     call s:helper.sync_execute('')
 
     call s:helper.search('Makefile')
-    call s:helper.sync_execute('child -layout=horizontal')
+    call s:helper.sync_execute('child -split=horizontal')
 
     call s:assert.file_name('Makefile')
     call s:assert.window_count(3)
@@ -207,7 +207,7 @@ function! s:suite.range()
     call s:helper.sync_execute('')
 
     let line = s:helper.search('Cargo\.toml')
-    let command = s:helper.sync_execute('child -layout=tab', {'range': [line, line + 1]})
+    let command = s:helper.sync_execute('child -split=tab', {'range': [line, line + 1]})
 
     call s:assert.tab_count(3)
 endfunction
@@ -282,7 +282,7 @@ function! s:suite.__new__() abort
         call s:helper.set_input('new_file')
 
         call s:helper.sync_execute('')
-        call s:helper.sync_execute('new -open=tab')
+        call s:helper.sync_execute('new -split=tab')
 
         call s:assert.file_name('new_file')
         call s:assert.tab_count(2)
@@ -1052,7 +1052,7 @@ function! s:suite.toggle_selection()
     call s:helper.search('Cargo\.toml')
     call s:helper.sync_execute('toggle_selection')
 
-    call s:helper.sync_execute('child -layout=tab')
+    call s:helper.sync_execute('child -split=tab')
 
     call s:assert.tab_count(3)
     call s:assert.file_name('Cargo.toml')
@@ -1068,7 +1068,7 @@ function! s:suite.toggle_all_selection()
 
     call s:helper.sync_execute('toggle_all_selection')
 
-    call s:helper.sync_execute('child -layout=tab')
+    call s:helper.sync_execute('child -split=tab')
 
     call s:assert.tab_count(5)
     call s:assert.file_name('Makefile')
@@ -1159,7 +1159,7 @@ function! s:suite.tab_open_group_node()
     call s:helper.sync_execute('toggle_selection')
     call s:helper.search('Makefile')
     call s:helper.sync_execute('toggle_selection')
-    call s:helper.sync_execute('child -layout=tab')
+    call s:helper.sync_execute('child -split=tab')
 
     call s:assert.tab_count(3)
 

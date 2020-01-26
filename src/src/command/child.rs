@@ -1,6 +1,6 @@
 use super::action::Paths;
 use super::command::CommandResult;
-use super::command::{CommandOption, Layout, SplitModName, SplitName};
+use super::command::{CommandOption, Split, SplitModName, SplitName};
 use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
@@ -9,21 +9,24 @@ use crate::repository::PathRepository;
 use itertools::Itertools;
 
 pub struct ChildCommandOptions {
-    layout: Layout,
+    split: Split,
     quit: bool,
 }
 
 impl From<Vec<CommandOption>> for ChildCommandOptions {
     fn from(opts: Vec<CommandOption>) -> Self {
-        let mut layout = Layout::Open;
+        let mut split = Split {
+            name: SplitName::Open,
+            mod_name: SplitModName::No,
+        };
         let mut quit = false;
         opts.into_iter().for_each(|opt| match opt {
-            CommandOption::Layout { value } => layout = value,
+            CommandOption::Split { value } => split = value,
             CommandOption::Quit => quit = true,
             _ => (),
         });
         ChildCommandOptions {
-            layout: layout,
+            split: split,
             quit: quit,
         }
     }
@@ -48,15 +51,15 @@ impl<'a> Command for ChildCommand<'a> {
                     .map(|target| target.to_string())
                     .collect();
 
-                match (is_group_node, self.opts.layout) {
+                match (is_group_node, self.opts.split.name) {
                     (false, _) => {
-                        let mut actions = vec![self.opts.layout.leaf_node_action(paths)];
+                        let mut actions = self.opts.split.leaf_node_action(paths);
                         if self.opts.quit {
                             actions.push(Action::Quit);
                         };
                         actions
                     }
-                    (true, Layout::Open) => paths
+                    (true, SplitName::Open) => paths
                         .iter()
                         .flat_map(|path| match self.repository.list(&path) {
                             Ok(paths) => vec![
@@ -96,8 +99,8 @@ impl<'a> Command for ChildCommand<'a> {
 
                         let mut actions = vec![Action::ForkBuffer {
                             items: items,
-                            mod_name: SplitModName::No,
-                            split_name: SplitName::from(self.opts.layout),
+                            mod_name: self.opts.split.mod_name,
+                            split_name: self.opts.split.name,
                         }];
                         actions.extend(errors);
                         actions

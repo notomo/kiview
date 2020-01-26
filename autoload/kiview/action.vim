@@ -5,10 +5,6 @@ function! kiview#action#new_handler(buffer, arg) abort
     let input_reader = kiview#input_reader#new()
     let handler = {
         \ 'funcs': {
-            \ 'open': { action -> s:open_targets(action, buffer) },
-            \ 'tab_open': { action -> s:tab_open_targets(action, buffer) },
-            \ 'vertical_open': { action -> s:vertical_open_targets(action, buffer) },
-            \ 'horizontal_open': { action -> s:horizontal_open_targets(action, buffer) },
             \ 'open_leaves': { action -> s:open_leaves(action, buffer) },
             \ 'open_view': { action -> s:open_view(action, buffer) },
             \ 'add_history': { action -> s:add_history(action, buffer) },
@@ -49,6 +45,7 @@ function! kiview#action#new_handler(buffer, arg) abort
 endfunction
 
 let s:split_names = {
+    \ 'open': 'edit',
     \ 'tab': 'tabedit',
     \ 'vertical': 'vsplit',
     \ 'horizontal': 'split',
@@ -56,39 +53,11 @@ let s:split_names = {
 
 function! s:open_leaves(action, buffer) abort
     let split = s:split_names[a:action.split_name]
+    if a:action.split_name !=? 'tab'
+        wincmd w
+    endif
     for path in a:action.paths
         execute a:action.mod_name split path
-    endfor
-    call a:buffer.current.clear_selection()
-endfunction
-
-function! s:open_targets(action, buffer) abort
-    wincmd w
-    for path in a:action.paths
-        execute 'edit' path
-    endfor
-    call a:buffer.current.clear_selection()
-endfunction
-
-function! s:tab_open_targets(action, buffer) abort
-    for path in a:action.paths
-        execute 'tabedit' path
-    endfor
-    call a:buffer.current.clear_selection()
-endfunction
-
-function! s:vertical_open_targets(action, buffer) abort
-    wincmd w
-    for path in a:action.paths
-        execute 'vsplit' path
-    endfor
-    call a:buffer.current.clear_selection()
-endfunction
-
-function! s:horizontal_open_targets(action, buffer) abort
-    wincmd w
-    for path in a:action.paths
-        execute 'split' path
     endfor
     call a:buffer.current.clear_selection()
 endfunction

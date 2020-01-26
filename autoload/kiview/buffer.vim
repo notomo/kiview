@@ -4,6 +4,7 @@ let s:id = get(s:, 'id', 0)
 
 let s:split_names = {
     \ 'no': '',
+    \ 'open': 'edit',
     \ 'tab': 'tabedit',
     \ 'vertical': 'vsplit',
     \ 'horizontal': 'split',
@@ -44,6 +45,9 @@ function! kiview#buffer#new() abort
 
     function! buffer.open(split_name, mod_name) abort
         execute a:mod_name s:split_names[a:split_name]
+        if a:split_name !=? 'tab' && a:split_name !=? 'no' && &filetype ==? 'kiview'
+            wincmd w
+        endif
         execute 'buffer' self.bufnr
 
         setlocal filetype=kiview

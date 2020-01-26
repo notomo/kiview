@@ -5,15 +5,6 @@ use serde_derive::Serialize;
 #[derive(Debug, Serialize, Clone)]
 #[serde(tag = "name")]
 pub enum Action {
-    #[serde(rename = "open")]
-    Open { paths: Vec<String> },
-    #[serde(rename = "tab_open")]
-    TabOpen { paths: Vec<String> },
-    #[serde(rename = "vertical_open")]
-    VerticalOpen { paths: Vec<String> },
-    #[serde(rename = "horizontal_open")]
-    HorizontalOpen { paths: Vec<String> },
-
     #[serde(rename = "open_leaves")]
     OpenLeaves {
         paths: Vec<String>,

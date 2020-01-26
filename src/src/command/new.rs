@@ -8,23 +8,23 @@ use crate::repository::PathRepository;
 
 pub struct NewCommandOptions {
     paths: Vec<String>,
-    open: Split,
+    split: Split,
 }
 
 impl From<Vec<CommandOption>> for NewCommandOptions {
     fn from(opts: Vec<CommandOption>) -> Self {
-        let mut open = Split {
+        let mut split = Split {
             name: SplitName::No,
             mod_name: SplitModName::No,
         };
         let mut paths = vec![];
         opts.into_iter().for_each(|opt| match opt {
-            CommandOption::Open { value } => open = value,
+            CommandOption::Split { value } => split = value,
             CommandOption::Paths { value } => paths.push(value),
             _ => (),
         });
         NewCommandOptions {
-            open: open,
+            split: split,
             paths: paths,
         }
     }
@@ -82,7 +82,7 @@ impl<'a> Command for NewCommand<'a> {
             self.current.target.as_ref().and_then(|t| t.last_sibling_id),
         )]
         .into_iter()
-        .chain(self.opts.open.leaf_node_action(open_paths))
+        .chain(self.opts.split.leaf_node_action(open_paths))
         .chain(errors)
         .collect();
 

@@ -71,36 +71,6 @@ impl From<&str> for CommandName {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Layout {
-    Tab,
-    Vertical,
-    Horizontal,
-    Open,
-}
-
-impl Layout {
-    pub fn leaf_node_action(&self, paths: Vec<String>) -> Action {
-        match self {
-            Layout::Tab => Action::TabOpen { paths: paths },
-            Layout::Vertical => Action::VerticalOpen { paths: paths },
-            Layout::Horizontal => Action::HorizontalOpen { paths: paths },
-            Layout::Open => Action::Open { paths: paths },
-        }
-    }
-}
-
-impl From<&str> for Layout {
-    fn from(s: &str) -> Self {
-        match s {
-            "tab" => Layout::Tab,
-            "vertical" => Layout::Vertical,
-            "horizontal" => Layout::Horizontal,
-            _ => Layout::Open,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
 pub struct Split {
     pub name: SplitName,
     pub mod_name: SplitModName,
@@ -130,21 +100,12 @@ pub enum SplitName {
     Vertical,
     #[serde(rename = "horizontal")]
     Horizontal,
+    #[serde(rename = "open")]
+    Open,
     #[serde(rename = "no")]
     No,
     #[serde(rename = "unknown")]
     Unknown,
-}
-
-impl From<Layout> for SplitName {
-    fn from(l: Layout) -> Self {
-        match l {
-            Layout::Tab => SplitName::Tab,
-            Layout::Vertical => SplitName::Vertical,
-            Layout::Horizontal => SplitName::Horizontal,
-            Layout::Open => SplitName::No,
-        }
-    }
 }
 
 impl From<&str> for SplitName {
@@ -153,6 +114,7 @@ impl From<&str> for SplitName {
             "tab" => SplitName::Tab,
             "vertical" => SplitName::Vertical,
             "horizontal" => SplitName::Horizontal,
+            "open" => SplitName::Open,
             "no" => SplitName::No,
             _ => SplitName::Unknown,
         }
@@ -203,7 +165,6 @@ impl From<&str> for Split {
 
 #[derive(Debug)]
 pub enum CommandOption {
-    Layout { value: Layout },
     Path { value: String },
     Paths { value: String },
     Quit,
@@ -211,7 +172,6 @@ pub enum CommandOption {
     Create,
     Back,
     Split { value: Split },
-    Open { value: Split },
     Unknown,
 }
 
@@ -219,9 +179,6 @@ impl From<&str> for CommandOption {
     fn from(arg: &str) -> Self {
         let key_value: Vec<_> = arg.split("=").collect();
         match &key_value[..] {
-            ["layout", layout] => CommandOption::Layout {
-                value: Layout::from(*layout),
-            },
             ["quit"] => CommandOption::Quit,
             ["no-confirm"] => CommandOption::NoConfirm,
             ["create"] => CommandOption::Create,
@@ -233,9 +190,6 @@ impl From<&str> for CommandOption {
                 value: path.to_string(),
             },
             ["split", split] => CommandOption::Split {
-                value: Split::from(*split),
-            },
-            ["open", split] => CommandOption::Open {
                 value: Split::from(*split),
             },
             _ => CommandOption::Unknown,
