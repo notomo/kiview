@@ -60,6 +60,21 @@ function! kiview#current#new(bufnr) abort
         return line_number
     endfunction
 
+    function! current.select(ids) abort
+        for mark_id in a:ids
+            if !has_key(self.props, mark_id)
+                throw 'invalid mark id: ' . mark_id
+            endif
+
+            let [row, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, mark_id)
+            if has_key(self.selected, mark_id)
+                continue
+            endif
+            call nvim_buf_add_highlight(self.bufnr, s:hl_namespace, 'KiviewSelected', row, 0, -1)
+            let self.selected[mark_id] = v:true
+        endfor
+    endfunction
+
     function! current.toggle_selection(ids) abort
         for mark_id in a:ids
             if !has_key(self.props, mark_id)

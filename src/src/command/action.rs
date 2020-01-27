@@ -41,6 +41,8 @@ pub enum Action {
         has_cut: bool,
     },
 
+    #[serde(rename = "select")]
+    Select { ids: Vec<u64> },
     #[serde(rename = "toggle_selection")]
     ToggleSelection { ids: Vec<u64> },
     #[serde(rename = "toggle_all_selection")]

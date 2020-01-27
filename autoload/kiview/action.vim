@@ -25,6 +25,7 @@ function! kiview#action#new_handler(buffer, arg) abort
             \ 'copy': { action -> s:copy(action, buffer) },
             \ 'cut': { action -> s:cut(action, buffer) },
             \ 'clear_register': { action -> s:clear_register(buffer) },
+            \ 'select': { action -> s:select(action, buffer) },
             \ 'toggle_selection': { action -> s:toggle_selection(action, buffer) },
             \ 'toggle_all_selection': { action -> s:toggle_all_selection(action, buffer) },
             \ 'show_error': { action -> s:show_error(action) },
@@ -221,6 +222,10 @@ endfunction
 
 function! s:clear_register(buffer) abort
     call a:buffer.register.clear()
+endfunction
+
+function! s:select(action, buffer) abort
+    call a:buffer.current.select(a:action.ids)
 endfunction
 
 function! s:toggle_selection(action, buffer) abort

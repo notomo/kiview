@@ -20,3 +20,21 @@ impl<'a> Command for ToggleSelectionCommand<'a> {
         Ok(vec![Action::ToggleSelection { ids: ids }])
     }
 }
+
+pub struct SelectCommand<'a> {
+    pub current: &'a Current<'a>,
+}
+
+impl<'a> Command for SelectCommand<'a> {
+    fn actions(&self) -> CommandResult {
+        let ids = self
+            .current
+            .targets
+            .iter()
+            .filter(|target| !target.is_parent_node)
+            .map(|target| target.id)
+            .collect();
+
+        Ok(vec![Action::Select { ids: ids }])
+    }
+}

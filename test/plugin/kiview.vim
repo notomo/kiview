@@ -1043,6 +1043,22 @@ function! s:suite.open_root()
     call s:assert.line_number(line_number)
 endfunction
 
+function! s:suite.select_two()
+    call s:helper.sync_execute('go -path=src')
+
+    call s:helper.search('\.gitignore')
+    call s:helper.sync_execute('select')
+    call s:helper.sync_execute('select')
+
+    call s:helper.search('Cargo\.toml')
+    call s:helper.sync_execute('select')
+
+    call s:helper.sync_execute('child -split=tab')
+
+    call s:assert.tab_count(3)
+    call s:assert.file_name('Cargo.toml')
+endfunction
+
 function! s:suite.toggle_selection()
     call s:helper.sync_execute('go -path=src')
 
