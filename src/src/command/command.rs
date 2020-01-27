@@ -69,7 +69,7 @@ impl CommandName {
 }
 
 impl CommandName {
-    fn parse(arg: &str) -> (Self, bool) {
+    fn parse(arg: &str) -> (Self, usize) {
         let command_names: Vec<_> = arg
             .split_whitespace()
             .filter(|arg| !arg.starts_with("-"))
@@ -95,7 +95,7 @@ impl CommandName {
             [] => CommandName::Go,
             _ => CommandName::Unknown,
         };
-        (name, command_names.len() == 0)
+        (name, command_names.len())
     }
 }
 
@@ -317,9 +317,9 @@ pub fn parse_command_actions(arg: &str, current: &Current) -> CommandResult {
     command.actions()
 }
 
-pub fn command_complete(arg: &str) -> Vec<String> {
-    let (_name, empty) = CommandName::parse(arg);
-    if empty {
+pub fn command_complete(arg: &str, line: &str) -> Vec<String> {
+    let (_name, count) = CommandName::parse(line);
+    if count == 0 || (count == 1 && arg.len() != 0) {
         return CommandName::all();
     }
     vec![]

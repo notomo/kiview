@@ -50,13 +50,21 @@ fn main() {
             ),
         )
         .subcommand(
-            SubCommand::with_name("complete").arg(
-                Arg::with_name("arg")
-                    .long("arg")
-                    .takes_value(true)
-                    .default_value("")
-                    .required(false),
-            ),
+            SubCommand::with_name("complete")
+                .arg(
+                    Arg::with_name("arg")
+                        .long("arg")
+                        .takes_value(true)
+                        .default_value("")
+                        .required(false),
+                )
+                .arg(
+                    Arg::with_name("line")
+                        .long("line")
+                        .takes_value(true)
+                        .default_value("")
+                        .required(false),
+                ),
         );
 
     let matches = app.get_matches();
@@ -83,7 +91,8 @@ fn main() {
         }
         ("complete", Some(cmd)) => {
             let arg = cmd.value_of("arg").unwrap();
-            let output = command_complete(&arg).join("\n");
+            let line = cmd.value_of("line").unwrap();
+            let output = command_complete(&arg, &line).join("\n");
             println!("{}", output);
         }
         _ => (),
