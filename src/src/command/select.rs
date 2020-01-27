@@ -38,3 +38,21 @@ impl<'a> Command for SelectCommand<'a> {
         Ok(vec![Action::Select { ids: ids }])
     }
 }
+
+pub struct UnselectCommand<'a> {
+    pub current: &'a Current<'a>,
+}
+
+impl<'a> Command for UnselectCommand<'a> {
+    fn actions(&self) -> CommandResult {
+        let ids = self
+            .current
+            .targets
+            .iter()
+            .filter(|target| !target.is_parent_node)
+            .map(|target| target.id)
+            .collect();
+
+        Ok(vec![Action::Unselect { ids: ids }])
+    }
+}

@@ -60,18 +60,47 @@ function! kiview#current#new(bufnr) abort
         return line_number
     endfunction
 
+    function! current._select(mark_id) abort
+        if !has_key(self.props, a:mark_id)
+            throw 'invalid mark id: ' . a:mark_id
+        endif
+
+        if has_key(self.selected, a:mark_id)
+            return
+        endif
+
+        let [row, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:mark_id)
+        call nvim_buf_add_highlight(self.bufnr, s:hl_namespace, 'KiviewSelected', row, 0, -1)
+        let self.selected[a:mark_id] = v:true
+    endfunction
+
     function! current.select(ids) abort
         for mark_id in a:ids
-            if !has_key(self.props, mark_id)
-                throw 'invalid mark id: ' . mark_id
-            endif
+            call self._select(mark_id)
+        endfor
+    endfunction
 
-            let [row, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, mark_id)
-            if has_key(self.selected, mark_id)
-                continue
-            endif
-            call nvim_buf_add_highlight(self.bufnr, s:hl_namespace, 'KiviewSelected', row, 0, -1)
-            let self.selected[mark_id] = v:true
+    function! current._unselect(mark_id) abort
+        if !has_key(self.props, a:mark_id)
+            throw 'invalid mark id: ' . a:mark_id
+        endif
+
+        if !has_key(self.selected, a:mark_id)
+            return
+        endif
+
+        let [row, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:mark_id)
+        call nvim_buf_clear_namespace(self.bufnr, s:hl_namespace, row, row + 1)
+        call remove(self.selected, a:mark_id)
+        let prop = self.props[a:mark_id]
+        if has_key(prop, 'opened') && prop.opened
+            call nvim_buf_add_highlight(self.bufnr, s:group_hl_namespace, 'KiviewNodeOpen', row, 0, -1)
+        endif
+    endfunction
+
+    function! current.unselect(ids) abort
+        for mark_id in a:ids
+            call self._unselect(mark_id)
         endfor
     endfunction
 
@@ -81,18 +110,11 @@ function! kiview#current#new(bufnr) abort
                 throw 'invalid mark id: ' . mark_id
             endif
 
-            let [row, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, mark_id)
             if has_key(self.selected, mark_id)
-                call nvim_buf_clear_namespace(self.bufnr, s:hl_namespace, row, row + 1)
-                call remove(self.selected, mark_id)
-                let prop = self.props[mark_id]
-                if has_key(prop, 'opened') && prop.opened
-                    call nvim_buf_add_highlight(self.bufnr, s:group_hl_namespace, 'KiviewNodeOpen', row, 0, -1)
-                endif
+                call self._unselect(mark_id)
                 continue
             endif
-            call nvim_buf_add_highlight(self.bufnr, s:hl_namespace, 'KiviewSelected', row, 0, -1)
-            let self.selected[mark_id] = v:true
+            call self._select(mark_id)
         endfor
     endfunction
 

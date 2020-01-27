@@ -29,6 +29,7 @@ pub use copy::CutCommand;
 mod select;
 pub use select::SelectCommand;
 pub use select::ToggleSelectionCommand;
+pub use select::UnselectCommand;
 
 mod paste;
 pub use paste::PasteCommand;
