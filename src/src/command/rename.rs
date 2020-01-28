@@ -123,10 +123,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
                         relative_path: target.to.clone(),
                         is_copy: false,
                     }),
-                    Err(err) => errors.push(Action::ShowError {
-                        path: target.to.clone(),
-                        message: err.inner.to_string(),
-                    }),
+                    Err(err) => errors.push(Action::show_error(&target.to, err)),
                 }
                 (items, errors)
             },

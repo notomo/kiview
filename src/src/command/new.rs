@@ -63,10 +63,7 @@ impl<'a> Command for NewCommand<'a> {
                                 open_paths.push(path.to_string());
                             };
                         }
-                        Err(err) => errors.push(Action::ShowError {
-                            path: path.to_string(),
-                            message: err.inner.to_string(),
-                        }),
+                        Err(err) => errors.push(Action::show_error(&path, err)),
                     };
                     (open_paths, errors)
                 });

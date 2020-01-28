@@ -68,10 +68,7 @@ impl<'a> Command for ChildCommand<'a> {
                                     path: path.to_string(),
                                 },
                             ],
-                            Err(err) => vec![Action::ShowError {
-                                path: path.to_string(),
-                                message: err.inner.to_string(),
-                            }],
+                            Err(err) => vec![Action::show_error(&path, err)],
                         })
                         .chain(vec![Action::AddHistory {
                             path: self.current.path.to_string(),
@@ -89,10 +86,7 @@ impl<'a> Command for ChildCommand<'a> {
                                             let item = Paths::from(paths).to_fork_buffer_item(path);
                                             items.push(item);
                                         }
-                                        Err(err) => errors.push(Action::ShowError {
-                                            path: path.to_string(),
-                                            message: err.inner.to_string(),
-                                        }),
+                                        Err(err) => errors.push(Action::show_error(&path, err)),
                                     };
                                     (items, errors)
                                 });

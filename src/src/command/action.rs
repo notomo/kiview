@@ -1,4 +1,5 @@
 use super::command::{SplitModName, SplitName};
+use crate::command::Error;
 use crate::repository::FullPath;
 use serde_derive::Serialize;
 
@@ -112,6 +113,15 @@ pub enum Action {
         items: Vec<RenameItem>,
         has_error: bool,
     },
+}
+
+impl Action {
+    pub fn show_error(path: &str, err: impl Into<Error>) -> Action {
+        Action::ShowError {
+            path: path.to_string(),
+            message: err.into().inner.to_string(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Clone)]

@@ -27,10 +27,7 @@ impl<'a> Command for ToggleTreeCommand<'a> {
                     Ok(children) => {
                         Paths::from(children).to_open_tree_action(target.id, target.depth)
                     }
-                    Err(err) => Action::ShowError {
-                        path: target.path.clone(),
-                        message: err.inner.to_string(),
-                    },
+                    Err(err) => Action::show_error(&target.path, err),
                 },
             })
             .collect();

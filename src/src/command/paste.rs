@@ -60,10 +60,7 @@ impl<'a> Command for PasteCommand<'a> {
                             !self.current.has_cut,
                             target.force,
                         ) {
-                            errors.push(Action::ShowError {
-                                path: to.clone(),
-                                message: err.inner.to_string(),
-                            })
+                            errors.push(Action::show_error(&to, err))
                         }
                     }
                 };
