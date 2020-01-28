@@ -1,4 +1,4 @@
-use super::command::{SplitModName, SplitName};
+use super::command::Split;
 use crate::command::Error;
 use crate::repository::FullPath;
 use serde_derive::Serialize;
@@ -9,15 +9,15 @@ pub enum Action {
     #[serde(rename = "open_leaves")]
     OpenLeaves {
         paths: Vec<String>,
-        split_name: SplitName,
-        mod_name: SplitModName,
+        #[serde(flatten)]
+        split: Split,
     },
 
     #[serde(rename = "open_view")]
     OpenView {
         path: String,
-        split_name: SplitName,
-        mod_name: SplitModName,
+        #[serde(flatten)]
+        split: Split,
     },
     #[serde(rename = "quit")]
     Quit,
@@ -97,8 +97,8 @@ pub enum Action {
     #[serde(rename = "fork_buffer")]
     ForkBuffer {
         items: Vec<ForkBufferItem>,
-        split_name: SplitName,
-        mod_name: SplitModName,
+        #[serde(flatten)]
+        split: Split,
     },
     #[serde(rename = "show_error")]
     ShowError { path: String, message: String },

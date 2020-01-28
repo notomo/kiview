@@ -93,8 +93,7 @@ impl<'a> Command for ChildCommand<'a> {
 
                         let mut actions = vec![Action::ForkBuffer {
                             items: items,
-                            mod_name: self.opts.split.mod_name,
-                            split_name: self.opts.split.name,
+                            split: self.opts.split,
                         }];
                         actions.extend(errors);
                         actions

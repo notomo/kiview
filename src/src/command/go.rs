@@ -59,8 +59,7 @@ impl<'a> Command for GoCommand<'a> {
         if self.current.opened && self.opts.create {
             return Ok(vec![Action::ForkBuffer {
                 items: vec![paths.to_fork_buffer_item(&target_group_path)],
-                split_name: self.opts.split.name,
-                mod_name: self.opts.split.mod_name,
+                split: self.opts.split,
             }]);
         }
 
@@ -82,8 +81,7 @@ impl<'a> Command for GoCommand<'a> {
         if !self.current.opened {
             actions.push(Action::OpenView {
                 path: target_group_path,
-                split_name: self.opts.split.name,
-                mod_name: self.opts.split.mod_name,
+                split: self.opts.split,
             });
 
             if let Some(line_number) = paths.search(|p| p.name == self.current.name) {

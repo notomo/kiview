@@ -109,8 +109,9 @@ impl From<&str> for CommandName {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub struct Split {
+    #[serde(rename = "split_name")]
     pub name: SplitName,
     pub mod_name: SplitModName,
 }
@@ -124,8 +125,7 @@ impl Split {
             SplitName::Unknown | SplitName::No => vec![],
             _ => vec![Action::OpenLeaves {
                 paths: paths,
-                split_name: self.name,
-                mod_name: self.mod_name,
+                split: self.clone(),
             }],
         }
     }
