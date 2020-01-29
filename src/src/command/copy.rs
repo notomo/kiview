@@ -10,16 +10,12 @@ pub struct CopyCommand<'a> {
 
 impl<'a> Command for CopyCommand<'a> {
     fn actions(&self) -> CommandResult {
-        let items = self
-            .current
-            .targets()
-            .filter(|target| !target.is_parent_node)
-            .map(|target| RegisteredItem {
-                path: target.to_string(),
-            })
-            .collect();
-
-        Ok(vec![Action::Copy { items: items }, Action::UnselectAll])
+        Ok(vec![
+            Action::Copy {
+                items: self.current.target_items(),
+            },
+            Action::UnselectAll,
+        ])
     }
 }
 
@@ -29,15 +25,22 @@ pub struct CutCommand<'a> {
 
 impl<'a> Command for CutCommand<'a> {
     fn actions(&self) -> CommandResult {
-        let items = self
-            .current
-            .targets()
+        Ok(vec![
+            Action::Cut {
+                items: self.current.target_items(),
+            },
+            Action::UnselectAll,
+        ])
+    }
+}
+
+impl<'a> Current<'a> {
+    fn target_items(&self) -> Vec<RegisteredItem> {
+        self.targets()
             .filter(|target| !target.is_parent_node)
             .map(|target| RegisteredItem {
                 path: target.to_string(),
             })
-            .collect();
-
-        Ok(vec![Action::Cut { items: items }, Action::UnselectAll])
+            .collect()
     }
 }

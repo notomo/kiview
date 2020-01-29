@@ -20,11 +20,13 @@ impl From<Vec<CommandOption>> for ChildCommandOptions {
             mod_name: SplitModName::No,
         };
         let mut quit = false;
+
         opts.into_iter().for_each(|opt| match opt {
             CommandOption::Split { value } => split = value,
             CommandOption::Quit => quit = true,
             _ => (),
         });
+
         ChildCommandOptions {
             split: split,
             quit: quit,
@@ -76,25 +78,13 @@ impl<'a> Command for ChildCommand<'a> {
                             back: false,
                         }])
                         .collect(),
-                    (true, _) => {
-                        let (mut actions, errors) =
-                            paths
-                                .iter()
-                                .fold((vec![], vec![]), |(mut items, mut errors), path| {
-                                    match self.repository.list(&path) {
-                                        Ok(paths) => {
-                                            let item = Paths::from(paths)
-                                                .to_fork_buffer(path, self.opts.split);
-                                            items.push(item);
-                                        }
-                                        Err(err) => errors.push(Action::show_error(&path, err)),
-                                    };
-                                    (items, errors)
-                                });
-
-                        actions.extend(errors);
-                        actions
-                    }
+                    (true, _) => paths
+                        .iter()
+                        .map(|path| match self.repository.list(&path) {
+                            Ok(paths) => Paths::from(paths).to_fork_buffer(path, self.opts.split),
+                            Err(err) => Action::show_error(&path, err),
+                        })
+                        .collect(),
                 }
             })
             .chain(vec![Action::UnselectAll])

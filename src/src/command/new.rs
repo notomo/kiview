@@ -18,11 +18,13 @@ impl From<Vec<CommandOption>> for NewCommandOptions {
             mod_name: SplitModName::No,
         };
         let mut paths = vec![];
+
         opts.into_iter().for_each(|opt| match opt {
             CommandOption::Split { value } => split = value,
             CommandOption::Paths { value } => paths.push(value),
             _ => (),
         });
+
         NewCommandOptions {
             split: split,
             paths: paths,

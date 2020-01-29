@@ -14,10 +14,12 @@ pub struct RemoveCommandOptions {
 impl From<Vec<CommandOption>> for RemoveCommandOptions {
     fn from(opts: Vec<CommandOption>) -> Self {
         let mut no_confirm = false;
+
         opts.into_iter().for_each(|opt| match opt {
             CommandOption::NoConfirm => no_confirm = true,
             _ => (),
         });
+
         RemoveCommandOptions {
             no_confirm: no_confirm,
         }

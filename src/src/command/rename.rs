@@ -17,11 +17,13 @@ impl From<Vec<CommandOption>> for RenameCommandOptions {
     fn from(opts: Vec<CommandOption>) -> Self {
         let mut no_confirm = false;
         let mut path = None;
+
         opts.into_iter().for_each(|opt| match opt {
             CommandOption::NoConfirm => no_confirm = true,
             CommandOption::Path { value } => path = Some(value),
             _ => (),
         });
+
         RenameCommandOptions {
             no_confirm: no_confirm,
             path: path,

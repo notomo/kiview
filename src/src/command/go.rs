@@ -22,6 +22,7 @@ impl From<Vec<CommandOption>> for GoCommandOptions {
         let mut back = false;
         let mut create = false;
         let mut path = None;
+
         opts.into_iter().for_each(|opt| match opt {
             CommandOption::Back => back = true,
             CommandOption::Create => create = true,
@@ -29,6 +30,7 @@ impl From<Vec<CommandOption>> for GoCommandOptions {
             CommandOption::Split { value } => split = value,
             _ => (),
         });
+
         GoCommandOptions {
             split: split,
             back: back,

@@ -106,11 +106,11 @@ endfunction
 
 function! s:try_to_restore_cursor(action, buffer) abort
     call a:buffer.history.restore_cursor(a:action.path)
-    call a:buffer.current.set(a:action.path)
+    call a:buffer.current.set_path(a:action.path)
 endfunction
 
 function! s:set_path(action, buffer) abort
-    call a:buffer.current.set(a:action.path)
+    call a:buffer.current.set_path(a:action.path)
 endfunction
 
 function! s:set_cursor(action, buffer) abort
@@ -132,7 +132,7 @@ endfunction
 function! s:open_view(action, buffer) abort
     call a:buffer.open(a:action.split_name, a:action.mod_name)
     call a:buffer.history.restore_cursor('')
-    call a:buffer.current.set(a:action.path)
+    call a:buffer.current.set_path(a:action.path)
 endfunction
 
 function! s:quit(buffer) abort
@@ -261,7 +261,7 @@ function! s:fork_buffer(action, buffer) abort
     call s:write_all(a:action.item, new_buffer)
 
     call new_buffer.open(a:action.split_name, a:action.mod_name)
-    call new_buffer.current.set(a:action.item.path)
+    call new_buffer.current.set_path(a:action.item.path)
 endfunction
 
 function! s:open_renamer(action, buffer) abort

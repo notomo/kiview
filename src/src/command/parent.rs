@@ -19,22 +19,21 @@ impl<'a> Command for ParentCommand<'a> {
 
         let paths: Paths = self.repository.list(&parent_path)?.into();
 
-        let mut actions = vec![paths.to_write_all_action()];
-
-        if let Some(last_path_line_number) = paths.search(|p| p.path == self.current.path) {
-            actions.push(Action::SetCursor {
-                line_number: last_path_line_number,
-            });
-        }
-
-        actions.extend(vec![
+        let mut actions = vec![
+            paths.to_write_all_action(),
             Action::SetPath { path: parent_path },
             Action::AddHistory {
                 path: self.current.path.to_string(),
                 line_number: self.current.line_number,
                 back: false,
             },
-        ]);
+        ];
+
+        if let Some(last_path_line_number) = paths.search(|p| p.path == self.current.path) {
+            actions.push(Action::SetCursor {
+                line_number: last_path_line_number,
+            });
+        }
 
         Ok(actions)
     }

@@ -11,7 +11,7 @@ function! kiview#current#new(bufnr) abort
         \ 'logger': kiview#logger#new('current'),
     \ }
 
-    function! current.set(path) abort
+    function! current.set_path(path) abort
         let current = win_getid()
         for id in win_findbuf(self.bufnr)
             call nvim_set_current_win(id)
