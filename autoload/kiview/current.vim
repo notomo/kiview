@@ -123,6 +123,11 @@ function! kiview#current#new(bufnr) abort
         call self.toggle_selection(map(mark_ids, { _, v -> v[0] }))
     endfunction
 
+    function! current.select_all() abort
+        let mark_ids = nvim_buf_get_extmarks(self.bufnr, s:namespace, [1, 0], [-1, 0], {})
+        call self.select(map(mark_ids, { _, v -> v[0] }))
+    endfunction
+
     function! current.to_line_number(id, default) abort
         if empty(a:id)
             return a:default

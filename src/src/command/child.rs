@@ -77,13 +77,14 @@ impl<'a> Command for ChildCommand<'a> {
                         }])
                         .collect(),
                     (true, _) => {
-                        let (items, errors) =
+                        let (mut actions, errors) =
                             paths
                                 .iter()
                                 .fold((vec![], vec![]), |(mut items, mut errors), path| {
                                     match self.repository.list(&path) {
                                         Ok(paths) => {
-                                            let item = Paths::from(paths).to_fork_buffer_item(path);
+                                            let item = Paths::from(paths)
+                                                .to_fork_buffer(path, self.opts.split);
                                             items.push(item);
                                         }
                                         Err(err) => errors.push(Action::show_error(&path, err)),
@@ -91,15 +92,12 @@ impl<'a> Command for ChildCommand<'a> {
                                     (items, errors)
                                 });
 
-                        let mut actions = vec![Action::ForkBuffer {
-                            items: items,
-                            split: self.opts.split,
-                        }];
                         actions.extend(errors);
                         actions
                     }
                 }
             })
+            .chain(vec![Action::UnselectAll])
             .collect();
 
         Ok(actions)

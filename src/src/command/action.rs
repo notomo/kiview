@@ -44,8 +44,12 @@ pub enum Action {
 
     #[serde(rename = "select")]
     Select { ids: Vec<u64> },
+    #[serde(rename = "select_all")]
+    SelectAll,
     #[serde(rename = "unselect")]
     Unselect { ids: Vec<u64> },
+    #[serde(rename = "unselect_all")]
+    UnselectAll,
     #[serde(rename = "toggle_selection")]
     ToggleSelection { ids: Vec<u64> },
     #[serde(rename = "toggle_all_selection")]
@@ -96,7 +100,7 @@ pub enum Action {
 
     #[serde(rename = "fork_buffer")]
     ForkBuffer {
-        items: Vec<ForkBufferItem>,
+        item: ForkBufferItem,
         #[serde(flatten)]
         split: Split,
     },
@@ -212,13 +216,16 @@ impl Paths {
         }
     }
 
-    pub fn to_fork_buffer_item(&self, path: &str) -> ForkBufferItem {
+    pub fn to_fork_buffer(&self, path: &str, split: Split) -> Action {
         let depth = 0;
         let parent_id = None;
-        ForkBufferItem {
-            path: path.to_string(),
-            lines: self.lines(depth),
-            props: self.props(depth, parent_id),
+        Action::ForkBuffer {
+            item: ForkBufferItem {
+                path: path.to_string(),
+                lines: self.lines(depth),
+                props: self.props(depth, parent_id),
+            },
+            split: split,
         }
     }
 

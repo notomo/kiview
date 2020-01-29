@@ -1059,6 +1059,36 @@ function! s:suite.select_two()
     call s:assert.file_name('Cargo.toml')
 endfunction
 
+function! s:suite.select_all()
+    call s:helper.sync_execute('go -path=src')
+
+    call s:helper.search('\.gitignore')
+    call s:helper.sync_execute('select')
+
+    call s:helper.search('Cargo\.toml')
+
+    call s:helper.sync_execute('select_all')
+    call s:helper.sync_execute('child -split=tab')
+
+    call s:assert.tab_count(7)
+    call s:assert.file_name('Makefile')
+endfunction
+
+function! s:suite.unselect_all()
+    call s:helper.sync_execute('go -path=src')
+
+    call s:helper.search('\.gitignore')
+    call s:helper.sync_execute('select')
+
+    call s:helper.search('Cargo\.toml')
+
+    call s:helper.sync_execute('unselect_all')
+    call s:helper.sync_execute('child -split=tab')
+
+    call s:assert.tab_count(2)
+    call s:assert.file_name('Cargo.toml')
+endfunction
+
 function! s:suite.unselect()
     call s:helper.sync_execute('go -path=src')
 

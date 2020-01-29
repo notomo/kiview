@@ -37,7 +37,9 @@ pub enum CommandName {
     ToggleTree,
     ToggleSelection,
     Select,
+    SelectAll,
     Unselect,
+    UnselectAll,
     ToggleAllSelection,
     Back,
     Unknown,
@@ -60,7 +62,9 @@ impl CommandName {
             "toggle_tree",
             "toggle_selection",
             "select",
+            "select_all",
             "unselect",
+            "unselect_all",
             "toggle_all_selection",
             "back",
         ]
@@ -92,7 +96,9 @@ impl CommandName {
             ["toggle_tree"] => CommandName::ToggleTree,
             ["toggle_selection"] => CommandName::ToggleSelection,
             ["select"] => CommandName::Select,
+            ["select_all"] => CommandName::SelectAll,
             ["unselect"] => CommandName::Unselect,
+            ["unselect_all"] => CommandName::UnselectAll,
             ["toggle_all_selection"] => CommandName::ToggleAllSelection,
             ["back"] => CommandName::Back,
             [] => CommandName::Go,
@@ -306,9 +312,15 @@ pub fn parse_command_actions(arg: &str, current: &Current) -> CommandResult {
             box command::ToggleSelectionCommand { current: current } as Box<dyn Command>
         }
         CommandName::Select => box command::SelectCommand { current: current } as Box<dyn Command>,
+        CommandName::SelectAll => box SimpleCommand {
+            action: Action::SelectAll,
+        } as Box<dyn Command>,
         CommandName::Unselect => {
             box command::UnselectCommand { current: current } as Box<dyn Command>
         }
+        CommandName::UnselectAll => box SimpleCommand {
+            action: Action::UnselectAll,
+        } as Box<dyn Command>,
         CommandName::ToggleAllSelection => box SimpleCommand {
             action: Action::ToggleAllSelection,
         } as Box<dyn Command>,

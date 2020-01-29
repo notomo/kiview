@@ -57,10 +57,9 @@ impl<'a> Command for GoCommand<'a> {
         let paths: Paths = self.repository.list(&target_group_path)?.into();
 
         if self.current.opened && self.opts.create {
-            return Ok(vec![Action::ForkBuffer {
-                items: vec![paths.to_fork_buffer_item(&target_group_path)],
-                split: self.opts.split,
-            }]);
+            return Ok(vec![
+                paths.to_fork_buffer(&target_group_path, self.opts.split)
+            ]);
         }
 
         let mut actions = vec![paths.to_write_all_action()];

@@ -26,7 +26,9 @@ function! kiview#action#new_handler(buffer, arg) abort
             \ 'cut': { action -> s:cut(action, buffer) },
             \ 'clear_register': { action -> s:clear_register(buffer) },
             \ 'select': { action -> s:select(action, buffer) },
+            \ 'select_all': { action -> s:select_all(action, buffer) },
             \ 'unselect': { action -> s:unselect(action, buffer) },
+            \ 'unselect_all': { action -> s:unselect_all(action, buffer) },
             \ 'toggle_selection': { action -> s:toggle_selection(action, buffer) },
             \ 'toggle_all_selection': { action -> s:toggle_all_selection(action, buffer) },
             \ 'show_error': { action -> s:show_error(action) },
@@ -211,13 +213,11 @@ endfunction
 
 function! s:copy(action, buffer) abort
     call a:buffer.register.copy(a:action.items)
-    call a:buffer.current.clear_selection()
     call kiview#messenger#new().info('Copied: ', a:action.items)
 endfunction
 
 function! s:cut(action, buffer) abort
     call a:buffer.register.cut(a:action.items)
-    call a:buffer.current.clear_selection()
     call kiview#messenger#new().info('Cut: ', a:action.items)
 endfunction
 
@@ -229,8 +229,16 @@ function! s:select(action, buffer) abort
     call a:buffer.current.select(a:action.ids)
 endfunction
 
+function! s:select_all(action, buffer) abort
+    call a:buffer.current.select_all()
+endfunction
+
 function! s:unselect(action, buffer) abort
     call a:buffer.current.unselect(a:action.ids)
+endfunction
+
+function! s:unselect_all(action, buffer) abort
+    call a:buffer.current.clear_selection()
 endfunction
 
 function! s:toggle_selection(action, buffer) abort
@@ -247,16 +255,13 @@ function! s:show_error(action) abort
 endfunction
 
 function! s:fork_buffer(action, buffer) abort
-    for item in a:action.items
-        let new_buffer = kiview#buffer#new()
-        call new_buffer.history.copy(a:buffer.history)
+    let new_buffer = kiview#buffer#new()
+    call new_buffer.history.copy(a:buffer.history)
 
-        call s:write_all(item, new_buffer)
+    call s:write_all(a:action.item, new_buffer)
 
-        call new_buffer.open(a:action.split_name, a:action.mod_name)
-        call new_buffer.current.set(item.path)
-    endfor
-    call a:buffer.current.clear_selection()
+    call new_buffer.open(a:action.split_name, a:action.mod_name)
+    call new_buffer.current.set(a:action.item.path)
 endfunction
 
 function! s:open_renamer(action, buffer) abort

@@ -19,7 +19,7 @@ impl<'a> Command for CopyCommand<'a> {
             })
             .collect();
 
-        Ok(vec![Action::Copy { items: items }])
+        Ok(vec![Action::Copy { items: items }, Action::UnselectAll])
     }
 }
 
@@ -38,6 +38,6 @@ impl<'a> Command for CutCommand<'a> {
             })
             .collect();
 
-        Ok(vec![Action::Cut { items: items }])
+        Ok(vec![Action::Cut { items: items }, Action::UnselectAll])
     }
 }
