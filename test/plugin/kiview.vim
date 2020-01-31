@@ -485,6 +485,22 @@ function! s:suite.__copy_cut_paste__() abort
         call s:helper.after_each()
     endfunction
 
+    function! suite.clear_clipboard()
+        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+
+        call s:helper.search('copy_file')
+        call s:helper.sync_execute('copy')
+
+        call s:helper.search('paste\/')
+        call s:helper.sync_execute('child')
+
+        call s:helper.sync_execute('clear_clipboard')
+        call s:helper.sync_execute('paste')
+
+        let lines = s:helper.lines()
+        call s:assert.not_contains(lines, 'copy_file')
+    endfunction
+
     function! suite.copy_and_paste()
         call s:helper.sync_execute('go -path=test/plugin/_test_data')
 

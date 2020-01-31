@@ -31,6 +31,7 @@ pub enum CommandName {
     Remove,
     Copy,
     Cut,
+    ClearClipboard,
     Paste,
     Rename,
     MultipleRename,
@@ -56,6 +57,7 @@ impl CommandName {
             "remove",
             "copy",
             "cut",
+            "clear_clipboard",
             "paste",
             "rename",
             "multiple_rename",
@@ -90,6 +92,7 @@ impl CommandName {
             ["remove"] => CommandName::Remove,
             ["copy"] => CommandName::Copy,
             ["cut"] => CommandName::Cut,
+            ["clear_clipboard"] => CommandName::ClearClipboard,
             ["paste"] => CommandName::Paste,
             ["rename"] => CommandName::Rename,
             ["multiple_rename"] => CommandName::MultipleRename,
@@ -291,6 +294,9 @@ pub fn parse_command_actions(arg: &str, current: &Current) -> CommandResult {
         } as Box<dyn Command>,
         CommandName::Copy => box command::CopyCommand { current: current } as Box<dyn Command>,
         CommandName::Cut => box command::CutCommand { current: current } as Box<dyn Command>,
+        CommandName::ClearClipboard => box SimpleCommand {
+            action: Action::ClearRegister,
+        } as Box<dyn Command>,
         CommandName::Paste => box command::PasteCommand {
             current: current,
             repository: path_repository,
