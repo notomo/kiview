@@ -3,6 +3,25 @@ let s:helper = KiviewTestHelper()
 let s:suite = s:helper.suite('plugin.kiview')
 let s:assert = s:helper.assert
 
+function! s:suite.before_each() abort
+    call s:helper.before_each()
+
+    call s:helper.new_directory('.depth0')
+    call s:helper.new_directory('a_dir/a_depth1')
+    call s:helper.new_file('a_dir/a_1_depth1.vim')
+    call s:helper.new_file('a_dir/a_2_depth1.vim')
+    call s:helper.new_file('a_dir/a_depth1/a_depth2.vim')
+    call s:helper.new_directory('b_dir/b_depth1/b_depth2/b_depth3')
+    call s:helper.new_directory('b_dir/.b_1_depth1')
+    call s:helper.new_directory('b_dir/.b_1_depth1/.b_1_depth2')
+    call s:helper.new_directory('b_dir/.b_2_depth1')
+    call s:helper.new_directory('b_dir/b_depth1/.b_1_depth2')
+    call s:helper.new_directory('b_dir/b_depth1/.b_2_depth2')
+    call s:helper.new_file('Makefile')
+
+    call s:helper.cd('')
+endfunction
+
 function! s:suite.create_one()
     let cwd = getcwd()
 
@@ -11,7 +30,7 @@ function! s:suite.create_one()
     let lines = s:helper.lines()
     call s:assert.not_empty(lines)
     call s:assert.equals(lines[0], '..')
-    call s:assert.contains(lines, 'autoload/')
+    call s:assert.contains(lines, 'a_dir/')
     call s:assert.not_contains(lines, '')
     call s:assert.filetype('kiview')
     call s:assert.false(&modifiable)
@@ -23,13 +42,13 @@ function! s:suite.create_one()
     call s:assert.syntax_name('KiviewNodeClosed')
 
     normal! j
-    call s:assert.current_line('.git/')
+    call s:assert.current_line('.depth0/')
     normal! j
-    call s:assert.current_line('autoload/')
+    call s:assert.current_line('a_dir/')
 
-    call s:helper.search('autoload\/')
+    call s:helper.search('a_dir\/')
     call s:assert.syntax_name('KiviewNodeClosed')
-    call s:assert.ends_with(kiview#get().path, 'autoload')
+    call s:assert.ends_with(kiview#get().path, 'a_dir')
 endfunction
 
 function! s:suite.cursor_position_on_create()
@@ -49,52 +68,52 @@ endfunction
 
 function! s:suite.do_parent_child()
     let cwd = getcwd()
-    cd ./test/plugin
+    cd ./a_dir/a_depth1
 
     call s:helper.sync_execute('')
 
     let lines = s:helper.lines()
     call s:assert.not_empty(lines)
-    call s:assert.contains(lines, 'kiview.vim')
+    call s:assert.contains(lines, 'a_depth2.vim')
     call s:assert.not_contains(lines, '')
     call s:assert.filetype('kiview')
-    call s:assert.working_dir(cwd . '/test/plugin')
+    call s:assert.working_dir(cwd . '/a_dir/a_depth1')
 
     call s:helper.sync_execute('parent')
 
     let test_lines = s:helper.lines()
     call s:assert.not_empty(test_lines)
     call s:assert.equals(lines[0], '..')
-    call s:assert.contains(test_lines, 'plugin/')
+    call s:assert.contains(test_lines, 'a_depth1/')
     call s:assert.not_contains(test_lines, '')
     call s:assert.filetype('kiview')
     call s:assert.false(&modifiable)
-    call s:assert.working_dir(cwd . '/test')
+    call s:assert.working_dir(cwd . '/a_dir')
 
     call s:helper.sync_execute('parent')
 
     let lines = s:helper.lines()
     call s:assert.not_empty(lines)
-    call s:assert.contains(lines, 'autoload/')
+    call s:assert.contains(lines, 'a_dir/')
     call s:assert.not_contains(lines, '')
     call s:assert.filetype('kiview')
     call s:assert.working_dir(cwd)
 
-    call s:helper.search('test/')
+    call s:helper.search('a_dir/')
     call s:helper.sync_execute('child')
 
     let lines = s:helper.lines()
     call s:assert.not_empty(lines)
     call s:assert.equals(lines[0], '..')
-    call s:assert.contains(test_lines, 'plugin/')
+    call s:assert.contains(test_lines, 'a_depth1/')
     call s:assert.not_contains(test_lines, '')
     call s:assert.filetype('kiview')
     call s:assert.lines(test_lines)
 
-    call s:helper.search('\.themisrc')
+    call s:helper.search('a_1_depth1.vim')
     call s:helper.sync_execute('child')
 
-    call s:assert.file_name('.themisrc')
+    call s:assert.file_name('a_1_depth1.vim')
     call s:assert.filetype('vim')
 endfunction
 
@@ -120,7 +139,7 @@ function! s:suite.quit_option()
     call s:assert.window_count(1)
 endfunction
 
-function! s:suite.tab_open()
+function! s:suite.tab_open_one()
     call s:helper.sync_execute('')
 
     call s:helper.search('Makefile')
@@ -156,18 +175,20 @@ function! s:suite.horizontal_open()
     call s:assert.filetype('kiview')
 endfunction
 
-function! s:suite.history()
-    cd ./src
+function! s:suite.navigation_history()
+    let cwd = getcwd()
+    cd ./b_dir
 
     call s:helper.sync_execute('')
 
-    call s:helper.search('src')
+    call s:helper.search('b_depth1\/')
+    call s:helper.sync_execute('child')
+    call s:assert.working_dir(cwd . '/b_dir/b_depth1')
+
+    call s:helper.search('b_depth2\/')
     call s:helper.sync_execute('child')
 
-    let lines = s:helper.lines()
-    call s:assert.contains(lines, 'repository/')
-
-    call s:helper.search('repository')
+    call s:helper.search('b_depth3\/')
     call s:helper.sync_execute('child')
 
     call s:helper.sync_execute('parent')
@@ -178,11 +199,11 @@ function! s:suite.history()
     call s:helper.sync_execute('child')
 
     let lines = s:helper.lines()
-    call s:assert.contains(lines, 'repository/')
+    call s:assert.contains(lines, 'b_depth3/')
 endfunction
 
 function! s:suite.no_error_with_continuous()
-    cd ./src/src/repository
+    cd ./b_dir/b_depth1/b_depth2
 
     let create_command = s:helper.execute('')
     let parent_command1 = s:helper.execute('parent')
@@ -202,18 +223,18 @@ function! s:suite.nop_logger()
 endfunction
 
 function! s:suite.range()
-    cd ./src
+    cd ./a_dir
 
     call s:helper.sync_execute('')
 
-    let line = s:helper.search('Cargo\.toml')
+    let line = s:helper.search('a_1_depth1.vim')
     let command = s:helper.sync_execute('child -split=tab', {'range': [line, line + 1]})
 
     call s:assert.tab_count(3)
 endfunction
 
 function! s:suite.parent_marker()
-    cd ./src
+    cd ./a_dir
 
     call s:helper.sync_execute('')
 
@@ -221,23 +242,23 @@ function! s:suite.parent_marker()
     call s:helper.sync_execute('child')
 
     let lines = s:helper.lines()
-    call s:assert.contains(lines, 'autoload/')
+    call s:assert.contains(lines, 'a_dir/')
     call s:assert.line_number(2)
 endfunction
 
 function! s:suite.go()
     call s:helper.sync_execute('')
-    call s:helper.sync_execute('go -path=./autoload')
+    call s:helper.sync_execute('go -path=./a_dir')
 
     let lines = s:helper.lines()
-    call s:assert.contains(lines, 'kiview/')
+    call s:assert.contains(lines, 'a_depth1/')
 endfunction
 
 function! s:suite.__new__() abort
     let suite = s:helper.sub_suite('new')
 
     function! suite.before_each()
-        call s:helper.before_each()
+        call s:suite.before_each()
 
         call s:helper.new_directory('tree')
         call s:helper.new_file('tree/file_in_tree')
@@ -252,7 +273,6 @@ function! s:suite.__new__() abort
 
     function! suite.new_one()
         let cwd = getcwd()
-        cd ./test/plugin/_test_data
 
         call s:helper.set_input('new/')
 
@@ -261,7 +281,7 @@ function! s:suite.__new__() abort
 
         call s:helper.search('new\/')
         call s:helper.sync_execute('child')
-        call s:assert.working_dir(cwd . '/test/plugin/_test_data/new')
+        call s:assert.working_dir(cwd . '/new')
 
         call s:helper.set_input('new_file')
 
@@ -277,8 +297,6 @@ function! s:suite.__new__() abort
     endfunction
 
     function! suite.new_with_open()
-        cd ./test/plugin/_test_data
-
         call s:helper.set_input('new_file')
 
         call s:helper.sync_execute('')
@@ -295,12 +313,10 @@ function! s:suite.__new__() abort
         call s:helper.sync_execute('new')
 
         let lines = s:helper.lines()
-        call s:assert.contains(lines, 'autoload/')
+        call s:assert.contains(lines, 'a_dir/')
     endfunction
 
     function! suite.new_already_exists()
-        cd ./test/plugin/_test_data
-
         call s:helper.set_input('already')
 
         call s:helper.sync_execute('')
@@ -310,8 +326,6 @@ function! s:suite.__new__() abort
     endfunction
 
     function! suite.new_in_tree()
-        cd ./test/plugin/_test_data
-
         call s:helper.sync_execute('')
 
         call s:helper.search('tree/')
@@ -329,7 +343,7 @@ function! s:suite.__new__() abort
 
     function! suite.new_multiple()
         let cwd = getcwd()
-        cd ./test/plugin/_test_data
+
         call s:helper.set_input('new_file1 new_file2')
 
         call s:helper.sync_execute('')
@@ -346,7 +360,7 @@ function! s:suite.__remove__() abort
     let suite = s:helper.sub_suite('remove')
 
     function! suite.before_each()
-        call s:helper.before_each()
+        call s:suite.before_each()
 
         call s:helper.new_file('removed_file1')
         call s:helper.new_file('removed_file2')
@@ -368,7 +382,6 @@ function! s:suite.__remove__() abort
     endfunction
 
     function! suite.remove_one()
-        cd ./test/plugin/_test_data
         call s:helper.set_input('y', 'y')
 
         call s:helper.sync_execute('')
@@ -389,7 +402,6 @@ function! s:suite.__remove__() abort
     endfunction
 
     function! suite.remove_in_tree()
-        cd ./test/plugin/_test_data
         call s:helper.set_input('y')
 
         call s:helper.sync_execute('')
@@ -407,7 +419,6 @@ function! s:suite.__remove__() abort
     endfunction
 
     function! suite.remove_parent_and_child()
-        cd ./test/plugin/_test_data
         call s:helper.set_input('y')
 
         call s:helper.sync_execute('')
@@ -434,7 +445,6 @@ function! s:suite.__remove__() abort
     endfunction
 
     function! suite.cancel_remove()
-        cd ./test/plugin/_test_data
         call s:helper.set_input('')
 
         call s:helper.sync_execute('')
@@ -447,7 +457,6 @@ function! s:suite.__remove__() abort
     endfunction
 
     function! suite.no_remove()
-        cd ./test/plugin/_test_data
         call s:helper.set_input('n')
 
         call s:helper.sync_execute('')
@@ -465,20 +474,21 @@ function! s:suite.__copy_cut_paste__() abort
     let suite = s:helper.sub_suite('copy_cut_paste')
 
     function! suite.before_each()
-        call s:helper.before_each()
+        call s:suite.before_each()
 
-        call s:helper.new_file('copy_file')
-        call s:helper.new_file('force_paste_file')
-        call s:helper.new_file('cut_file')
-        call s:helper.new_directory('paste')
-        call s:helper.new_directory('tree')
-        call s:helper.new_file('tree/file_in_tree')
-        call s:helper.new_file_with_content('tree/force_paste_file', ['has contents'])
+        call s:helper.new_directory('copy_and_paste')
+        call s:helper.new_file('copy_and_paste/copy_file')
+        call s:helper.new_file('copy_and_paste/force_paste_file')
+        call s:helper.new_file('copy_and_paste/cut_file')
+        call s:helper.new_directory('copy_and_paste/paste')
+        call s:helper.new_directory('copy_and_paste/tree')
+        call s:helper.new_file('copy_and_paste/tree/file_in_tree')
+        call s:helper.new_file_with_content('copy_and_paste/tree/force_paste_file', ['has contents'])
 
-        call s:helper.new_file('already')
+        call s:helper.new_file('copy_and_paste/already')
 
-        call s:helper.new_directory('has_already')
-        call s:helper.new_file_with_content('has_already/already', ['has contents'])
+        call s:helper.new_directory('copy_and_paste/has_already')
+        call s:helper.new_file_with_content('copy_and_paste/has_already/already', ['has contents'])
     endfunction
 
     function! suite.after_each()
@@ -486,7 +496,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.clear_clipboard()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
 
         call s:helper.search('copy_file')
         call s:helper.sync_execute('copy')
@@ -502,7 +512,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.copy_and_paste()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
 
         let messenger = s:helper.messenger()
 
@@ -511,7 +521,7 @@ function! s:suite.__copy_cut_paste__() abort
         call s:helper.sync_execute('copy') " copy disables cut
 
         call s:assert.contains(messenger.msg, 'Copied')
-        call s:assert.contains(messenger.msg, 'test/plugin/_test_data/copy_file')
+        call s:assert.contains(messenger.msg, '/copy_file')
 
         call s:helper.search('paste\/')
         call s:helper.sync_execute('child')
@@ -534,7 +544,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.cut_and_paste()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
 
         let messenger = s:helper.messenger()
 
@@ -542,7 +552,7 @@ function! s:suite.__copy_cut_paste__() abort
         call s:helper.sync_execute('cut')
 
         call s:assert.contains(messenger.msg, 'Cut')
-        call s:assert.contains(messenger.msg, 'test/plugin/_test_data/cut_file')
+        call s:assert.contains(messenger.msg, '/cut_file')
 
         call s:helper.search('paste\/')
         call s:helper.sync_execute('child')
@@ -565,7 +575,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.paste_in_tree()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
 
         call s:helper.search('copy_file')
         call s:helper.sync_execute('cut')
@@ -583,7 +593,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.copy_and_renamed_paste_on_cmdline()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
 
         call s:helper.search('tree')
         call s:helper.sync_execute('toggle_tree')
@@ -603,7 +613,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.copy_and_renamed_paste_on_renamer()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
 
         call s:helper.search('copy_file')
         call s:helper.sync_execute('copy')
@@ -624,7 +634,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.cancel_renamed_paste_on_renamer()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
         let test_lines = s:helper.lines()
 
         call s:helper.search('copy_file')
@@ -643,7 +653,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.cancel_renamed_paste_on_cmdline()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
         let test_lines = s:helper.lines()
 
         call s:helper.search('copy_file')
@@ -659,7 +669,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.cancel_paste_on_already_exists()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data/has_already')
+        call s:helper.sync_execute('go -path=copy_and_paste/has_already')
 
         call s:helper.search('already')
         call s:helper.sync_execute('copy')
@@ -674,7 +684,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.force_paste_on_already_exists()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data/has_already')
+        call s:helper.sync_execute('go -path=copy_and_paste/has_already')
 
         call s:helper.search('already')
         call s:helper.sync_execute('copy')
@@ -689,7 +699,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.force_cut_paste_on_already_exists()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data/has_already')
+        call s:helper.sync_execute('go -path=copy_and_paste/has_already')
 
         call s:helper.search('already')
         call s:helper.sync_execute('cut')
@@ -707,7 +717,7 @@ function! s:suite.__copy_cut_paste__() abort
     function! suite.share_clipboard()
         let cwd = getcwd()
 
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
 
         call s:helper.search('copy_file')
         call s:helper.sync_execute('copy')
@@ -719,17 +729,17 @@ function! s:suite.__copy_cut_paste__() abort
         call s:helper.sync_execute('paste')
 
         let lines = s:helper.lines()
-        call s:assert.working_dir(cwd . '/test/plugin/_test_data/paste')
+        call s:assert.working_dir(cwd . '/copy_and_paste/paste')
         call s:assert.contains(lines, 'copy_file')
 
         wincmd p
         let lines = s:helper.lines()
-        call s:assert.working_dir(cwd . '/test/plugin/_test_data')
+        call s:assert.working_dir(cwd . '/copy_and_paste')
         call s:assert.contains(lines, 'copy_file')
     endfunction
 
     function! suite.directory_copy()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
 
         call s:helper.search('tree\/')
         call s:helper.sync_execute('copy')
@@ -744,7 +754,7 @@ function! s:suite.__copy_cut_paste__() abort
     endfunction
 
     function! suite.directory_cut()
-        call s:helper.sync_execute('go -path=test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=copy_and_paste')
 
         call s:helper.search('tree\/')
         call s:helper.sync_execute('cut')
@@ -769,7 +779,7 @@ function! s:suite.__rename__() abort
     let suite = s:helper.sub_suite('rename')
 
     function! suite.before_each()
-        call s:helper.before_each()
+        call s:suite.before_each()
 
         call s:helper.new_file('rename_file')
 
@@ -784,8 +794,6 @@ function! s:suite.__rename__() abort
     endfunction
 
     function! suite.rename_one()
-        cd ./test/plugin/_test_data
-
         call s:helper.set_input('renamed_file')
 
         call s:helper.sync_execute('')
@@ -799,8 +807,6 @@ function! s:suite.__rename__() abort
     endfunction
 
     function! suite.rename_in_tree()
-        cd ./test/plugin/_test_data
-
         call s:helper.set_input('renamed_file')
 
         call s:helper.sync_execute('')
@@ -817,8 +823,6 @@ function! s:suite.__rename__() abort
     endfunction
 
     function! suite.rename_already_exists()
-        cd ./test/plugin/_test_data
-
         call s:helper.sync_execute('')
 
         call s:helper.search('rename_file')
@@ -829,8 +833,6 @@ function! s:suite.__rename__() abort
     endfunction
 
     function! suite.multiple_rename_one()
-        cd ./test/plugin/_test_data
-
         call s:helper.sync_execute('')
 
         call s:helper.search('rename_file')
@@ -857,8 +859,6 @@ function! s:suite.__rename__() abort
     endfunction
 
     function! suite.multiple_rename_already_exists()
-        cd ./test/plugin/_test_data
-
         call s:helper.sync_execute('')
 
         call s:helper.search('rename_file')
@@ -880,8 +880,6 @@ function! s:suite.__rename__() abort
     endfunction
 
     function! suite.multiple_rename_twice()
-        cd ./test/plugin/_test_data
-
         call s:helper.sync_execute('')
 
         call s:helper.search('rename_file')
@@ -950,7 +948,7 @@ endfunction
 function! s:suite.toggle_tree()
     call s:helper.sync_execute('')
 
-    call s:helper.search('autoload/')
+    call s:helper.search('a_dir/')
 
     let lines = s:helper.lines()
     call s:helper.sync_execute('toggle_tree')
@@ -959,10 +957,10 @@ function! s:suite.toggle_tree()
 
     call s:helper.sync_execute('toggle_tree')
 
-    call s:helper.search('kiview.vim')
+    call s:helper.search('a_1_depth1.vim')
     call s:helper.sync_execute('child')
 
-    call s:assert.file_name('kiview.vim')
+    call s:assert.file_name('a_1_depth1.vim')
 endfunction
 
 function! s:suite.cannot_toggle_parent_node()
@@ -979,26 +977,26 @@ endfunction
 function! s:suite.toggle_multi_trees()
     call s:helper.sync_execute('')
 
-    call s:helper.search('autoload\/')
+    call s:helper.search('a_dir\/')
     call s:helper.sync_execute('toggle_tree')
 
-    call s:helper.search('plugin\/')
+    call s:helper.search('b_dir\/')
     call s:helper.sync_execute('toggle_tree')
 
-    call s:helper.search('kiview\.vim')
+    call s:helper.search('a_1_depth1\.vim')
     call s:helper.sync_execute('child')
 
-    call s:assert.path('plugin/kiview.vim')
+    call s:assert.path('a_dir/a_1_depth1.vim')
 endfunction
 
 function! s:suite.toggle_parent_and_child()
     call s:helper.sync_execute('')
 
-    call s:helper.search('autoload\/')
+    call s:helper.search('a_dir\/')
     call s:helper.sync_execute('toggle_selection')
     call s:helper.sync_execute('toggle_tree')
 
-    call s:helper.search('kiview\/')
+    call s:helper.search('b_dir\/')
     call s:helper.sync_execute('toggle_selection')
 
     call s:helper.sync_execute('toggle_tree')
@@ -1008,10 +1006,11 @@ function! s:suite.__toggle_deep__() abort
     let suite = s:helper.sub_suite('toggle_deep')
 
     function! suite.before_each()
-        call s:helper.before_each()
+        call s:suite.before_each()
 
-        call s:helper.new_directory('depth0')
-        call s:helper.new_directory('depth0/depth1')
+        call s:helper.new_directory('toggle')
+        call s:helper.new_directory('toggle/depth0')
+        call s:helper.new_directory('toggle/depth0/depth1')
     endfunction
 
     function! suite.after_each()
@@ -1019,7 +1018,7 @@ function! s:suite.__toggle_deep__() abort
     endfunction
 
     function! suite.toggle_last_dir()
-        call s:helper.sync_execute('go -path=./test/plugin/_test_data/depth0')
+        call s:helper.sync_execute('go -path=toggle/depth0')
 
         let lines = s:helper.lines()
 
@@ -1031,9 +1030,9 @@ function! s:suite.__toggle_deep__() abort
     endfunction
 
     function! suite.toggle_single_dir()
-        call s:helper.sync_execute('go -path=./test/plugin/_test_data')
+        call s:helper.sync_execute('go -path=toggle')
 
-        call s:helper.search('depth0\/')
+        call s:helper.search('^depth0\/')
         call s:helper.sync_execute('toggle_tree')
 
         let lines = s:helper.lines()
@@ -1060,97 +1059,95 @@ function! s:suite.open_root()
 endfunction
 
 function! s:suite.select_two()
-    call s:helper.sync_execute('go -path=src')
+    call s:helper.sync_execute('go -path=a_dir')
 
-    call s:helper.search('\.gitignore')
+    call s:helper.search('a_1_depth1\.vim')
     call s:helper.sync_execute('select')
     call s:helper.sync_execute('select')
 
-    call s:helper.search('Cargo\.toml')
+    call s:helper.search('a_2_depth1\.vim')
     call s:helper.sync_execute('select')
 
     call s:helper.sync_execute('child -split=tab')
 
     call s:assert.tab_count(3)
-    call s:assert.file_name('Cargo.toml')
+    call s:assert.file_name('a_2_depth1.vim')
 endfunction
 
 function! s:suite.select_all()
-    call s:helper.sync_execute('go -path=src')
+    call s:helper.sync_execute('go -path=a_dir')
 
-    call s:helper.search('\.gitignore')
+    call s:helper.search('a_1_depth1\.vim')
     call s:helper.sync_execute('select')
 
-    call s:helper.search('Cargo\.toml')
+    call s:helper.search('a_2_depth1\.vim')
 
     call s:helper.sync_execute('select_all')
     call s:helper.sync_execute('child -split=tab')
 
-    call s:assert.tab_count(7)
-    call s:assert.file_name('Makefile')
+    call s:assert.tab_count(4)
+    call s:assert.file_name('a_2_depth1.vim')
 endfunction
 
 function! s:suite.unselect_all()
-    call s:helper.sync_execute('go -path=src')
+    call s:helper.sync_execute('go -path=a_dir')
 
-    call s:helper.search('\.gitignore')
+    call s:helper.search('a_1_depth1\.vim')
     call s:helper.sync_execute('select')
 
-    call s:helper.search('Cargo\.toml')
+    call s:helper.search('a_2_depth1\.vim')
 
     call s:helper.sync_execute('unselect_all')
     call s:helper.sync_execute('child -split=tab')
 
     call s:assert.tab_count(2)
-    call s:assert.file_name('Cargo.toml')
+    call s:assert.file_name('a_2_depth1.vim')
 endfunction
 
 function! s:suite.unselect()
-    call s:helper.sync_execute('go -path=src')
+    call s:helper.sync_execute('go -path=a_dir')
 
-    call s:helper.search('\.gitignore')
+    call s:helper.search('a_1_depth1\.vim')
     call s:helper.sync_execute('select')
     call s:helper.sync_execute('unselect')
     call s:helper.sync_execute('unselect')
 
-    call s:helper.search('Cargo\.toml')
+    call s:helper.search('a_2_depth1\.vim')
     call s:helper.sync_execute('select')
 
     call s:helper.sync_execute('child -split=tab')
 
     call s:assert.tab_count(2)
-    call s:assert.file_name('Cargo.toml')
+    call s:assert.file_name('a_2_depth1.vim')
 endfunction
 
 function! s:suite.toggle_selection()
-    call s:helper.sync_execute('go -path=src')
+    call s:helper.sync_execute('go -path=a_dir')
 
-    call s:helper.search('\.gitignore')
+    call s:helper.search('a_1_depth1\.vim')
     call s:helper.sync_execute('toggle_selection')
 
-    call s:helper.search('Cargo\.toml')
+    call s:helper.search('a_2_depth1\.vim')
     call s:helper.sync_execute('toggle_selection')
 
     call s:helper.sync_execute('child -split=tab')
 
     call s:assert.tab_count(3)
-    call s:assert.file_name('Cargo.toml')
+    call s:assert.file_name('a_2_depth1.vim')
 endfunction
 
 function! s:suite.toggle_all_selection()
-    call s:helper.sync_execute('go -path=src')
+    call s:helper.sync_execute('go -path=a_dir')
 
-    call s:helper.search('src\/')
-    call s:helper.sync_execute('toggle_selection')
-    call s:helper.search('target\/')
+    call s:helper.search('a_depth1\/')
     call s:helper.sync_execute('toggle_selection')
 
     call s:helper.sync_execute('toggle_all_selection')
 
     call s:helper.sync_execute('child -split=tab')
 
-    call s:assert.tab_count(5)
-    call s:assert.file_name('Makefile')
+    call s:assert.tab_count(3)
+    call s:assert.file_name('a_2_depth1.vim')
 
     call s:helper.sync_execute('parent')
     call s:helper.sync_execute('toggle_all_selection')
@@ -1202,17 +1199,17 @@ function! s:suite.no_split()
 endfunction
 
 function! s:suite.clear_selection_on_error()
-    call s:helper.sync_execute('go -path=./src')
+    call s:helper.sync_execute('go -path=./a_dir')
 
-    call s:helper.search('\.gitignore')
+    call s:helper.search('a_1_depth1\.vim')
     call s:helper.sync_execute('toggle_selection')
 
     call s:helper.sync_execute('go -path=./not_found')
 
-    call s:helper.search('Makefile')
+    call s:helper.search('a_2_depth1\.vim')
     call s:helper.sync_execute('child')
 
-    call s:assert.file_name('Makefile')
+    call s:assert.file_name('a_2_depth1.vim')
 endfunction
 
 function! s:suite.open_same_path()
@@ -1234,7 +1231,7 @@ function! s:suite.tab_open_group_node()
     let cwd = getcwd()
 
     call s:helper.sync_execute('')
-    call s:helper.search('test\/')
+    call s:helper.search('a_dir\/')
     call s:helper.sync_execute('toggle_selection')
     call s:helper.search('Makefile')
     call s:helper.sync_execute('toggle_selection')
@@ -1246,12 +1243,12 @@ function! s:suite.tab_open_group_node()
 
     tabprevious
     call s:assert.filetype('kiview')
-    call s:assert.working_dir(cwd . '/test')
+    call s:assert.working_dir(cwd . '/a_dir')
 
-    call s:helper.search('plugin\/')
+    call s:helper.search('a_depth1\/')
     call s:helper.sync_execute('child')
 
-    call s:assert.working_dir(cwd . '/test/plugin')
+    call s:assert.working_dir(cwd . '/a_dir/a_depth1')
 
     tabprevious
     call s:assert.working_dir(cwd)
@@ -1261,24 +1258,24 @@ function! s:suite.history_back()
     call s:helper.sync_execute('')
     let working_dir = getcwd()
 
-    call s:helper.search('src\/')
+    call s:helper.search('b_dir\/')
     call s:helper.sync_execute('child')
-    call s:helper.search('target\/')
-    call s:helper.sync_execute('child')
-
-    call s:helper.sync_execute('back')
-    call s:assert.working_dir(working_dir . '/src')
-
-    call s:helper.search('src\/')
-    call s:helper.sync_execute('child')
-    call s:helper.search('command\/')
+    call s:helper.search('b_depth1\/')
     call s:helper.sync_execute('child')
 
     call s:helper.sync_execute('back')
-    call s:assert.working_dir(working_dir . '/src/src')
+    call s:assert.working_dir(working_dir . '/b_dir')
+
+    call s:helper.search('\.b_1_depth1\/')
+    call s:helper.sync_execute('child')
+    call s:helper.search('\.b_1_depth2\/')
+    call s:helper.sync_execute('child')
 
     call s:helper.sync_execute('back')
-    call s:assert.working_dir(working_dir . '/src')
+    call s:assert.working_dir(working_dir . '/b_dir/.b_1_depth1')
+
+    call s:helper.sync_execute('back')
+    call s:assert.working_dir(working_dir . '/b_dir')
 
     call s:helper.sync_execute('back')
     call s:assert.working_dir(working_dir)
@@ -1297,6 +1294,5 @@ function! s:suite.fallback_if_not_exists()
     call s:helper.delete('depth1/depth2')
 
     call s:helper.sync_execute('')
-    " TODO: not write test_data path
-    call s:assert.working_dir(cwd . '/test/plugin/_test_data/depth1')
+    call s:assert.working_dir(cwd . '/depth1')
 endfunction

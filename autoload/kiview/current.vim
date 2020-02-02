@@ -42,7 +42,7 @@ function! kiview#current#new(bufnr) abort
     endfunction
 
     function! current.toggle_tree(id, opened) abort
-        call self.logger.logf('id: %s, opened: %s', a:id, a:opened)
+        call self.logger.logf('toggle tree, id: %s, opened: %s', a:id, a:opened)
         let [index, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:id)
         let line_number = index + 1
         let prop = self.props[a:id]

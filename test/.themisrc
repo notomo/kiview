@@ -79,7 +79,7 @@ function! KiviewTestHelper() abort
         let result = search(a:pattern)
         if result == 0
             let message = printf('%s not found', a:pattern)
-            call self.assert().fail(message)
+            call self.assert.fail(message)
         endif
         return result
     endfunction
