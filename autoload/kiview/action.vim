@@ -102,6 +102,7 @@ function! s:close_tree(action, buffer) abort
     let end = line_number + line_count
     call a:buffer.current.unset_props(start, end)
     call a:buffer.write([], start, end + 1)
+    call a:buffer.current.log()
 endfunction
 
 function! s:try_to_restore_cursor(action, buffer) abort

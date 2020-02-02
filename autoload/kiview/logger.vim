@@ -55,7 +55,7 @@ function! kiview#logger#new(...) abort
         let props = deepcopy(a:props)
         for [id, line, _] in marks
             let props[id].id = id
-            let lines[str2nr(line)] = printf('%s  %s', lines[line], string(props[id]))
+            let lines[str2nr(line)] = printf('%s  %s', lines[line], props[id].id)
         endfor
         call self.logs(lines)
     endfunction

@@ -1011,6 +1011,9 @@ function! s:suite.__toggle_deep__() abort
         call s:helper.new_directory('toggle')
         call s:helper.new_directory('toggle/depth0')
         call s:helper.new_directory('toggle/depth0/depth1')
+        call s:helper.new_file('toggle/depth0/depth1/file')
+        call s:helper.new_directory('toggle/dir')
+        call s:helper.new_file('toggle/file')
     endfunction
 
     function! suite.after_each()

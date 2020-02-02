@@ -37,6 +37,10 @@ function! kiview#current#new(bufnr) abort
         endfor
     endfunction
 
+    function! current.log() abort
+        call self.logger.label('line').buffer_log(self.bufnr, s:namespace, self.props)
+    endfunction
+
     function! current.unset_props_all() abort
         call self.unset_props(0, 1)
     endfunction
@@ -150,6 +154,7 @@ function! kiview#current#new(bufnr) abort
             let self.props[id] = prop
             let line_number += 1
         endfor
+        let last_line_number = line_number - 1
         let last_sibling_id = id
 
         let [_, prev_prop] = pairs[0]
@@ -157,6 +162,11 @@ function! kiview#current#new(bufnr) abort
             let prev_prop.next_sibling_id = id
             let prev_prop = prop
         endfor
+        let marks = nvim_buf_get_extmarks(self.bufnr, s:namespace, [last_line_number + 1, 0], [last_line_number + 1, -1], {})
+        if !empty(marks)
+            let [id, _, _] = marks[0]
+            let prop.next_sibling_id = id
+        endif
 
         for [id, prop] in pairs
             if prop.is_parent_node
