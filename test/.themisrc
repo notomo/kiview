@@ -2,12 +2,13 @@
 call themis#option('recursive', 1)
 
 let s:root = getcwd()
-let s:test_data_dir = './test/plugin/_test_data/'
+let s:test_data_dir = s:root . '/test/plugin/_test_data/'
 
 function! KiviewTestHelper() abort
     let helper = {
         \ 'before_each': function('s:before_each'),
         \ 'after_each': function('s:after_each'),
+        \ 'assert': s:assert(),
     \ }
 
     function! helper.execute(arg, ...) abort
@@ -35,15 +36,24 @@ function! KiviewTestHelper() abort
         call mkdir(s:test_data_dir . a:path, 'p')
     endfunction
 
+    function! helper.delete(path) abort
+        let path = s:test_data_dir . a:path
+        let result = delete(path, 'rf')
+        if result != 0
+            let message = printf('failed to delete: %s', path)
+            call self.assert.fail(message)
+        endif
+    endfunction
+
+    function! helper.cd(path) abort
+        execute 'cd' s:test_data_dir . a:path
+    endfunction
+
     function! helper.suite(name) abort
         let suite = themis#suite(a:name)
         let suite.before_each = self.before_each
         let suite.after_each = self.after_each
         return suite
-    endfunction
-
-    function! helper.assert() abort
-        return s:assert()
     endfunction
 
     function! helper.sub_suite(name) abort
@@ -59,7 +69,7 @@ function! KiviewTestHelper() abort
         let new_line = substitute(old_line, a:from, a:to, '')
         if old_line ==? new_line
             let message = printf('failed: substitute("%s", "%s", "%s", "")', old_line, a:from, a:to)
-            call self.assert().fail(message)
+            call self.assert.fail(message)
             return
         endif
         call setline('.', new_line)

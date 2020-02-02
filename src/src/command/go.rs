@@ -48,13 +48,13 @@ pub struct GoCommand<'a> {
 
 impl<'a> Command for GoCommand<'a> {
     fn actions(&self) -> CommandResult {
-        let target_group_path = self
-            .repository
-            .path(match &self.opts.path {
-                Some(opt_path) => opt_path.as_str(),
-                None => self.current.path,
-            })
-            .canonicalize()?;
+        let target_group_path = match &self.opts.path {
+            Some(opt_path) => self.repository.path(opt_path.as_str()).canonicalize()?,
+            None => self
+                .repository
+                .path(self.current.path)
+                .parent_if_not_exists()?,
+        };
 
         let paths: Paths = self.repository.list(&target_group_path)?.into();
 

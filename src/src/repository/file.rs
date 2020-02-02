@@ -146,6 +146,15 @@ impl<'a> Path for FilePath<'a> {
         Ok(self.path.join(path).to_str()?.to_string())
     }
 
+    fn parent_if_not_exists(&self) -> Result<String, Error> {
+        let mut path = self.path;
+        while !path.exists() {
+            path = path.parent()?;
+        }
+        let fulll_path = path.canonicalize()?;
+        Ok(fulll_path.to_str()?.to_string())
+    }
+
     fn exists(&self) -> bool {
         self.path.exists()
     }

@@ -1,7 +1,7 @@
 
 let s:helper = KiviewTestHelper()
 let s:suite = s:helper.suite('plugin.kiview')
-let s:assert = s:helper.assert()
+let s:assert = s:helper.assert
 
 function! s:suite.create_one()
     let cwd = getcwd()
@@ -1285,4 +1285,18 @@ function! s:suite.history_back()
 
     call s:helper.sync_execute('back')
     call s:assert.working_dir(working_dir)
+endfunction
+
+function! s:suite.fallback_if_not_exists()
+    call s:helper.new_directory('depth1/depth2/depth3')
+    call s:helper.new_file('depth1/depth2/depth3/depth3_file')
+
+    let cwd = getcwd()
+    call s:helper.cd('depth1/depth2/depth3')
+    execute 'edit' getcwd() . '/depth3_file'
+    call s:helper.delete('depth1/depth2')
+
+    call s:helper.sync_execute('')
+    " TODO: not write test_data path
+    call s:assert.working_dir(cwd . '/test/plugin/_test_data/depth1')
 endfunction

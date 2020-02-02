@@ -1,7 +1,7 @@
 
 let s:helper = KiviewTestHelper()
 let s:suite = s:helper.suite('autoload.kiview.complete')
-let s:assert = s:helper.assert()
+let s:assert = s:helper.assert
 
 let s:_cursor_position = 8888
 

@@ -73,6 +73,7 @@ pub trait Path {
     fn contained(&self, haystack: &str) -> bool;
     fn to_relative(&self, base: &str) -> Result<String, Error>;
     fn root(&self) -> String;
+    fn parent_if_not_exists(&self) -> Result<String, Error>;
 
     fn parent_or_root(&self) -> String {
         match self.parent() {

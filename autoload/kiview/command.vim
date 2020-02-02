@@ -77,8 +77,9 @@ function! kiview#command#new(buffer, range, event_service, arg, parent_id) abort
 endfunction
 
 function! s:build_input(buffer, range) abort
+    let cwd = getcwd()
     let input = {
-        \ 'path': getcwd(),
+        \ 'path': !empty(cwd) ? cwd : expand('%:p:h'),
         \ 'name': expand('%'),
         \ 'line_number': 2,
         \ 'registered_targets': a:buffer.register.targets,
