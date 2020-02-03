@@ -234,10 +234,16 @@ function! s:before_each() abort
 
     call kiview#logger#set_func({ msg -> themis#log(msg) })
     call kiview#messenger#set_func({ msg -> themis#log('[test messenger] ' . msg) })
+    call kiview#input_reader#set_func(function('s:default_input_func'))
     call themis#log('')
 
     filetype on
     syntax enable
+endfunction
+
+function! s:default_input_func(message, default) abort
+    let message = printf('not set test input for message: %s %s', a:message, a:default)
+    throw message
 endfunction
 
 function! s:after_each() abort
