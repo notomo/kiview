@@ -67,7 +67,7 @@ function! kiview#command#new(buffer, range, event_service, arg, parent_id) abort
 
     function! command.wait(...) abort
         if empty(a:000)
-            let timeout_msec = 100
+            let timeout_msec = 1000
         else
             let timeout_msec = a:000[0]
         endif
