@@ -2,10 +2,16 @@
 let s:limitter = kiview#limitter#new()
 let s:id = 0
 
+" TODO: configurable
+let s:executable = expand('<sfile>:h:h:h') . '/src/target/debug/kiview'
+function! kiview#command#executable() abort
+    return s:executable
+endfunction
+
 function! kiview#command#new(buffer, range, event_service, arg, parent_id) abort
     let s:id += 1
 
-    let cmd = ['kiview', 'do', '--arg=' . a:arg]
+    let cmd = [s:executable, 'do', '--arg=' . a:arg]
     let command = {
         \ 'id': s:id,
         \ 'parent_id': a:parent_id,
