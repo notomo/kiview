@@ -157,6 +157,10 @@ impl<'a> Path for FilePath<'a> {
         Ok(abs_path)
     }
 
+    fn equals(&self, path: &str) -> bool {
+        self.path.to_slash() == StdPath::new(path).to_slash()
+    }
+
     fn exists(&self) -> bool {
         self.path.exists()
     }

@@ -292,8 +292,14 @@ pub fn parse_command_actions(arg: &str, current: &Current) -> CommandResult {
             repository: path_repository,
             opts: opts.into(),
         } as Box<dyn Command>,
-        CommandName::Copy => box command::CopyCommand { current: current } as Box<dyn Command>,
-        CommandName::Cut => box command::CutCommand { current: current } as Box<dyn Command>,
+        CommandName::Copy => box command::CopyCommand {
+            current: current,
+            repository: path_repository,
+        } as Box<dyn Command>,
+        CommandName::Cut => box command::CutCommand {
+            current: current,
+            repository: path_repository,
+        } as Box<dyn Command>,
         CommandName::ClearClipboard => box SimpleCommand {
             action: Action::ClearRegister,
         } as Box<dyn Command>,

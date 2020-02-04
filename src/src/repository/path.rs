@@ -65,6 +65,7 @@ pub trait PathRepository {
 pub trait Path {
     fn is_group_node(&self) -> bool;
     fn parent(&self) -> Option<String>;
+    fn equals(&self, path: &str) -> bool;
     fn canonicalize(&self) -> Result<String, Error>;
     fn join(&self, path: &str) -> Result<String, Error>;
     fn exists(&self) -> bool;

@@ -66,7 +66,11 @@ impl<'a> Command for GoCommand<'a> {
 
         let mut actions = vec![paths.to_write_all_action()];
 
-        if self.current.path != target_group_path {
+        if !self
+            .repository
+            .path(self.current.path)
+            .equals(&target_group_path)
+        {
             actions.extend(vec![
                 Action::TryToRestoreCursor {
                     path: target_group_path.clone(),

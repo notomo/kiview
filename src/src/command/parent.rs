@@ -29,7 +29,8 @@ impl<'a> Command for ParentCommand<'a> {
             },
         ];
 
-        if let Some(last_path_line_number) = paths.search(|p| p.path == self.current.path) {
+        let current_path = self.repository.path(self.current.path);
+        if let Some(last_path_line_number) = paths.search(|p| current_path.equals(&p.path)) {
             actions.push(Action::SetCursor {
                 line_number: last_path_line_number,
             });
