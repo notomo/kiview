@@ -7,14 +7,19 @@ use serde_derive::Deserialize;
 pub struct Current<'a> {
     pub path: &'a str,
 
+    #[serde(default)]
     pub name: &'a str,
 
+    #[serde(default)]
     pub line_number: u64,
 
     #[serde(default)]
     pub opened: bool,
 
+    #[serde(default)]
     pub has_cut: bool,
+
+    #[serde(default)]
     pub renamer_opened: bool,
 
     #[serde(default)]
