@@ -3,6 +3,8 @@ use crate::repository::{FullPath, Path, PathRepository};
 use std::fs;
 use std::path::Path as StdPath;
 
+extern crate url;
+
 extern crate fs_extra;
 
 pub struct FilePathRepository {}
@@ -16,40 +18,34 @@ impl PathRepository for FilePathRepository {
         paths.sort_by(|a, b| b.is_dir().cmp(&a.is_dir()).then(a.cmp(b)));
         let paths = paths;
 
-        let dirs_and_files = paths
+        let dirs_and_files: Result<Vec<FullPath>, Error> = paths
             .into_iter()
             .map(|p| match p.is_dir() {
                 false => (p, ""),
                 true => (p, "/"),
             })
-            .map(|(p, suffix)| FullPath {
-                name: p
-                    .file_name()
-                    .and_then(|name| {
-                        name.to_str()
-                            .and_then(|name| Some(format!("{}{}", name, suffix)))
-                    })
-                    .unwrap_or(String::from("")),
-                path: p
-                    .canonicalize()
-                    .and_then(|p| Ok(p.to_str().unwrap_or("").to_string()))
-                    .unwrap_or(String::from("")),
-                is_parent_node: false,
-            })
-            .filter(|p| p.name != "" && p.path != "");
+            .try_fold(vec![], |mut full_paths, (p, suffix)| {
+                let abs_path = url::Url::from_file_path(p.canonicalize()?)?.to_file_path()?;
+                full_paths.push(FullPath {
+                    name: format!("{}{}", p.file_name()?.to_str()?, suffix),
+                    path: abs_path.to_str()?.to_string(),
+                    is_parent_node: false,
+                });
+                Ok(full_paths)
+            });
 
-        Ok(box dirs_and_files)
+        Ok(box dirs_and_files?.into_iter())
     }
 
     fn list(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error> {
+        let parent = StdPath::new(path)
+            .parent()
+            .unwrap_or_else(|| StdPath::new(path));
+        let abs_path = url::Url::from_file_path(parent.canonicalize()?)?.to_file_path()?;
+
         Ok(box vec![FullPath {
             name: String::from(".."),
-            path: StdPath::new(path)
-                .parent()
-                .unwrap_or_else(|| StdPath::new(path))
-                .canonicalize()?
-                .to_str()?
-                .to_string(),
+            path: abs_path.to_str()?.to_string(),
             is_parent_node: true,
         }]
         .into_iter()
@@ -138,8 +134,9 @@ impl<'a> Path for FilePath<'a> {
     }
 
     fn canonicalize(&self) -> Result<String, Error> {
-        let fulll_path = self.path.to_path_buf().canonicalize()?;
-        Ok(fulll_path.to_str()?.to_string())
+        let abs_path =
+            url::Url::from_file_path(self.path.to_path_buf().canonicalize()?)?.to_file_path()?;
+        Ok(abs_path.to_str()?.to_string())
     }
 
     fn join(&self, path: &str) -> Result<String, Error> {
@@ -151,8 +148,9 @@ impl<'a> Path for FilePath<'a> {
         while !path.exists() {
             path = path.parent()?;
         }
-        let fulll_path = path.canonicalize()?;
-        Ok(fulll_path.to_str()?.to_string())
+        let abs_path =
+            url::Url::from_file_path(path.to_path_buf().canonicalize()?)?.to_file_path()?;
+        Ok(abs_path.to_str()?.to_string())
     }
 
     fn exists(&self) -> bool {

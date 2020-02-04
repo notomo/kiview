@@ -47,6 +47,16 @@ impl From<ErrorKind> for Error {
     }
 }
 
+impl From<()> for Error {
+    fn from(_error: ()) -> Error {
+        Error {
+            inner: Context::new(ErrorKind::Internal {
+                message: String::from("() Error"),
+            }),
+        }
+    }
+}
+
 impl From<StripPrefixError> for Error {
     fn from(error: StripPrefixError) -> Error {
         Error {

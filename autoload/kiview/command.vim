@@ -84,8 +84,10 @@ endfunction
 
 function! s:build_input(buffer, range) abort
     let cwd = getcwd()
+    let path = !empty(cwd) ? cwd : expand('%:p:h')
+    let path = substitute(path, '\', '/', 'g')
     let input = {
-        \ 'path': !empty(cwd) ? cwd : expand('%:p:h'),
+        \ 'path': path,
         \ 'name': expand('%'),
         \ 'line_number': 2,
         \ 'registered_targets': a:buffer.register.targets,
