@@ -12,7 +12,8 @@ impl Dispatcher {
 pub trait PathRepository {
     fn list(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error>;
     fn children(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error>;
-    fn create(&self, path: &str) -> Result<(), Error>;
+    fn create_leaf(&self, path: &str) -> Result<(), Error>;
+    fn create_group(&self, path: &str) -> Result<(), Error>;
     fn rename(&self, from: &str, to: &str, force: bool) -> Result<(), Error>;
     fn copy(&self, from: &str, to: &str) -> Result<(), Error>;
     fn remove(&self, paths: Vec<String>) -> Result<(), Error>;
@@ -58,7 +59,10 @@ pub trait PathRepository {
 
     fn create_with<'a>(&self, base_path: &'a str, joined: &'a str) -> Result<(), Error> {
         let new_path = self.path(base_path).join(joined)?;
-        Ok(self.create(&new_path)?)
+        Ok(match joined.ends_with("/") {
+            false => self.create_leaf(&new_path),
+            true => self.create_group(&new_path),
+        }?)
     }
 }
 

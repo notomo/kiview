@@ -57,7 +57,7 @@ impl PathRepository for FilePathRepository {
         .chain(self.children(path)?))
     }
 
-    fn create(&self, path: &str) -> Result<(), Error> {
+    fn create_leaf(&self, path: &str) -> Result<(), Error> {
         if StdPath::new(path).exists() {
             return Err(ErrorKind::AlreadyExists {
                 path: path.to_string(),
@@ -65,10 +65,18 @@ impl PathRepository for FilePathRepository {
             .into());
         }
 
-        Ok(match path.ends_with("/") {
-            true => fs::create_dir_all(path).and_then(|_| Ok(())),
-            false => fs::File::create(path).and_then(|_| Ok(())),
-        }?)
+        Ok(fs::File::create(path).and_then(|_| Ok(()))?)
+    }
+
+    fn create_group(&self, path: &str) -> Result<(), Error> {
+        if StdPath::new(path).exists() {
+            return Err(ErrorKind::AlreadyExists {
+                path: path.to_string(),
+            }
+            .into());
+        }
+
+        Ok(fs::create_dir_all(path)?)
     }
 
     fn rename(&self, from: &str, to: &str, force: bool) -> Result<(), Error> {
