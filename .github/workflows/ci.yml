@@ -39,4 +39,5 @@ jobs:
         env:
           THEMIS_VIM: ${{ steps.vim.outputs.executable }}
           THEMIS_HOME: ./vim-themis
+          KIVIEW_LOG_LEVEL: info
         run: make test

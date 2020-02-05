@@ -229,11 +229,14 @@ function! s:assert() abort
     return assert
 endfunction
 
+let s:log_level = exists('$KIVIEW_LOG_LEVEL') ? $KIVIEW_LOG_LEVEL : 'debug'
+
 function! s:before_each() abort
     call mkdir(s:test_data_dir, 'p')
 
     execute 'cd' s:root
 
+    call kiview#logger#set_level(s:log_level)
     call kiview#logger#set_func({ msg -> themis#log(msg) })
     call kiview#messenger#set_func({ msg -> themis#log('[test messenger] ' . msg) })
     call kiview#input_reader#set_func(function('s:default_input_func'))

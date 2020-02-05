@@ -1,3 +1,5 @@
+
+KIVIEW_LOG_LEVEL ?= debug
 test:
 	$(MAKE) build
 	THEMIS_VIM=nvim THEMIS_ARGS="-e -s --headless" themis

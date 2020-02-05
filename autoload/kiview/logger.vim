@@ -1,6 +1,7 @@
 
 function! kiview#logger#clear() abort
     let s:logger_func = v:null
+    let s:level = 'debug'
 endfunction
 
 call kiview#logger#clear()
@@ -10,12 +11,17 @@ function! kiview#logger#set_func(func) abort
     let s:logger_func = { message -> a:func(message) }
 endfunction
 
+function! kiview#logger#set_level(level) abort
+    let s:level = a:level
+endfunction
+
 function! kiview#logger#new(...) abort
     if empty(s:logger_func)
         return s:nop_logger()
     endif
     let logger = {
         \ 'func': s:logger_func,
+        \ 'level': s:level,
         \ 'labels': a:000,
         \ '_label': join(map(copy(a:000), { _, v -> printf('[%s] ', v) }), ''),
     \ }
@@ -33,6 +39,9 @@ function! kiview#logger#new(...) abort
     endfunction
 
     function! logger.log(message) abort
+        if s:level !=? 'debug'
+            return
+        endif
         if type(a:message) == v:t_list || type(a:message) == v:t_dict
             let message = string(a:message)
         else
