@@ -26,9 +26,7 @@ impl PathRepository for FilePathRepository {
                 true => (p, "/"),
             })
             .try_fold(vec![], |mut full_paths, (p, suffix)| {
-                let abs_path = url::Url::from_file_path(p.canonicalize()?)?
-                    .to_file_path()?
-                    .to_slash()?;
+                let abs_path = canonicalize(p.as_path())?;
                 full_paths.push(FullPath {
                     name: format!("{}{}", p.file_name()?.to_str()?, suffix),
                     path: abs_path,
@@ -44,10 +42,7 @@ impl PathRepository for FilePathRepository {
         let parent = StdPath::new(path)
             .parent()
             .unwrap_or_else(|| StdPath::new(path));
-        let abs_path = url::Url::from_file_path(parent.canonicalize()?)?
-            .to_file_path()?
-            .to_slash()?;
-
+        let abs_path = canonicalize(parent)?;
         Ok(box vec![FullPath {
             name: String::from(".."),
             path: abs_path,
@@ -140,18 +135,15 @@ impl<'a> Path for FilePath<'a> {
     }
 
     fn parent(&self) -> Option<String> {
-        self.path.parent().and_then(|p| p.to_slash())
+        self.path.parent().and_then(|p| to_slash(p))
     }
 
     fn canonicalize(&self) -> Result<String, Error> {
-        let abs_path = url::Url::from_file_path(self.path.to_path_buf().canonicalize()?)?
-            .to_file_path()?
-            .to_slash()?;
-        Ok(abs_path)
+        canonicalize(self.path)
     }
 
     fn join(&self, path: &str) -> Result<String, Error> {
-        Ok(self.path.join(path).to_slash()?)
+        Ok(to_slash(self.path.join(path).as_path())?)
     }
 
     fn parent_if_not_exists(&self) -> Result<String, Error> {
@@ -159,14 +151,11 @@ impl<'a> Path for FilePath<'a> {
         while !path.exists() {
             path = path.parent()?;
         }
-        let abs_path = url::Url::from_file_path(path.to_path_buf().canonicalize()?)?
-            .to_file_path()?
-            .to_slash()?;
-        Ok(abs_path)
+        canonicalize(path)
     }
 
     fn equals(&self, path: &str) -> bool {
-        self.path.to_slash() == StdPath::new(path).to_slash()
+        to_slash(self.path) == to_slash(StdPath::new(path))
     }
 
     fn exists(&self) -> bool {
@@ -181,7 +170,7 @@ impl<'a> Path for FilePath<'a> {
     }
 
     fn to_string(&self) -> Result<String, Error> {
-        Ok(self.path.to_slash()?)
+        Ok(to_slash(self.path)?)
     }
 
     fn contained(&self, haystack: &str) -> bool {
@@ -189,10 +178,22 @@ impl<'a> Path for FilePath<'a> {
     }
 
     fn to_relative(&self, base: &str) -> Result<String, Error> {
-        Ok(self.path.strip_prefix(base)?.to_slash()?)
+        Ok(to_slash(self.path.strip_prefix(base)?)?)
     }
 
     fn root(&self) -> String {
         String::from("/")
     }
+}
+
+fn to_slash(p: &StdPath) -> Option<String> {
+    p.to_slash().and_then(|p| Some(p.replace("://", ":/")))
+}
+
+fn canonicalize(p: &StdPath) -> Result<String, Error> {
+    Ok(to_slash(
+        url::Url::from_file_path(p.canonicalize()?)?
+            .to_file_path()?
+            .as_path(),
+    )?)
 }

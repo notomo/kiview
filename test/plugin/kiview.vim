@@ -258,8 +258,6 @@ function! s:suite.__new__() abort
     let suite = s:helper.sub_suite('new')
 
     function! suite.before_each()
-        call s:suite.before_each()
-
         call s:helper.new_directory('tree')
         call s:helper.new_file('tree/file_in_tree')
         call s:helper.new_directory('tree2')
@@ -360,8 +358,6 @@ function! s:suite.__remove__() abort
     let suite = s:helper.sub_suite('remove')
 
     function! suite.before_each()
-        call s:suite.before_each()
-
         call s:helper.new_file('removed_file1')
         call s:helper.new_file('removed_file2')
         call s:helper.new_file('removed_cancel_file')
@@ -474,8 +470,6 @@ function! s:suite.__copy_cut_paste__() abort
     let suite = s:helper.sub_suite('copy_cut_paste')
 
     function! suite.before_each()
-        call s:suite.before_each()
-
         call s:helper.new_directory('copy_and_paste')
         call s:helper.new_file('copy_and_paste/copy_file')
         call s:helper.new_file('copy_and_paste/force_paste_file')
@@ -779,8 +773,6 @@ function! s:suite.__rename__() abort
     let suite = s:helper.sub_suite('rename')
 
     function! suite.before_each()
-        call s:suite.before_each()
-
         call s:helper.new_file('rename_file')
 
         call s:helper.new_file_with_content('already', ['has contents'])
@@ -1006,8 +998,6 @@ function! s:suite.__toggle_deep__() abort
     let suite = s:helper.sub_suite('toggle_deep')
 
     function! suite.before_each()
-        call s:suite.before_each()
-
         call s:helper.new_directory('toggle')
         call s:helper.new_directory('toggle/depth0')
         call s:helper.new_directory('toggle/depth0/depth1')
