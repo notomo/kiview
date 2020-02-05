@@ -814,7 +814,7 @@ function! s:suite.__rename__() abort
         call s:assert.not_contains(lines, '  rename_file')
     endfunction
 
-    function! suite.rename_already_exists()
+    function! suite.rename_one_already_exists()
         call s:helper.sync_execute('')
 
         call s:helper.search('rename_file')

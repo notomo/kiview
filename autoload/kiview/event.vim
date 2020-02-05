@@ -47,6 +47,9 @@ function! s:callback(amatch, event_name) abort
     let index = stridx(id_err, ':', len(a:event_name . ':'))
     let id = id_err[len(a:event_name . ':') : index - 1]
     let err = id_err[index + 1 :]
+    if !has_key(s:callbacks[a:event_name], id)
+        return
+    endif
     call s:callbacks[a:event_name][id](id, err)
 
     call remove(s:callbacks[a:event_name], id)
