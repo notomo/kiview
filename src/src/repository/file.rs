@@ -25,6 +25,8 @@ impl PathRepository for FilePathRepository {
                 false => (p, ""),
                 true => (p, "/"),
             })
+            // NOTICE: remove broken symlink
+            .filter(|(p, _)| p.exists())
             .try_fold(vec![], |mut full_paths, (p, suffix)| {
                 let abs_path = canonicalize(p.as_path())?;
                 full_paths.push(FullPath {
