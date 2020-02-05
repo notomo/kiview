@@ -73,6 +73,7 @@ endfunction
 
 function! s:handle_stderr(job_id, data, event) abort dict
     let valid_data = filter(a:data, { _, v -> !empty(v) })
+    let valid_data = map(valid_data, { _, v -> tr(v, "\n", ' ') })
     call extend(self.job.stderr, valid_data)
     call self.job.logger.label('stderr').logs(valid_data)
 endfunction
