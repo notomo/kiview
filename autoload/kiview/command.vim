@@ -88,7 +88,7 @@ function! s:build_input(buffer, range) abort
     let path = substitute(path, '\', '/', 'g')
     let input = {
         \ 'path': path,
-        \ 'name': expand('%'),
+        \ 'name': substitute(expand('%'), '\', '/', 'g'),
         \ 'line_number': 2,
         \ 'registered_targets': a:buffer.register.targets,
         \ 'rename_targets': a:buffer.renamer.targets,

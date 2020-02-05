@@ -1278,6 +1278,11 @@ function! s:suite.history_back()
 endfunction
 
 function! s:suite.fallback_if_not_exists()
+    if has('win32')
+        " FIXME
+        return s:assert.skip('windows cannot remove directory in use')
+    endif
+
     call s:helper.new_directory('depth1/depth2/depth3')
     call s:helper.new_file('depth1/depth2/depth3/depth3_file')
 
