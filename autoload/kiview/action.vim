@@ -189,7 +189,7 @@ function! s:choose(action, buffer, input_reader) abort
         return
     elseif empty(targets) && !empty(rename_targets)
         let is_copy = !a:action.has_cut ? v:true : v:false
-        let items = map(rename_targets, { _, v -> {'path': v.from, 'relative_path': v.from, 'id': v.from, 'to': v.path, 'is_copy': is_copy}})
+        let items = map(rename_targets, { _, v -> {'path': v.from, 'relative_path': v.relative_path, 'is_copy': is_copy}})
         call a:buffer.renamer.open(a:action.path, items)
         return
     endif

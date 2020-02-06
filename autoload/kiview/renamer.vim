@@ -26,7 +26,7 @@ function! kiview#renamer#new(source_id, bufnr) abort
         let name = printf('kiview://%s/%s/kiview-rename', self.source_id, s:id)
         call nvim_buf_set_name(self.bufnr, name)
 
-        let lines = [''] + map(copy(a:items), { _, v -> has_key(v, 'to') ? v.to : v.relative_path })
+        let lines = [''] + map(copy(a:items), { _, v -> v.relative_path })
         call nvim_buf_set_lines(self.bufnr, 0, -1, v:true, lines)
 
         call nvim_buf_set_virtual_text(self.bufnr, s:namespace, 0, [[a:path, 'Comment']], {})
