@@ -57,12 +57,13 @@ pub trait PathRepository {
         Ok(new_path)
     }
 
-    fn create_with<'a>(&self, base_path: &'a str, joined: &'a str) -> Result<(), Error> {
+    fn create_with<'a>(&self, base_path: &'a str, joined: &'a str) -> Result<String, Error> {
         let new_path = self.path(base_path).join(joined)?;
-        Ok(match joined.ends_with("/") {
+        match joined.ends_with("/") {
             false => self.create_leaf(&new_path),
             true => self.create_group(&new_path),
-        }?)
+        }?;
+        Ok(new_path)
     }
 }
 

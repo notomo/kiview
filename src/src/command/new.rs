@@ -59,10 +59,10 @@ impl<'a> Command for NewCommand<'a> {
                 .iter()
                 .fold((vec![], vec![]), |(mut open_paths, mut errors), path| {
                     match self.repository.create_with(&target_group_path, &path) {
-                        Ok(_) => {
+                        Ok(new_path) => {
                             // HACK: not supported group node open
-                            if !self.repository.path(&path).is_group_node() {
-                                open_paths.push(path.to_string());
+                            if !self.repository.path(&new_path).is_group_node() {
+                                open_paths.push(new_path);
                             };
                         }
                         Err(err) => errors.push(Action::show_error(&path, err)),
