@@ -1,3 +1,4 @@
+doautocmd User KiviewSourceLoad
 
 let s:last_command = v:null
 

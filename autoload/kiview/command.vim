@@ -8,6 +8,13 @@ function! kiview#command#executable() abort
     return s:executable
 endfunction
 
+function! kiview#command#set_executable(executable) abort
+    if !executable(a:executable)
+        throw 'not executable: ' . a:executable
+    endif
+    let s:executable = a:executable
+endfunction
+
 function! kiview#command#new(buffer, range, event_service, arg, parent_id) abort
     let s:id += 1
 
