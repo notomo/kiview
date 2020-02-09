@@ -76,7 +76,7 @@ fn main() {
             std::io::stdin().lock().read_line(&mut line).unwrap();
             let current: Current = serde_json::from_str(&line).unwrap();
 
-            match parse_command_actions(arg, &current) {
+            match parse_command_actions(arg, current) {
                 Ok(actions) => {
                     let output = json!({
                         "actions": actions,

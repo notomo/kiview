@@ -8,12 +8,12 @@ use crate::command::ErrorKind;
 use crate::itertools::Itertools;
 use crate::repository::PathRepository;
 
-pub struct PasteCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct PasteCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
 }
 
-impl<'a> Command for PasteCommand<'a> {
+impl Command for PasteCommand {
     fn actions(&self) -> CommandResult {
         let target_group_path = match &self.current.target {
             Some(target) if !target.is_parent_node => self
@@ -49,7 +49,7 @@ impl<'a> Command for PasteCommand<'a> {
 
                 match (target.force, self.repository.path(&to).exists()) {
                     (false, true) => items.push(ChooseItem {
-                        relative_path: self.repository.path(&to).to_relative(self.current.path)?,
+                        relative_path: self.repository.path(&to).to_relative(&self.current.path)?,
                         path: to.clone(),
                         from: from,
                     }),

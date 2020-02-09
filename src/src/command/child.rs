@@ -34,13 +34,13 @@ impl From<Vec<CommandOption>> for ChildCommandOptions {
     }
 }
 
-pub struct ChildCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct ChildCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
     pub opts: ChildCommandOptions,
 }
 
-impl<'a> Command for ChildCommand<'a> {
+impl Command for ChildCommand {
     fn actions(&self) -> CommandResult {
         let actions: Vec<_> = self
             .current

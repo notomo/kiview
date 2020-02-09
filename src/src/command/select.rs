@@ -3,11 +3,11 @@ use crate::command::Action;
 use crate::command::Command;
 use crate::command::Current;
 
-pub struct ToggleSelectionCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct ToggleSelectionCommand {
+    pub current: Current,
 }
 
-impl<'a> Command for ToggleSelectionCommand<'a> {
+impl Command for ToggleSelectionCommand {
     fn actions(&self) -> CommandResult {
         Ok(vec![Action::ToggleSelection {
             ids: self.current.target_ids(),
@@ -15,11 +15,11 @@ impl<'a> Command for ToggleSelectionCommand<'a> {
     }
 }
 
-pub struct SelectCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct SelectCommand {
+    pub current: Current,
 }
 
-impl<'a> Command for SelectCommand<'a> {
+impl Command for SelectCommand {
     fn actions(&self) -> CommandResult {
         Ok(vec![Action::Select {
             ids: self.current.target_ids(),
@@ -27,11 +27,11 @@ impl<'a> Command for SelectCommand<'a> {
     }
 }
 
-pub struct UnselectCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct UnselectCommand {
+    pub current: Current,
 }
 
-impl<'a> Command for UnselectCommand<'a> {
+impl Command for UnselectCommand {
     fn actions(&self) -> CommandResult {
         Ok(vec![Action::Unselect {
             ids: self.current.target_ids(),
@@ -39,7 +39,7 @@ impl<'a> Command for UnselectCommand<'a> {
     }
 }
 
-impl<'a> Current<'a> {
+impl Current {
     fn target_ids(&self) -> Vec<u64> {
         self.targets
             .iter()

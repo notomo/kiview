@@ -40,19 +40,19 @@ impl From<Vec<CommandOption>> for GoCommandOptions {
     }
 }
 
-pub struct GoCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct GoCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
     pub opts: GoCommandOptions,
 }
 
-impl<'a> Command for GoCommand<'a> {
+impl Command for GoCommand {
     fn actions(&self) -> CommandResult {
         let target_group_path = match &self.opts.path {
             Some(opt_path) => self.repository.path(opt_path.as_str()).canonicalize()?,
             None => self
                 .repository
-                .path(self.current.path)
+                .path(&self.current.path)
                 .parent_if_not_exists()?,
         };
 
@@ -68,7 +68,7 @@ impl<'a> Command for GoCommand<'a> {
 
         if !self
             .repository
-            .path(self.current.path)
+            .path(&self.current.path)
             .equals(&target_group_path)
         {
             actions.extend(vec![

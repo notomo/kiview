@@ -245,7 +245,7 @@ impl From<&str> for CommandOption {
     }
 }
 
-pub fn parse_command_actions(arg: &str, current: &Current) -> CommandResult {
+pub fn parse_command_actions(arg: &str, current: Current) -> CommandResult {
     let command_name = CommandName::from(arg);
 
     let opts: Vec<CommandOption> = arg

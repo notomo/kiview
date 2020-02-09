@@ -6,12 +6,12 @@ use crate::command::Current;
 use crate::command::Error;
 use crate::repository::PathRepository;
 
-pub struct CopyCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct CopyCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
 }
 
-impl<'a> Command for CopyCommand<'a> {
+impl Command for CopyCommand {
     fn actions(&self) -> CommandResult {
         Ok(vec![
             Action::Copy {
@@ -22,12 +22,12 @@ impl<'a> Command for CopyCommand<'a> {
     }
 }
 
-pub struct CutCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct CutCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
 }
 
-impl<'a> Command for CutCommand<'a> {
+impl Command for CutCommand {
     fn actions(&self) -> CommandResult {
         Ok(vec![
             Action::Cut {
@@ -38,7 +38,7 @@ impl<'a> Command for CutCommand<'a> {
     }
 }
 
-impl<'a> Current<'a> {
+impl Current {
     fn target_items(
         &self,
         repository: &Box<dyn PathRepository>,

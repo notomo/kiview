@@ -4,11 +4,11 @@ use itertools::Itertools;
 use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
-pub struct Current<'a> {
-    pub path: &'a str,
+pub struct Current {
+    pub path: String,
 
     #[serde(default)]
-    pub name: &'a str,
+    pub name: String,
 
     #[serde(default)]
     pub line_number: u64,
@@ -38,7 +38,7 @@ pub struct Current<'a> {
     pub rename_targets: Vec<RenameTarget>,
 }
 
-impl<'a> Current<'a> {
+impl<'a> Current {
     pub fn targets(&self) -> impl Iterator<Item = &Target> {
         if self.selected_targets.len() != 0 {
             return self.selected_targets.iter();

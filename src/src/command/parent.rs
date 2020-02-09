@@ -5,14 +5,14 @@ use crate::command::Command;
 use crate::command::Current;
 use crate::repository::PathRepository;
 
-pub struct ParentCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct ParentCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
 }
 
-impl<'a> Command for ParentCommand<'a> {
+impl Command for ParentCommand {
     fn actions(&self) -> CommandResult {
-        let parent_path = match self.repository.path(self.current.path).parent() {
+        let parent_path = match self.repository.path(&self.current.path).parent() {
             Some(parent_path) => parent_path,
             None => return Ok(vec![]),
         };
@@ -29,7 +29,7 @@ impl<'a> Command for ParentCommand<'a> {
             },
         ];
 
-        let current_path = self.repository.path(self.current.path);
+        let current_path = self.repository.path(&self.current.path);
         if let Some(last_path_line_number) = paths.search(|p| current_path.equals(&p.path)) {
             actions.push(Action::SetCursor {
                 line_number: last_path_line_number,

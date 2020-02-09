@@ -5,12 +5,12 @@ use crate::command::Command;
 use crate::command::Current;
 use crate::repository::PathRepository;
 
-pub struct ToggleTreeCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct ToggleTreeCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
 }
 
-impl<'a> Command for ToggleTreeCommand<'a> {
+impl Command for ToggleTreeCommand {
     fn actions(&self) -> CommandResult {
         let actions: Vec<_> = self
             .current

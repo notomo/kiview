@@ -26,13 +26,13 @@ impl From<Vec<CommandOption>> for RemoveCommandOptions {
     }
 }
 
-pub struct RemoveCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct RemoveCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
     pub opts: RemoveCommandOptions,
 }
 
-impl<'a> Command for RemoveCommand<'a> {
+impl Command for RemoveCommand {
     fn actions(&self) -> CommandResult {
         let targets = self
             .current

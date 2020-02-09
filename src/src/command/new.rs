@@ -32,13 +32,13 @@ impl From<Vec<CommandOption>> for NewCommandOptions {
     }
 }
 
-pub struct NewCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct NewCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
     pub opts: NewCommandOptions,
 }
 
-impl<'a> Command for NewCommand<'a> {
+impl Command for NewCommand {
     fn actions(&self) -> CommandResult {
         if self.opts.paths.len() == 0 {
             return Ok(vec![Action::ConfirmNew]);

@@ -31,13 +31,13 @@ impl From<Vec<CommandOption>> for RenameCommandOptions {
     }
 }
 
-pub struct RenameCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct RenameCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
     pub opts: RenameCommandOptions,
 }
 
-impl<'a> Command for RenameCommand<'a> {
+impl Command for RenameCommand {
     fn actions(&self) -> CommandResult {
         let (target, path) = match (self.opts.no_confirm, &self.current.target, &self.opts.path) {
             (false, Some(target), _) if !target.is_parent_node => {
@@ -45,7 +45,7 @@ impl<'a> Command for RenameCommand<'a> {
                     relative_path: self
                         .repository
                         .path(&target.path)
-                        .to_relative(self.current.path)?,
+                        .to_relative(&self.current.path)?,
                     path: target.to_string(),
                 }])
             }
@@ -76,12 +76,12 @@ impl<'a> Command for RenameCommand<'a> {
     }
 }
 
-pub struct MultipleRenameCommand<'a> {
-    pub current: &'a Current<'a>,
+pub struct MultipleRenameCommand {
+    pub current: Current,
     pub repository: Box<dyn PathRepository>,
 }
 
-impl<'a> Command for MultipleRenameCommand<'a> {
+impl Command for MultipleRenameCommand {
     fn actions(&self) -> CommandResult {
         if self.current.rename_targets.len() == 0 && !self.current.renamer_opened {
             let items: Result<Vec<RenameItem>, Error> = self
@@ -92,7 +92,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
                     let relative_path = self
                         .repository
                         .path(&target.path)
-                        .to_relative(self.current.path)?;
+                        .to_relative(&self.current.path)?;
                     items.push(RenameItem {
                         id: target.id,
                         path: target.path.clone(),
@@ -114,7 +114,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
             |(mut items, mut errors), target| {
                 match self.repository.rename_or_copy_with(
                     &target.from,
-                    self.current.path,
+                    &self.current.path,
                     &target.to,
                     target.is_copy,
                     false,
@@ -131,7 +131,7 @@ impl<'a> Command for MultipleRenameCommand<'a> {
             },
         );
 
-        let paths: Paths = self.repository.list(self.current.path)?.into();
+        let paths: Paths = self.repository.list(&self.current.path)?.into();
 
         let mut actions = vec![
             Action::CompleteRenamer {
