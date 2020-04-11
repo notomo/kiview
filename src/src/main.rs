@@ -1,100 +1,68 @@
 #![feature(box_syntax)]
 #![feature(try_trait)]
 
-use clap::{App, Arg, SubCommand};
+extern crate itertools;
 
 #[macro_use]
-extern crate serde_json;
-
-use std::io::prelude::*;
-
-extern crate itertools;
+extern crate lazy_static;
 
 #[macro_use]
 extern crate log;
 extern crate log4rs;
 
+mod command;
+mod handler;
+mod repository;
+mod state;
+
 use log::LevelFilter;
 use log4rs::append::file::FileAppender;
 use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
+use nvim_rs::create::tokio as create;
+use std::error::Error;
 
-mod command;
-use command::{command_complete, parse_command_actions, Current};
+#[tokio::main]
+async fn main() {
+    {
+        let logfile = FileAppender::builder()
+            .encoder(Box::new(PatternEncoder::new("{l} - {m}\n")))
+            .build("/tmp/kiview.log")
+            .unwrap();
+        let config = Config::builder()
+            .appender(Appender::builder().build("logfile", Box::new(logfile)))
+            .build(
+                Root::builder()
+                    .appender("logfile")
+                    .build(LevelFilter::Debug),
+            )
+            .unwrap();
+        log4rs::init_config(config).unwrap();
+    }
 
-mod repository;
-
-fn main() {
-    let logfile = FileAppender::builder()
-        .encoder(Box::new(PatternEncoder::new("{l} - {m}\n")))
-        .build("/tmp/kiview.log")
-        .unwrap();
-    let config = Config::builder()
-        .appender(Appender::builder().build("logfile", Box::new(logfile)))
-        .build(
-            Root::builder()
-                .appender("logfile")
-                .build(LevelFilter::Debug),
-        )
-        .unwrap();
-    log4rs::init_config(config).unwrap();
-
-    let app = App::new("kiview")
-        .subcommand(
-            SubCommand::with_name("do").arg(
-                Arg::with_name("arg")
-                    .long("arg")
-                    .takes_value(true)
-                    .default_value("")
-                    .required(false),
-            ),
-        )
-        .subcommand(
-            SubCommand::with_name("complete")
-                .arg(
-                    Arg::with_name("arg")
-                        .long("arg")
-                        .takes_value(true)
-                        .default_value("")
-                        .required(false),
-                )
-                .arg(
-                    Arg::with_name("line")
-                        .long("line")
-                        .takes_value(true)
-                        .default_value("")
-                        .required(false),
-                ),
-        );
-
-    let matches = app.get_matches();
-    match matches.subcommand() {
-        ("do", Some(cmd)) => {
-            let arg = cmd.value_of("arg").unwrap();
-
-            let mut line = String::new();
-            std::io::stdin().lock().read_line(&mut line).unwrap();
-            let current: Current = serde_json::from_str(&line).unwrap();
-
-            match parse_command_actions(arg, current) {
-                Ok(actions) => {
-                    let output = json!({
-                        "actions": actions,
+    let handler = handler::NeovimHandler {};
+    let (nvim, io_handler) = create::new_parent(handler).await;
+    match io_handler.await {
+        Err(joinerr) => eprintln!("Error joining IO loop: '{}'", joinerr),
+        Ok(Err(err)) => {
+            if !err.is_reader_error() {
+                nvim.err_writeln(&format!("Error: '{}'", err))
+                    .await
+                    .unwrap_or_else(|e| {
+                        eprintln!("Well, dang... '{}'", e);
                     });
-                    println!("{}", serde_json::to_string(&output).unwrap());
-                }
-                Err(err) => {
-                    eprintln!("{}", err);
-                    std::process::exit(1);
+            }
+
+            if !err.is_channel_closed() {
+                eprintln!("Error: '{}'", err);
+
+                let mut source = err.source();
+                while let Some(e) = source {
+                    eprintln!("Caused by: '{}'", e);
+                    source = e.source();
                 }
             }
         }
-        ("complete", Some(cmd)) => {
-            let arg = cmd.value_of("arg").unwrap();
-            let line = cmd.value_of("line").unwrap();
-            let output = command_complete(&arg, &line).join("\n");
-            println!("{}", output);
-        }
-        _ => (),
+        Ok(Ok(())) => {}
     }
 }

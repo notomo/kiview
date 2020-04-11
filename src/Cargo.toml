@@ -18,3 +18,8 @@ log = "0.4.8"
 log4rs = "0.9.0"
 url = "2.1.1"
 path-slash = "0.1.1"
+rmpv = "0.4.3"
+nvim-rs = { git = "https://github.com/KillTheMule/nvim-rs", rev = "9efc7480f976d80f9e57443d62c1da2f37805186", features = ["use_tokio"] }
+async-trait = "0.1.22"
+tokio = { version = "0.2.9", features = [ "blocking", "process", "time" ] }
+lazy_static = "1.4.0"

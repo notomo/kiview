@@ -13,7 +13,7 @@ function! KiviewTestHelper() abort
 
     function! helper.execute(arg, ...) abort
         let options = get(a:000, 0, {})
-        return kiview#main(a:arg, options)
+        return kiview#main_dev(a:arg, options)
     endfunction
 
     function! helper.sync_execute(arg, ...) abort

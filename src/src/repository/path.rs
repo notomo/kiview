@@ -9,7 +9,7 @@ impl Dispatcher {
     }
 }
 
-pub trait PathRepository {
+pub trait PathRepository: Send + Sync {
     fn list(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error>;
     fn children(&self, path: &str) -> Result<Box<dyn Iterator<Item = FullPath>>, Error>;
     fn create_leaf(&self, path: &str) -> Result<(), Error>;
