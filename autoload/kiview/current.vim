@@ -47,7 +47,7 @@ function! kiview#current#new(bufnr) abort
 
     function! current.toggle_tree(id, opened) abort
         call self.logger.logf('toggle tree, id: %s, opened: %s', a:id, a:opened)
-        let [index, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:id)
+        let [index, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:id, {})
         let line_number = index + 1
         let prop = self.props[a:id]
         let prop.opened = a:opened
@@ -73,7 +73,7 @@ function! kiview#current#new(bufnr) abort
             return
         endif
 
-        let [row, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:mark_id)
+        let [row, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:mark_id, {})
         call nvim_buf_add_highlight(self.bufnr, s:hl_namespace, 'KiviewSelected', row, 0, -1)
         let self.selected[a:mark_id] = v:true
     endfunction
@@ -93,7 +93,7 @@ function! kiview#current#new(bufnr) abort
             return
         endif
 
-        let [row, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:mark_id)
+        let [row, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:mark_id, {})
         call nvim_buf_clear_namespace(self.bufnr, s:hl_namespace, row, row + 1)
         call remove(self.selected, a:mark_id)
         let prop = self.props[a:mark_id]
@@ -136,7 +136,7 @@ function! kiview#current#new(bufnr) abort
         if empty(a:id)
             return a:default
         endif
-        let [index, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:id)
+        let [index, _] = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, a:id, {})
         return index + 1
     endfunction
 
@@ -149,7 +149,7 @@ function! kiview#current#new(bufnr) abort
         let line_number = a:start - 1
         let pairs = []
         for prop in a:props
-            let id = nvim_buf_set_extmark(self.bufnr, s:namespace, 0, line_number, 0, {})
+            let id = nvim_buf_set_extmark(self.bufnr, s:namespace, line_number, 0, {})
             call add(pairs, [id, prop])
             let self.props[id] = prop
             let line_number += 1

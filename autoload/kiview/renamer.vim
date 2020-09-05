@@ -32,7 +32,7 @@ function! kiview#renamer#new(source_id, bufnr) abort
         call nvim_buf_set_virtual_text(self.bufnr, s:namespace, 0, [[a:path, 'Comment']], {})
         let line = 1
         for item in a:items
-            call nvim_buf_set_extmark(self.bufnr, s:namespace, 0, line, 0, {})
+            call nvim_buf_set_extmark(self.bufnr, s:namespace, line, 0, {})
             call nvim_buf_set_virtual_text(self.bufnr, s:namespace, line, [[' <- ' . item.relative_path, 'Comment']], {})
             let line += 1
         endfor
@@ -85,7 +85,7 @@ function! kiview#renamer#new(source_id, bufnr) abort
 
     function! renamer.complete(items, has_error) abort
         for item in a:items
-            let mark = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, item.id)
+            let mark = nvim_buf_get_extmark_by_id(self.bufnr, s:namespace, item.id, {})
             if empty(mark)
                 continue
             endif
